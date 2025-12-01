@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E8E8E8"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/signupFormContainer"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="15dp"
+        app:cardUseCompatPadding="true"
+        android:backgroundTint="#FFFFFF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- לוגו -->
+            <ImageView
+                android:id="@+id/imgLogoSignup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:src="@mipmap/ic_launcher" />
+
+            <!-- כותרת כמו ב Create account -->
+            <TextView
+                android:id="@+id/signup_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Create account"
+                android:textAlignment="center"
+                android:textColor="#000000"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
+
+
+            <!-- שדות טופס -->
+            <EditText
+                android:id="@+id/ET_signup_name"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_rounded"
+                android:hint="@string/signup_name_hint"
+                android:inputType="textPersonName"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/ET_signup_email"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_rounded"
+                android:hint="@string/signup_email_hint"
+                android:inputType="textEmailAddress"
+                android:padding="12dp"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/ET_signup_username"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_rounded"
+                android:hint="@string/signup_username_hint"
+                android:inputType="textPersonName"
+                android:padding="12dp"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/ET_signup_password"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_rounded"
+                android:hint="@string/signup_password_hint"
+                android:inputType="textPersonName"
+                android:padding="12dp"
+                android:textColorHint="@color/gray"
+                android:textColor="@color/black" />
+
+            <Spinner
+                android:id="@+id/Spin_signup_class"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="18dp"
+                android:background="@drawable/bg_input_rounded"
+                android:padding="12dp" />
+
+            <!-- כפתור יצירת משתמש כמו form-btn ב HTML -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSignup"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/signup_button"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:background="@drawable/bg_button_primary"
+                app:backgroundTint="@null"
+                app:cornerRadius="20dp"
+                android:onClick="SignUp_Click" />
+
+            <!-- כבר יש לך חשבון -->
+            <LinearLayout
+                android:id="@+id/signup_login_cta_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:id="@+id/signup_login_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Already have an account?"
+                    android:textSize="10sp"
+                    android:textColor="#747474" />
+
+                <TextView
+                    android:id="@+id/signup_login_link"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" Log in"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#008080"
+                    android:onClick="Login_Click" />
+            </LinearLayout>
+
+            <!-- כפתור גוגל כמו במסך התחברות -->
+            <LinearLayout
+                android:id="@+id/signup_google_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="10dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_button_google"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="SignUpGoogle_Click">
+
+                <ImageView
+                    android:id="@+id/signup_google_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_google" />
+
+                <TextView
+                    android:id="@+id/signup_google_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sign up with Google"
+                    android:textSize="11sp"
+                    android:textColor="#333333"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

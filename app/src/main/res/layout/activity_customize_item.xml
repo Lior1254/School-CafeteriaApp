@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:layoutDirection="rtl"
+    android:orientation="vertical"
+    android:padding="10dp"
+    tools:context=".CustomizeItemActivity">
+
+
+    <!-- HEADER: תמונה + שם -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="Close_btn_Click"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/back_arrow" />
+        <!-- שים לב: התג נסגר עם /> -->
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/ivProductIMG"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+            <TextView
+                android:id="@+id/tvProductName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="שם המוצר"
+                android:textColor="@color/mc_text_primary"
+                android:textSize="34sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/ivProductIMG"
+                app:layout_constraintTop_toBottomOf="@+id/ivProductIMG" />
+
+            <TextView
+                android:id="@+id/tv_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="מחיר"
+                android:textColor="@color/mc_text_secondary"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="@+id/tvProductName"
+                app:layout_constraintTop_toBottomOf="@+id/tvProductName" />
+
+            <TextView
+                android:id="@+id/tvProductDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="תיאור המוצר"
+                android:textAlignment="viewStart"
+                android:textColor="@color/mc_text_secondary"
+                app:layout_constraintEnd_toEndOf="@+id/ivProductIMG"
+                app:layout_constraintStart_toStartOf="@+id/tv_price"
+                app:layout_constraintTop_toBottomOf="@+id/tv_price" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/Addons"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/white"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"
+                android:scrollbars="vertical"
+                android:fadeScrollbars="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvProductDescription" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/addToCartBar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/white"
+        android:clipToPadding="false"
+        android:elevation="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="5dp">
+
+
+        <!-- רווח בין הכפתור לבקר הכמות -->
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardQuantity"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:gravity="center"
+                android:orientation="horizontal"
+
+                android:padding="8dp">
+
+                <!-- כפתור + (אייקון בלבד, נקי וחד) -->
+                <ImageButton
+                    android:id="@+id/ibtn_plus_item"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:onClick="Plus_btn_Click"
+                    android:padding="8dp"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/plus_black" />
+
+
+                <!-- מונה כמות -->
+                <TextView
+                    android:id="@+id/tv_amount_of_items"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textColor="@color/black"
+                    android:textSize="18sp" />
+
+                <!-- כפתור – (אייקון בלבד) -->
+                <ImageButton
+                    android:id="@+id/ibtn_minus_item"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:onClick="Minus_btn_Click"
+                    android:padding="8dp"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/minus_gray" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <!-- כפתור פעולה ראשי – Filled (Material3 ברירת מחדל) -->
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_AddToCart"
+            style="?attr/materialButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:letterSpacing="0.02"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="הוספה להזמנה"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:backgroundTint="@color/ice_blue"
+            app:cornerRadius="20dp"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconTint="?attr/colorOnPrimary"
+            app:rippleColor="?attr/colorOnPrimary" />
+
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

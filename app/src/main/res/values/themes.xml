@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Prog1" parent="Theme.Material3.DayNight.NoActionBar" />
+
+    <style name="Theme.Prog1.Fullscreen" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="CustomBottomNavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/ice_blue_light_indicator</item>
+    </style>
+
+
+
+    <!-- ===================================== -->
+    <!--      Styles for Profile Screen        -->
+    <!-- ===================================== -->
+
+    <!-- סגנון בסיסי לשורה בכרטיס הפרופיל -->
+    <style name="ProfileRowStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:layoutDirection">ltr</item>
+    </style>
+
+    <!-- סגנון למסגרת העגולה של האייקון -->
+    <style name="ProfileIconContainerStyle">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_marginStart">12dp</item>
+        <item name="android:background">@drawable/bg_circle_white</item>
+    </style>
+
+    <!-- סגנון לאייקון עצמו (בתוך המסגרת) -->
+    <style name="ProfileIconStyle">
+        <item name="android:layout_width">22dp</item>
+        <item name="android:layout_height">22dp</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <!-- סגנון לטקסט בשורה (מתוקן) -->
+    <style name="ProfileTextStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">12dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- סגנון לחץ ימינה (עבור כפתורים) - עם גודל מוקטן -->
+    <style name="ProfileArrowStyle">
+        <item name="android:layout_width">22dp</item>
+        <item name="android:layout_height">22dp</item>
+        <item name="android:src">@drawable/forward_arrow</item> <!-- או @drawable/ic_arrow_forward -->
+        <item name="android:layout_marginEnd">12dp</item> <!-- שיניתי מ-padding ל-margin -->
+        <item name="android:tint">@color/white</item>
+    </style>
+
+
+    <!-- סגנון לקו המפריד בין השורות -->
+    <style name="ProfileSeparatorStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">12dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:background">#4DFFFFFF</item> <!-- לבן עם 30% שקיפות -->
+    </style>
+
+
+
+
+
+
+</resources>

@@ -1,0 +1,111 @@
+<resources>
+
+    <!-- כל הטקסטים בעברית -->
+    <string name="app_name">האפליקציה שלי</string>
+    <string name="logo_cd">לוגו האפליקציה</string>
+
+    <!-- התחברות -->
+    <string name="login_title">התחברות</string>
+    <string name="login_username_hint">שם משתמש</string>
+    <string name="login_password_hint">סיסמה</string>
+    <string name="login_button">התחבר</string>
+    <string name="login_signup_cta">עדיין לא נרשמת? להרשמה</string>
+
+    <!-- הרשמה -->
+    <string name="signup_title">הרשמה</string>
+    <string name="signup_name_hint">שם</string>
+    <string name="signup_email_hint">אימייל</string>
+    <string name="signup_username_hint">שם משתמש</string>
+    <string name="signup_password_hint">סיסמה</string>
+    <string name="signup_button">הרשמה</string>
+    <string name="signup_login_cta">כבר יש משתמש? התחברות</string>
+
+
+    <string-array name="class_names">
+        <!-- ז -->
+        <item>כיתה</item>
+
+        <item>ז׳1</item>
+        <item>ז׳2</item>
+        <item>ז׳3</item>
+        <item>ז׳4</item>
+        <item>ז׳5</item>
+        <item>ז׳6</item>
+        <item>ז׳7</item>
+        <item>ז׳8</item>
+
+        <!-- ח -->
+        <item>ח׳1</item>
+        <item>ח׳2</item>
+        <item>ח׳3</item>
+        <item>ח׳4</item>
+        <item>ח׳5</item>
+        <item>ח׳6</item>
+        <item>ח׳7</item>
+        <item>ח׳8</item>
+
+        <!-- ט -->
+        <item>ט׳1</item>
+        <item>ט׳2</item>
+        <item>ט׳3</item>
+        <item>ט׳4</item>
+        <item>ט׳5</item>
+        <item>ט׳6</item>
+        <item>ט׳7</item>
+        <item>ט׳8</item>
+
+        <!-- י -->
+        <item>י׳1</item>
+        <item>י׳2</item>
+        <item>י׳3</item>
+        <item>י׳4</item>
+        <item>י׳5</item>
+        <item>י׳6</item>
+        <item>י׳7</item>
+        <item>י׳8</item>
+
+        <!-- י״א -->
+        <item>י״א1</item>
+        <item>י״א2</item>
+        <item>י״א3</item>
+        <item>י״א4</item>
+        <item>י״א5</item>
+        <item>י״א6</item>
+        <item>י״א7</item>
+        <item>י״א8</item>
+
+        <!-- י״ב -->
+        <item>י״ב1</item>
+        <item>י״ב2</item>
+        <item>י״ב3</item>
+        <item>י״ב4</item>
+        <item>י״ב5</item>
+        <item>י״ב6</item>
+        <item>י״ב7</item>
+        <item>י״ב8</item>
+
+        <item>בוגר</item>
+    </string-array>
+
+
+
+    <string name="user_or_phone_hint">שם משתמש או מספר טלפון</string>
+    <string name="password_hint">סיסמה</string>
+    <string name="no_account_q">אין לך חשבון?</string>
+    <string name="go_to_signup">להרשמה</string>
+    <string name="login_disclaimer">בהתחברות אתה מאשר את תנאי השימוש ומדיניות הפרטיות</string>
+
+    <string name="username_hint">שם משתמש</string>
+    <string name="class_hint">כיתה</string>
+    <string name="phone_hint">מספר טלפון</string>
+    <string name="email_hint">אימייל</string>
+    <string name="next_button">הבא</string>
+    <string name="create_account_button">יצירת חשבון</string>
+    <string name="back_button">חזרה</string>
+    <string name="have_account_q">כבר יש לך חשבון?</string>
+    <string name="go_to_login">להתחברות</string>
+    <string name="step_1_of_2">שלב 1 מתוך 2</string>
+    <string name="step_2_of_2">שלב 2 מתוך 2</string>
+    <string name="app_name_cafeteria">הקפיטקיה של ליאור</string>
+
+</resources>

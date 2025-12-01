@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray">#666666</color>
+    <color name="blue">#006b98</color>
+
+    <color name="light_blue">#008ac5</color>
+    <color name="dark_blue">#1e3742</color>
+    <color name="ice_blue">#86AFF7</color>
+    <color name="ice_blue_light_indicator">#3387CEEB</color>
+
+    <color name="logout_red_foreground">#FF5252</color>
+    <color name="logout_red_background">#40FF5252</color>
+
+
+    <color name="card_background_cream">#FFF7E9</color>
+    <color name="status_received_grey">#9E9E9E</color>
+    <color name="status_in_progress_yellow">#FFC107</color>
+    <color name="status_ready_green">#4CAF50</color>
+    <color name="status_collected_purple">#7E57C2</color>
+
+    <color name="md_yellow">#FFC107</color>
+    <color name="md_green">#4CAF50</color>
+    <color name="md_text_dark">#424242</color>
+    <color name="md_border">#DADCE0</color>
+    <color name="green">#0b4306</color>
+
+    <color name="mc_secondary">#2E7D32</color>
+    <color name="mc_danger">#DA291C</color>
+    <color name="mc_text_primary">#212121</color>
+    <color name="mc_text_secondary">#666666</color>
+    <color name="mc_divider">#E0E0E0</color>
+    <color name="mc_chip_bg">#FFF8E1</color>
+
+
+
+
+</resources>
+
