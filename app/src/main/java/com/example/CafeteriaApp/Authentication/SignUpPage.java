@@ -1,6 +1,7 @@
 package com.example.CafeteriaApp.Authentication;
 
 import android.animation.ObjectAnimator;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -157,11 +158,15 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
         if (FBRef.refAuth.getCurrentUser() != null) {
             FBRef.refAuth.signOut();
         }
-
+        ProgressDialog pd = new ProgressDialog(this);
+        pd.setTitle("Connecting");
+        pd.setMessage("Create user...");
+        pd.show();
         FBRef.refAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+
                         if (task.isSuccessful())
                         {
                             FirebaseUser user = FBRef.refAuth.getCurrentUser();
@@ -175,8 +180,10 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
                                 FBRef.refUsers.child(user.getUid()).setValue(userData)
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
+                                            public void onComplete(@NonNull Task<Void> task2) {
+                                                pd.dismiss();
+                                                if (task2.isSuccessful())
+                                                {
                                                     Toast.makeText(SignUpPage.this, "User created successfully.", Toast.LENGTH_SHORT).show();
                                                     finish();
                                                 } else {
@@ -184,11 +191,15 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
                                                 }
                                             }
                                         });
-                                Toast.makeText(SignUpPage.this, "User created successfully.", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            {
+                                pd.dismiss();
                             }
                         }
                         else
                         {
+                            pd.dismiss();
                             // Handle specific exceptions
                             Exception exp = task.getException();
                             if (exp instanceof FirebaseAuthWeakPasswordException) {

@@ -1,6 +1,8 @@
 package com.example.CafeteriaApp.Models;
 
-public class UserData
+import java.io.Serializable;
+
+public class UserData implements Serializable
 {
     private String uid;
     private String name;

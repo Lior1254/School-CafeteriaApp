@@ -42,7 +42,6 @@
 
                 <!-- Title -->
                 <TextView
-                    android:id="@+id/login_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
@@ -73,12 +72,11 @@
                     android:layout_height="50dp"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/bg_input_rounded"
-                    android:gravity="right"
                     android:hint="@string/email_hint"
                     android:inputType="textEmailAddress"
                     android:padding="12dp"
                     android:textColor="@color/black"
-                    android:textColorHint="#999999" />
+                    android:textColorHint="@color/gray" />
 
                 <EditText
                     android:id="@+id/ED_login_password"
@@ -90,8 +88,8 @@
                     android:hint="@string/login_password_hint"
                     android:inputType="textPassword"
                     android:padding="12dp"
-                    android:textColor="#000000"
-                    android:textColorHint="#999999" />
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/gray" />
 
                 <TextView
                     android:id="@+id/login_forgot_password"
@@ -105,7 +103,6 @@
                     android:textSize="10sp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/login_button"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:background="@drawable/bg_button_primary"
