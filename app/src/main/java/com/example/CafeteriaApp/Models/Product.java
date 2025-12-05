@@ -1,11 +1,11 @@
-package com.example.CafeteriaApp.Adapters;
+package com.example.CafeteriaApp.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.DrawableRes;
 
-public class ProductItem implements Parcelable {
+public class Product implements Parcelable {
 
     @DrawableRes
     public final int imageRes;
@@ -13,10 +13,10 @@ public class ProductItem implements Parcelable {
     public final String description;
     public final double price;
     public final boolean supportAddon;
-    public final AddonItem[] addons;
+    public final Addon[] addons;
 
-    public ProductItem(int imageRes, String name, String description, double price,
-                       boolean supportAddon, AddonItem[] addons) {
+    public Product(int imageRes, String name, String description, double price,
+                   boolean supportAddon, Addon[] addons) {
         this.imageRes = imageRes;
         this.name = name;
         this.description = description;
@@ -30,13 +30,13 @@ public class ProductItem implements Parcelable {
     }
 
     // ---- Parcelable ----
-    protected ProductItem(Parcel in) {
+    protected Product(Parcel in) {
         imageRes = in.readInt();
         name = in.readString();
         description = in.readString();
         price = in.readDouble();
         supportAddon = in.readByte() != 0;
-        addons = in.createTypedArray(AddonItem.CREATOR);
+        addons = in.createTypedArray(Addon.CREATOR);
     }
 
     @Override
@@ -54,15 +54,15 @@ public class ProductItem implements Parcelable {
         return 0;
     }
 
-    public static final Creator<ProductItem> CREATOR = new Creator<ProductItem>() {
+    public static final Creator<Product> CREATOR = new Creator<Product>() {
         @Override
-        public ProductItem createFromParcel(Parcel in) {
-            return new ProductItem(in);
+        public Product createFromParcel(Parcel in) {
+            return new Product(in);
         }
 
         @Override
-        public ProductItem[] newArray(int size) {
-            return new ProductItem[size];
+        public Product[] newArray(int size) {
+            return new Product[size];
         }
     };
 }

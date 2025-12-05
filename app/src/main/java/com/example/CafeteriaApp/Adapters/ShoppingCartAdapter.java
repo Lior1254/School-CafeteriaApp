@@ -12,6 +12,8 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.CafeteriaApp.Models.Addon;
+import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
 
 import java.util.ArrayList;
@@ -20,18 +22,18 @@ import java.util.List;
 public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final LayoutInflater inflater;
-    private final List<ProductItem> items = new ArrayList<>();
+    private final List<Product> items = new ArrayList<>();
     @LayoutRes private final int rowLayoutId;
 
     boolean isFavorit = false;
 
-    public ShoppingCartAdapter(@NonNull Context ctx, @NonNull List<ProductItem> start, @LayoutRes int rowLayoutId) {
+    public ShoppingCartAdapter(@NonNull Context ctx, @NonNull List<Product> start, @LayoutRes int rowLayoutId) {
         this.inflater = LayoutInflater.from(ctx);
         this.items.addAll(start);
         this.rowLayoutId = rowLayoutId;
     }
 
-    public void setItems(List<ProductItem> data){
+    public void setItems(List<Product> data){
         items.clear();
         if (data != null) items.addAll(data);
         notifyDataSetChanged();
@@ -45,7 +47,7 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder h, int position) {
-        ProductItem it = items.get(position);
+        Product it = items.get(position);
         View v = h.itemView;
 
         //Wedding
@@ -100,10 +102,10 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override public int getItemCount() { return items.size(); }
 
-    private static String buildAddonsSummary(@NonNull ProductItem p){
+    private static String buildAddonsSummary(@NonNull Product p){
         if (!p.supportAddon || p.addons == null || p.addons.length == 0) return "ללא תוספות";
         StringBuilder sb = new StringBuilder();
-        for (AddonItem a : p.addons) {
+        for (Addon a : p.addons) {
             if (a != null && a.isAddonChecked) {
                 if (sb.length() > 0) sb.append(" • ");
                 sb.append(a.name);

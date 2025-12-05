@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.CustomProductAdapterRV;
-import com.example.CafeteriaApp.Adapters.ProductItem;
+import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.CustomizeItemActivity;
 import com.example.CafeteriaApp.MenuCategories;
 import com.example.CafeteriaApp.R;
@@ -30,11 +30,11 @@ public class MenuFragment extends Fragment {
     private TextView dialog_tvProductName, dialog_tvTotalPrice;
     private ImageView dialog_ivProductIMG;
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public View onCreateView(@NonNull LayoutInflater i,
                              @Nullable ViewGroup c,
-                             @Nullable Bundle b)
-    {
+                             @Nullable Bundle b) {
         return i.inflate(R.layout.fragment_home, c, false);
     }
 
@@ -43,7 +43,7 @@ public class MenuFragment extends Fragment {
         RecyclerView RV_items = v.findViewById(R.id.RV_items);
         RV_items.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(requireContext()));
 
-        List<ProductItem> data = new ArrayList<>(
+        List<Product> data = new ArrayList<>(
                 Arrays.asList(MenuCategories.SANDWICHES.products)
         );
 
@@ -62,63 +62,5 @@ public class MenuFragment extends Fragment {
     }
 
 
-
-
-
-    private void showProductDialog(ProductItem item) {
-        View product_dialog = getLayoutInflater()
-                .inflate(R.layout.custom_alertdialog_product_options, null, false);
-
-        //Weddings
-        dialog_ivProductIMG   = (ImageView) product_dialog.findViewById(R.id.ivProductIMG);
-        dialog_tvProductName  = (TextView) product_dialog.findViewById(R.id.tvProductName);
-        dialog_tvTotalPrice   = (TextView) product_dialog.findViewById(R.id.dialog_tvTotalPrice);
-        dialog_btnPay         = (Button) product_dialog.findViewById(R.id.dialog_btnPay);
-
-        dialog_lv_options = (ListView) product_dialog.findViewById(R.id.dialog_lv_options);
-
-        if (dialog_ivProductIMG != null && item.imageRes != 0) dialog_ivProductIMG.setImageResource(item.imageRes);
-        if (dialog_tvProductName != null) dialog_tvProductName.setText(item.name);
-        if (dialog_tvTotalPrice != null)  dialog_tvTotalPrice.setText(item.getPriceText());
-
-        if (item.supportAddon && item.addons != null && item.addons.length > 0)
-        {
-            Intent intent = new Intent(this.requireContext(), CustomizeItemActivity.class);
-            intent.putExtra("item", item);
-            startActivity(intent);
-
-        }
-        /*
-        if (item.supportAddon && item.addons != null && item.addons.length > 0)
-        {
-            dialog_lv_options.setVisibility(View.VISIBLE);
-            CustomProductOptionAdapter addonAdp = new CustomProductOptionAdapter(this.requireContext(), List.of(item.addons));
-            dialog_lv_options.setAdapter(addonAdp);
-
-        }
-
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setView(product_dialog)
-                .create();
-        dialog.show();
-
-
-
-        dialog_btnPay.setOnClickListener(v -> {
-
-            dialog.dismiss();
-        });
-
-         */
-
-
-
-    }
-
-
-
-    private void onPayClicked(ProductItem item, int qty, List<String> addons) {
-    }
-
-    }
+}
 

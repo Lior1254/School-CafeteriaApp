@@ -1,7 +1,7 @@
 package com.example.CafeteriaApp;
 
-import com.example.CafeteriaApp.Adapters.AddonItem;
-import com.example.CafeteriaApp.Adapters.ProductItem;
+import com.example.CafeteriaApp.Models.Addon;
+import com.example.CafeteriaApp.Models.Product;
 
 /**
  * מחלקה אחת שמרכזת קטגוריות ותפריט מלא בפורמט שלך (public final + arrays).
@@ -12,9 +12,9 @@ public final class MenuCategories {
     /** זוג שם־קטגוריה + מערך מוצרים. */
     public static final class Category {
         public final String name;
-        public final ProductItem[] products;
+        public final Product[] products;
 
-        public Category(String name, ProductItem[] products) {
+        public Category(String name, Product[] products) {
             this.name = name;
             this.products = products;
         }
@@ -31,19 +31,19 @@ public final class MenuCategories {
     private static final int IC_SAUCE   = R.drawable.ic_launcher_foreground; // רוטב ביתי
 
     // --- Addons משותפים לכריכים (מחירים 1–2 ₪, ותבלינים חינם) ---
-    private static final AddonItem ADD_AVOCADO   = new AddonItem(IC_AVOCADO, "אבוקדו", 2.00);
-    private static final AddonItem ADD_EGG       = new AddonItem(IC_EGG,     "ביצה",   1.50);
-    private static final AddonItem ADD_CABBAGE   = new AddonItem(IC_CABBAGE, "כרוב",   1.00);
-    private static final AddonItem ADD_SALTPEP   = new AddonItem(IC_SPICE,   "מלח/פלפל", 0.00);
-    private static final AddonItem ADD_HOUSE_SAU = new AddonItem(IC_SAUCE,   "רוטב ביתי", 0.00); // "רוטב של זיפים"
+    private static final Addon ADD_AVOCADO   = new Addon(IC_AVOCADO, "אבוקדו", 2.00);
+    private static final Addon ADD_EGG       = new Addon(IC_EGG,     "ביצה",   1.50);
+    private static final Addon ADD_CABBAGE   = new Addon(IC_CABBAGE, "כרוב",   1.00);
+    private static final Addon ADD_SALTPEP   = new Addon(IC_SPICE,   "מלח/פלפל", 0.00);
+    private static final Addon ADD_HOUSE_SAU = new Addon(IC_SAUCE,   "רוטב ביתי", 0.00); // "רוטב של זיפים"
 
     // ======================
     // כריכים (טוסט/טוסט גדול/טונה/שקשוקה)
     // ======================
     public static final Category SANDWICHES = new Category(
             "כריכים",
-            new ProductItem[]{
-                    new ProductItem(
+            new Product[]{
+                    new Product(
                             PH,
                             "טוסט",
                             "לחם טרי, גבינה צהובה",
@@ -51,7 +51,7 @@ public final class MenuCategories {
                             false,
                             null
                     ),
-                    new ProductItem(
+                    new Product(
                             TOAST,
                             "טוסט גדול",
                             "לחם כפול, גבינה נדיבה",
@@ -59,21 +59,21 @@ public final class MenuCategories {
                             false,
                             null
                     ),
-                    new ProductItem(
+                    new Product(
                             TOAST,
                             "כריך טונה",
                             "לבחירה: לבן/מלא",
                             10.00,
                             true,
-                            new AddonItem[]{ ADD_AVOCADO, ADD_EGG, ADD_CABBAGE, ADD_SALTPEP, ADD_HOUSE_SAU }
+                            new Addon[]{ ADD_AVOCADO, ADD_EGG, ADD_CABBAGE, ADD_SALTPEP, ADD_HOUSE_SAU }
                     ),
-                    new ProductItem(
+                    new Product(
                             PH,
                             "כריך שקשוקה",
                             "שקשוקה עדינה בלחם טרי",
                             10.00,
                             true,
-                            new AddonItem[]{ ADD_AVOCADO, ADD_EGG, ADD_CABBAGE, ADD_SALTPEP, ADD_HOUSE_SAU }
+                            new Addon[]{ ADD_AVOCADO, ADD_EGG, ADD_CABBAGE, ADD_SALTPEP, ADD_HOUSE_SAU }
                     ),
             }
     );
@@ -83,8 +83,8 @@ public final class MenuCategories {
     // ======================
     public static final Category PASTA = new Category(
             "פסטה",
-            new ProductItem[]{
-                    new ProductItem(
+            new Product[]{
+                    new Product(
                             PH,
                             "פסטה פנה ברוטב עגבניות",
                             "פנה, רוטב עגבניות עדין",
@@ -100,13 +100,13 @@ public final class MenuCategories {
     // ======================
     public static final Category COLD_DRINKS = new Category(
             "משקאות קרים",
-            new ProductItem[]{
-                    new ProductItem(PH, "קולה זירו (פחית)",   "330 מ״ל", 6.00, false, null),
-                    new ProductItem(PH, "קוקה-קולה (פחית)",   "330 מ״ל", 6.00, false, null),
-                    new ProductItem(PH, "ספרייט (פחית)",      "330 מ״ל", 6.00, false, null),
-                    new ProductItem(PH, "פאנטה תפוז (פחית)",  "330 מ״ל", 6.00, false, null),
-                    new ProductItem(PH, "סודה (פחית)",        "330 מ״ל", 6.00, false, null),
-                    new ProductItem(PH, "ברד",                "טעמים לבחירה", 9.00, false, null),
+            new Product[]{
+                    new Product(PH, "קולה זירו (פחית)",   "330 מ״ל", 6.00, false, null),
+                    new Product(PH, "קוקה-קולה (פחית)",   "330 מ״ל", 6.00, false, null),
+                    new Product(PH, "ספרייט (פחית)",      "330 מ״ל", 6.00, false, null),
+                    new Product(PH, "פאנטה תפוז (פחית)",  "330 מ״ל", 6.00, false, null),
+                    new Product(PH, "סודה (פחית)",        "330 מ״ל", 6.00, false, null),
+                    new Product(PH, "ברד",                "טעמים לבחירה", 9.00, false, null),
             }
     );
 
@@ -115,9 +115,9 @@ public final class MenuCategories {
     // ======================
     public static final Category DESSERTS = new Category(
             "קינוחים (שוקולדים)",
-            new ProductItem[]{
-                    new ProductItem(PH, "קינדר", "שוקולד חלב", 5.00, false, null),
-                    new ProductItem(PH, "בואנו", "שוקולד/וופלים", 5.00, false, null),
+            new Product[]{
+                    new Product(PH, "קינדר", "שוקולד חלב", 5.00, false, null),
+                    new Product(PH, "בואנו", "שוקולד/וופלים", 5.00, false, null),
             }
     );
 
@@ -126,8 +126,8 @@ public final class MenuCategories {
     // ======================
     public static final Category BAKERY = new Category(
             "מאפים",
-            new ProductItem[]{
-                    new ProductItem(
+            new Product[]{
+                    new Product(
                             PH,
                             "בורקס תפוחי אדמה",
                             "פריך וחם",

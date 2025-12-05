@@ -1,18 +1,19 @@
-package com.example.CafeteriaApp.Adapters;
+package com.example.CafeteriaApp.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.DrawableRes;
 
-public class AddonItem implements Parcelable {
+public class Addon implements Parcelable {
     @DrawableRes
+
     public final int iconRes;
     public final String name;
     public final double price;
     public boolean isAddonChecked;
 
-    public AddonItem(int iconRes, String name, double price) {
+    public Addon(int iconRes, String name, double price) {
         this.iconRes = iconRes;
         this.name = name;
         this.price = price;
@@ -23,7 +24,7 @@ public class AddonItem implements Parcelable {
         return "₪" + String.format("%.2f", price);
     }
 
-    protected AddonItem(Parcel in) {
+    protected Addon(Parcel in) {
         iconRes = in.readInt();
         name = in.readString();
         price = in.readDouble();
@@ -43,15 +44,15 @@ public class AddonItem implements Parcelable {
         return 0;
     }
 
-    public static final Creator<AddonItem> CREATOR = new Creator<AddonItem>() {
+    public static final Creator<Addon> CREATOR = new Creator<Addon>() {
         @Override
-        public AddonItem createFromParcel(Parcel in) {
-            return new AddonItem(in);
+        public Addon createFromParcel(Parcel in) {
+            return new Addon(in);
         }
 
         @Override
-        public AddonItem[] newArray(int size) {
-            return new AddonItem[size];
+        public Addon[] newArray(int size) {
+            return new Addon[size];
         }
     };
 }

@@ -6,7 +6,7 @@
 
     <!-- התחברות -->
     <string name="login_title">התחברות</string>
-    <string name="login_username_hint">שם משתמש</string>
+    <string name="login_email_hint">אימייל</string>
     <string name="login_password_hint">סיסמה</string>
     <string name="login_button">התחבר</string>
     <string name="login_signup_cta">עדיין לא נרשמת? להרשמה</string>
@@ -96,23 +96,7 @@
 
 
 
-    <string name="user_or_phone_hint">שם משתמש או מספר טלפון</string>
-    <string name="password_hint">סיסמה</string>
-    <string name="no_account_q">אין לך חשבון?</string>
-    <string name="go_to_signup">להרשמה</string>
-    <string name="login_disclaimer">בהתחברות אתה מאשר את תנאי השימוש ומדיניות הפרטיות</string>
 
-    <string name="username_hint">שם משתמש</string>
-    <string name="class_hint">כיתה</string>
-    <string name="phone_hint">מספר טלפון</string>
-    <string name="email_hint">אימייל</string>
-    <string name="next_button">הבא</string>
-    <string name="create_account_button">יצירת חשבון</string>
-    <string name="back_button">חזרה</string>
-    <string name="have_account_q">כבר יש לך חשבון?</string>
-    <string name="go_to_login">להתחברות</string>
-    <string name="step_1_of_2">שלב 1 מתוך 2</string>
-    <string name="step_2_of_2">שלב 2 מתוך 2</string>
     <string name="app_name_cafeteria">הקפיטקיה של ליאור</string>
 
 </resources>

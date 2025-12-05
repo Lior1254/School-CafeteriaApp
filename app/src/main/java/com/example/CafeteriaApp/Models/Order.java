@@ -1,4 +1,4 @@
-package com.example.CafeteriaApp.Adapters;
+package com.example.CafeteriaApp.Models;
 
 public class Order {
     private String id;

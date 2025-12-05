@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.R;
 
 import java.util.List;
@@ -19,15 +20,15 @@ public class CustomProductOptionRvAdapter
 
     // === Callback יחיד לשינוי סימון ===
     public interface OnCheckedChangeListener {
-        void onCheckChanged(AddonItem item, int position, boolean isChecked);
+        void onCheckChanged(Addon item, int position, boolean isChecked);
     }
 
     private final LayoutInflater inflater;
-    private final List<AddonItem> addons;
+    private final List<Addon> addons;
     private final OnCheckedChangeListener listener;
 
     public CustomProductOptionRvAdapter(Context c,
-                                        List<AddonItem> addons,
+                                        List<Addon> addons,
                                         OnCheckedChangeListener l) {
         this.inflater = LayoutInflater.from(c);
         this.addons = addons;
@@ -35,7 +36,7 @@ public class CustomProductOptionRvAdapter
         setHasStableIds(true);
     }
 
-    public List<AddonItem> getData() { return addons; }
+    public List<Addon> getData() { return addons; }
 
     @Override public long getItemId(int position) { return position; }
 
@@ -50,7 +51,7 @@ public class CustomProductOptionRvAdapter
 
     @Override
     public void onBindViewHolder(@NonNull Row h, int position) {
-        AddonItem a = addons.get(position);
+        Addon a = addons.get(position);
 
         // טקסטים
         h.lv_checkBox.setText("   " + a.name);

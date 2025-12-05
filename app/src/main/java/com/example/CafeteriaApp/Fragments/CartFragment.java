@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.CafeteriaApp.Adapters.ProductItem;
+import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.Adapters.ShoppingCartAdapter;
 import com.example.CafeteriaApp.MainPage;
 import com.example.CafeteriaApp.R;
@@ -45,25 +45,25 @@ public class CartFragment extends Fragment {
             startActivity(intent);
         });
 
-        List<ProductItem> productItems = Arrays.asList(
-                new ProductItem(R.drawable.ic_launcher_background, "ארוחת ריב", "צ'יפס • קולה זירו", 59.0, true, null),
-                new ProductItem(R.drawable.images,  "צ'יפס",      "רגיל",              18.0, false, null)
+        List<Product> products = Arrays.asList(
+                new Product(R.drawable.ic_launcher_background, "ארוחת ריב", "צ'יפס • קולה זירו", 59.0, true, null),
+                new Product(R.drawable.images,  "צ'יפס",      "רגיל",              18.0, false, null)
         );
 
 
         Wedding(view);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-        ShoppingCartAdapter adapter = new ShoppingCartAdapter(requireContext(), productItems, R.layout.recyclerview_item_order);
+        ShoppingCartAdapter adapter = new ShoppingCartAdapter(requireContext(), products, R.layout.recyclerview_item_order);
         rv.setAdapter(adapter);
 
-        updateData(productItems);
+        updateData(products);
     }
 
-    public void updateData(List<ProductItem> data) {
+    public void updateData(List<Product> data) {
         tv_amount_of_items.setText(data.size() + " מוצרים");
 
         double cartPrice = 0;
-        for(ProductItem p : data)
+        for(Product p : data)
         {
             cartPrice += p.price;
         }

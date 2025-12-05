@@ -12,9 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.CafeteriaApp.Adapters.AddonItem;
+import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Adapters.CustomProductOptionRvAdapter;
-import com.example.CafeteriaApp.Adapters.ProductItem;
+import com.example.CafeteriaApp.Models.Product;
 
 import java.util.Arrays;
 
@@ -26,7 +26,7 @@ public class CustomizeItemActivity extends AppCompatActivity {
     RecyclerView Addons;
     Button btn_AddToCart;
     ImageButton ibtn_plus_item,ibtn_minus_item;
-    ProductItem item;
+    Product item;
 
     private int amount_of_products = 1;
     private double totalPrice = 0 , price = 0;
@@ -63,7 +63,7 @@ public class CustomizeItemActivity extends AppCompatActivity {
     {
         if (android.os.Build.VERSION.SDK_INT >= 33)
         {
-            item = intent.getParcelableExtra("item", ProductItem.class);
+            item = intent.getParcelableExtra("item", Product.class);
         } else
         {
             item = intent.getParcelableExtra("item");
@@ -86,7 +86,7 @@ public class CustomizeItemActivity extends AppCompatActivity {
         }
     }
 
-    private void updateUI(AddonItem addon)
+    private void updateUI(Addon addon)
     {
         if(addon.isAddonChecked)
         {

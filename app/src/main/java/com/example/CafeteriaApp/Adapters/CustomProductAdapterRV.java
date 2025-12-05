@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
 
 import java.util.List;
@@ -19,11 +20,11 @@ import java.util.List;
  */
 public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final List<ProductItem> items;
-    public interface OnItemClick { void onClick(ProductItem item); }
+    private final List<Product> items;
+    public interface OnItemClick { void onClick(Product item); }
     private final OnItemClick listener;
 
-    public CustomProductAdapterRV(List<ProductItem> items, OnItemClick listener) {
+    public CustomProductAdapterRV(List<Product> items, OnItemClick listener) {
         this.items = items;
         this.listener = listener;
     }
@@ -46,7 +47,7 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
         TextView tvD  = itemView.findViewById(R.id.lv_item_description);
         TextView tvP  = itemView.findViewById(R.id.lv_item_price);
 
-        ProductItem p = items.get(position);
+        Product p = items.get(position);
         iv.setImageResource(p.imageRes);
         tvN.setText(p.name);
         tvD.setText(p.description);

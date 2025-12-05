@@ -72,24 +72,34 @@
                     android:layout_height="50dp"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/bg_input_rounded"
-                    android:hint="@string/email_hint"
+                    android:hint="@string/login_email_hint"
+                    android:gravity="right"
                     android:inputType="textEmailAddress"
                     android:padding="12dp"
                     android:textColor="@color/black"
                     android:textColorHint="@color/gray" />
 
-                <EditText
-                    android:id="@+id/ED_login_password"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_input_rounded"
-                    android:gravity="right"
-                    android:hint="@string/login_password_hint"
-                    android:inputType="textPassword"
-                    android:padding="12dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray" />
+                    app:boxBackgroundMode="none"
+                    app:hintEnabled="false"
+                    app:passwordToggleEnabled="true"
+                    app:passwordToggleTint="@color/black">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/ED_login_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_input_rounded"
+                        android:gravity="right"
+                        android:hint="@string/login_password_hint"
+                        android:inputType="textPassword"
+                        android:padding="12dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/gray" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:id="@+id/login_forgot_password"
