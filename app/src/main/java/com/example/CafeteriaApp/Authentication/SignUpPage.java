@@ -1,7 +1,10 @@
 package com.example.CafeteriaApp.Authentication;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -9,25 +12,30 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.CafeteriaApp.Helpers.FBRef;
+import com.example.CafeteriaApp.Models.UserData;
 import com.example.CafeteriaApp.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.FirebaseNetworkException;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
 
 public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
-    private View vfSteps; // ViewFlipper
-    private MaterialButton btnPrev, btnNextOrCreate;
-    private TextView loginRedirectText;
-    private EditText ET_signup_password, ET_signup_username, ET_signup_email, ET_signup_name;
-    private Spinner Spin_signup_class;
-    private AutoCompleteTextView actClass;
-
-    private Intent intent;
-    private boolean isNextButtonEnabled = false;
-
-    private String username, password;
-    private String[] classes;
+    private TextView  tv_signup_warning;
+    private EditText ET_signup_password, ET_signup_username, ET_signup_email, ET_signup_name, ET_signup_phoneNumber;
+    private Spinner Spin_signup_class, Spin_signup_School;
+    private String name, username, email, password, phoneNumber;
+    private String[] classes,schools;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +43,6 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
         setContentView(R.layout.activity_sign_up_page);
         Weddings();
         setAdapter();
-        getIntent();
 
 
     }
@@ -43,160 +50,177 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
 
     public void Weddings()
     {
-
-
         ET_signup_name = findViewById(R.id.ET_signup_name);
         ET_signup_email = findViewById(R.id.ET_signup_email);
         ET_signup_username = findViewById(R.id.ET_signup_username);
         ET_signup_password = findViewById(R.id.ET_signup_password);
+        ET_signup_phoneNumber = findViewById(R.id.ET_signup_phoneNumber);
         Spin_signup_class = findViewById(R.id.Spin_signup_class);
-
-
+        Spin_signup_School = findViewById(R.id.Spin_signup_School);
+        tv_signup_warning = findViewById(R.id.tv_signup_warning);
 
     }
 
     public void setAdapter()
     {
+        //Spin_signup_School
+        schools = getResources().getStringArray(R.array.school_names);
+        Spin_signup_School.setOnItemSelectedListener(this);
+        ArrayAdapter<String> adpSchool = new ArrayAdapter<>(
+                this,
+                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                schools
+        );
+        Spin_signup_School.setAdapter(adpSchool);
+
         classes = getResources().getStringArray(R.array.class_names);
         Spin_signup_class.setOnItemSelectedListener(this);
-        ArrayAdapter<String> adp = new ArrayAdapter<>(
+        ArrayAdapter<String> adpClass = new ArrayAdapter<>(
                 this,
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
                 classes
         );
-        Spin_signup_class.setAdapter(adp);
+        Spin_signup_class.setAdapter(adpClass);
     }
 
 
+    private void showWarning(String warning) {
+        tv_signup_warning.setVisibility(View.VISIBLE);
+        tv_signup_warning.setText(warning);
 
-
-    /*
-    public void Next_Click(View view) {
-
-        if (!isNextButtonEnabled) { // --- STAGE 1: username + password ---
-            String user = etUsername.getText().toString().trim();
-            String pass = etPasswordSignup.getText().toString();
-
-            // validate username + password
-            if (!isLegally(user, "username")) {
-                etUsername.setError("שם משתמש חייב להיות רק עברית או רק אנגלית (6–15), ללא רווחים.");
-                etUsername.requestFocus();
-                return;
-            } else {
-                etUsername.setError(null);
-            }
-
-            if (!isLegally(pass, "password")) {
-                etPasswordSignup.setError("סיסמה חייבת להיות בין 6–15 תווים.");
-                etPasswordSignup.requestFocus();
-                return;
-            } else {
-                etPasswordSignup.setError(null);
-            }
-
-            // save stage-1 values
-            username = user;
-            password = pass;
-
-            // move to stage 2 (ViewFlipper child #1)
-            isNextButtonEnabled = true;                       // we are now in stage 2
-            tvStepIndicator.setText(R.string.step_2_of_2);
-            ViewFlipper flipper = findViewById(R.id.vfSteps);
-            if (flipper.getDisplayedChild() == 0) {
-                flipper.setDisplayedChild(1);
-                btnPrev.setVisibility(View.VISIBLE);
-                btnNextOrCreate.setText(R.string.create_account_button); // change button text
-            }
-
-        } else { // --- STAGE 2: class + phone + email ---
-            String klass = actClass.getText().toString().trim(); // AutoCompleteTextView/EditText
-            String phone = etPhone.getText().toString().trim();
-            String email = etEmail.getText().toString().trim();
-
-            // very basic checks; adjust to your rules
-            if (klass.isEmpty()) {
-                actClass.setError("נא להזין כיתה");
-                actClass.requestFocus();
-                return;
-            } else actClass.setError(null);
-
-            if (!phone.matches("^[0-9]{9,}$")) {
-                etPhone.setError("מספר טלפון לא תקין");
-                etPhone.requestFocus();
-                return;
-            } else etPhone.setError(null);
-
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                etEmail.setError("אימייל לא תקין");
-                etEmail.requestFocus();
-                return;
-            } else etEmail.setError(null);
-
-            // TODO: create account / move forward
-            // startActivity(new Intent(this, MainActivity.class));
-            // finish();
-        }
+        // Add a shake animation to grab the user's attention
+        ObjectAnimator animator = ObjectAnimator.ofFloat(tv_signup_warning, "translationX", 0f, 25f, -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f);
+        animator.setDuration(500); // milliseconds
+        animator.start();
     }
 
-    public void Prev_Click(View v) {
-        // go back to stage 1
-        ViewFlipper flipper = findViewById(R.id.vfSteps);
-        if (flipper.getDisplayedChild() == 1) {
-            flipper.setDisplayedChild(0);
-        }
-        isNextButtonEnabled = false;                           // we are back to stage 1
-        btnPrev.setVisibility(View.GONE);
-        btnNextOrCreate.setText(R.string.next_button);
-        tvStepIndicator.setText(R.string.step_1_of_2);
-    }
+    public boolean CheckInput()
+    {
+        // Get texts from fields
+        name = ET_signup_name.getText().toString().trim();
+        username = ET_signup_username.getText().toString().trim();
+        email = ET_signup_email.getText().toString().trim();
+        password = ET_signup_password.getText().toString().trim();
+        phoneNumber = ET_signup_phoneNumber.getText().toString().trim();
 
-    public boolean isLegally(String str, String witch_input) {
-        if (str == null) str = "";
-        str = str.trim();
-
-        // *** IMPORTANT: never compare strings with '==' in Java. Use equals(). ***
-        if ("username".equals(witch_input)) {
-            // length 6..15
-            if (str.length() < 6) {
-                Toast.makeText(this, "שם המשתמש צריך להיות עם 6 תווים לפחות.", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            if (str.length() > 15) {
-                Toast.makeText(this, "שם המשתמש יכול להכיל עד 15 תווים.", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            // only Hebrew OR only English letters, no spaces (no mix)
-            // עברית: \u05D0-\u05EA ; אנגלית: A-Z a-z
-            boolean ok = str.matches("^(?:[A-Za-z]{6,15}|[\\u05D0-\\u05EA]{6,15})$");
-            if (!ok) {
-                Toast.makeText(this, "שם משתמש חייב להיות רק אותיות עברית או רק אותיות אנגלית, ללא רווחים.", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-        } else if ("password".equals(witch_input)) {
-            if (str.length() < 6) {
-                Toast.makeText(this, "הסיסמה צריכה להיות עם 6 תווים לפחות.", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            if (str.length() > 15) {
-                Toast.makeText(this, "הסיסמה יכולה להכיל עד 15 תווים.", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            // you can add more password rules if you want (digits, symbols, etc.)
+        // Check name
+        if (name.isEmpty()) {
+            showWarning("  נא להזין שם");
+            return false;
         }
 
+        // Check email (not empty and valid format)
+        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showWarning("  נא להזין כתובת אימייל תקינה");
+            return false;
+        }
+
+        // Check phone number
+        if (phoneNumber.length() != 10 || !phoneNumber.startsWith("05")) {
+            showWarning("  נא להזין מספר טלפון תקין\n  (10 ספרות, מתחיל ב-05)");
+            return false;
+        }
+
+        // Check username (must be longer than 4 characters)
+        if (username.length() <= 4) {
+            showWarning("  שם משתמש חייב להכיל מעל 4 תווים");
+            return false;
+        }
+
+        // Check password (must be longer than 6 characters)
+        if (password.length() <= 6) {
+            showWarning("  סיסמה חייבת להכיל מעל 6 תווים");
+            return false;
+        }
+
+        // Check school spinner (the first option is usually a title like "Select school")
+        if (Spin_signup_School.getSelectedItemPosition() == 0) {
+            showWarning("   נא לבחור בית ספר");
+            return false;
+        }
+
+        // Check class spinner
+        if (Spin_signup_class.getSelectedItemPosition() == 0) {
+            showWarning("  נא לבחור כיתה");
+            return false;
+        }
+
+        // If everything is valid, hide the warning message and return true
+        tv_signup_warning.setVisibility(View.GONE);
         return true;
     }
 
+    public void CreateAccount()
+    {
 
-    */
+        // As requested: Sign out the previous user before creating a new one.
+        if (FBRef.refAuth.getCurrentUser() != null) {
+            FBRef.refAuth.signOut();
+        }
+
+        FBRef.refAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful())
+                        {
+                            FirebaseUser user = FBRef.refAuth.getCurrentUser();
+                            if (user != null)
+                            {
+                                String school = Spin_signup_School.getSelectedItem().toString();
+                                String classRoom = Spin_signup_class.getSelectedItem().toString();
+                                UserData userData = new UserData(user.getUid(), name, email, username, phoneNumber, school, classRoom);
+
+                                // Save to Realtime Database with listener
+                                FBRef.refUsers.child(user.getUid()).setValue(userData)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(SignUpPage.this, "User created successfully.", Toast.LENGTH_SHORT).show();
+                                                    finish();
+                                                } else {
+                                                    showWarning("Failed to save user data: " + task.getException().getMessage());
+                                                }
+                                            }
+                                        });
+                                Toast.makeText(SignUpPage.this, "User created successfully.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        else
+                        {
+                            // Handle specific exceptions
+                            Exception exp = task.getException();
+                            if (exp instanceof FirebaseAuthWeakPasswordException) {
+                                showWarning("  הסיסמה חלשה מדי.");
+                            } else if (exp instanceof FirebaseAuthUserCollisionException) {
+                                showWarning("  האימייל הזה כבר רשום במערכת.");
+                            } else if (exp instanceof FirebaseAuthInvalidCredentialsException) {
+                                showWarning("  פורמט אימייל לא תקין.");
+                            } else if (exp instanceof FirebaseNetworkException) {
+                                showWarning("  שגיאת רשת, בדוק את החיבור שלך.");
+                            } else {
+                                if (exp != null) {
+                                    showWarning("  שגיאה: " + exp.getMessage());
+                                } else {
+                                    showWarning("  אירעה שגיאה לא ידועה.");
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+    public void SignUp_Click(View view) {
+        if(CheckInput())
+        {
+            CreateAccount();
+        }
+    }
+
     public void SignUpGoogle_Click(View view) {
 
     }
-    public void Login_Click(View view) {
-        finish();
-    }
+
 
     //Spinner input
     @Override

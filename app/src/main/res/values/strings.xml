@@ -17,9 +17,16 @@
     <string name="signup_email_hint">אימייל</string>
     <string name="signup_username_hint">שם משתמש</string>
     <string name="signup_password_hint">סיסמה</string>
+    <string name="signup_phone_hint">מספר טלפון</string>
     <string name="signup_button">הרשמה</string>
     <string name="signup_login_cta">כבר יש משתמש? התחברות</string>
 
+
+    <string-array name="school_names">
+
+        <item>בית ספר</item>
+        <item>מקיף ז</item>
+    </string-array>
 
     <string-array name="class_names">
         <!-- ז -->

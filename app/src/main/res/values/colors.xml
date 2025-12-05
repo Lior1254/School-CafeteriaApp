@@ -10,6 +10,10 @@
     <color name="ice_blue">#86AFF7</color>
     <color name="ice_blue_light_indicator">#3387CEEB</color>
 
+
+    <color name="Yellow_warning">#ffcc00</color>
+
+
     <color name="logout_red_foreground">#FF5252</color>
     <color name="logout_red_background">#40FF5252</color>
 
@@ -34,7 +38,26 @@
     <color name="mc_chip_bg">#FFF8E1</color>
 
 
-
+    <color name="cream">#FFF5E6</color>
+    <color name="soft_gray">#D9D9D9</color>
+    <color name="soft_blue">#7EBCE6</color>
+    <color name="warm_sand">#E9DCC9</color>
+    <color name="soft_green">#A8D5BA</color>
+    <color name="mint">#C7F2E3</color>
+    <color name="peach">#FFDFC2</color>
+    <color name="sky">#CFEAFF</color>
+    <color name="rose">#F4C1C1</color>
+    <color name="lavender">#D6C8FF</color>
+    <color name="coal">#2C2C2C</color>
+    <color name="fog">#F2F2F2</color>
+    <color name="soft_black">#1A1A1A</color>
+    <color name="silver">#BFBFBF</color>
+    <color name="cloud">#ECECEC</color>
+    <color name="deep_blue">#003A58</color>
+    <color name="aqua">#55D1C6</color>
+    <color name="ocean">#237AA6</color>
+    <color name="forest">#2D5C50</color>
+    <color name="sunset">#FFB38A</color>
 
 </resources>
 
