@@ -48,9 +48,9 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
         TextView tvP  = itemView.findViewById(R.id.lv_item_price);
 
         Product p = items.get(position);
-        iv.setImageResource(p.imageRes);
-        tvN.setText(p.name);
-        tvD.setText(p.description);
+        iv.setImageResource(p.getImageRes());
+        tvN.setText(p.getName());
+        tvD.setText(p.getDescription());
         tvP.setText(p.getPriceText());
 
         // Item click (same behavior as ListView's OnItemClickListener)

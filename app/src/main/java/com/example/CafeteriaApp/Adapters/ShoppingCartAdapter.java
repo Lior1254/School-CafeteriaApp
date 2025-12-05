@@ -57,11 +57,11 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ImageView ivImg   = v.findViewById(R.id.item_img);
         ImageButton btnFav= v.findViewById(R.id.item_favorit_img_btn);
 
-        if (tvName  != null) tvName.setText(it.name);
+        if (tvName  != null) tvName.setText(it.getName());
         if (tvAddon != null) tvAddon.setText(buildAddonsSummary(it));
         if (tvPrice != null) tvPrice.setText(it.getPriceText());
         if (ivImg   != null) {
-            if (it.imageRes != 0) ivImg.setImageResource(it.imageRes);
+            if (it.getImageRes() != 0) ivImg.setImageResource(it.getImageRes());
             else ivImg.setImageResource(android.R.color.transparent);
         }
 
@@ -103,12 +103,14 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override public int getItemCount() { return items.size(); }
 
     private static String buildAddonsSummary(@NonNull Product p){
-        if (!p.supportAddon || p.addons == null || p.addons.length == 0) return "ללא תוספות";
+        if (p.getAddons() == null || p.getAddons().length == 0) return "ללא תוספות";
+        
         StringBuilder sb = new StringBuilder();
-        for (Addon a : p.addons) {
-            if (a != null && a.isAddonChecked) {
+        for (Addon a : p.getAddons()) {
+            // Updated to check isSelected() and getAddonName()
+            if (a != null && a.isSelected()) {
                 if (sb.length() > 0) sb.append(" • ");
-                sb.append(a.name);
+                sb.append(a.getAddonName());
             }
         }
         return sb.length()==0 ? "ללא תוספות" : sb.toString();

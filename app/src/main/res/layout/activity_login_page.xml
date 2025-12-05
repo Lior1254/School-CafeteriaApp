@@ -72,10 +72,11 @@
                     android:layout_height="50dp"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/bg_input_rounded"
-                    android:hint="@string/login_email_hint"
                     android:gravity="right"
+                    android:hint="@string/login_email_hint"
                     android:inputType="textEmailAddress"
                     android:padding="12dp"
+                    android:text="2008@gmail.com"
                     android:textColor="@color/black"
                     android:textColorHint="@color/gray" />
 
@@ -97,6 +98,7 @@
                         android:hint="@string/login_password_hint"
                         android:inputType="textPassword"
                         android:padding="12dp"
+                        android:text="1111111"
                         android:textColor="@color/black"
                         android:textColorHint="@color/gray" />
                 </com.google.android.material.textfield.TextInputLayout>

@@ -44,26 +44,29 @@ public class CustomProductOptionRvAdapter
     @Override
     public Row onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = inflater.inflate(R.layout.custom_lv_product_optinon, parent, false);
-        // Ripple נחמד לשורה (אפשר גם לשים ב-XML של ה-row)
         v.setBackgroundResource(androidx.appcompat.R.drawable.abc_list_selector_holo_light);
         return new Row(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull Row h, int position) {
-        Addon a = addons.get(position);
+        int realPosition = position + 1;
 
-        // טקסטים
-        h.lv_checkBox.setText("   " + a.name);
+        if (realPosition >= addons.size()) return;
+
+        Addon a = addons.get(realPosition);
+
+        // Updated to use new getters
+        h.lv_checkBox.setText("   " + a.getAddonName());
         h.tv_price.setText(a.getPriceText() + " +");
 
         // מניעת טריגר שווא בזמן מחזור ה-View
         h.lv_checkBox.setOnCheckedChangeListener(null);
-        h.lv_checkBox.setChecked(a.isAddonChecked);
+        h.lv_checkBox.setChecked(a.isSelected());
 
         // שינוי מצב הסימון
         h.lv_checkBox.setOnCheckedChangeListener((button, isChecked) -> {
-            a.isAddonChecked = isChecked; // עדכן מודל
+            a.setSelected(isChecked); // Update model via setter
             if (listener != null) {
                 int pos = h.getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
@@ -72,12 +75,14 @@ public class CustomProductOptionRvAdapter
             }
         });
 
-        // לחיצה על כל השורה → toggle לצ'קבוקס (ה-Listener למעלה כבר ייקרא פעם אחת)
         h.itemView.setOnClickListener(v -> h.lv_checkBox.toggle());
     }
 
     @Override
-    public int getItemCount() { return addons == null ? 0 : addons.size(); }
+    public int getItemCount() {
+        if (addons == null || addons.isEmpty()) return 0;
+        return addons.size() - 1;
+    }
 
     static class Row extends RecyclerView.ViewHolder {
         TextView tv_price;

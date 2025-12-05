@@ -14,12 +14,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.Adapters.ShoppingCartAdapter;
 import com.example.CafeteriaApp.MainPage;
+import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CartFragment extends Fragment {
@@ -45,10 +45,10 @@ public class CartFragment extends Fragment {
             startActivity(intent);
         });
 
-        List<Product> products = Arrays.asList(
-                new Product(R.drawable.ic_launcher_background, "ארוחת ריב", "צ'יפס • קולה זירו", 59.0, true, null),
-                new Product(R.drawable.images,  "צ'יפס",      "רגיל",              18.0, false, null)
-        );
+
+        List<Product> products = new ArrayList<>();
+        products.add(new Product("1001", "ארוחת ריב", "צ'יפס • קולה זירו", 59.0, "עיקריות", null, R.drawable.ic_launcher_background, 1));
+        products.add(new Product("1002", "צ'יפס", "רגיל", 18.0, "תוספות", null, R.drawable.images, 1));
 
 
         Wedding(view);
@@ -65,7 +65,7 @@ public class CartFragment extends Fragment {
         double cartPrice = 0;
         for(Product p : data)
         {
-            cartPrice += p.price;
+            cartPrice += p.getPrice();
         }
         if(cartPrice != 0)
         {

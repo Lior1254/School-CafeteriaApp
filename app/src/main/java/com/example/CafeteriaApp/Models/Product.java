@@ -1,68 +1,102 @@
 package com.example.CafeteriaApp.Models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.io.Serializable;
 
-import androidx.annotation.DrawableRes;
+public class Product implements Serializable
+{
+    private String id;
+    private String name;
+    private String description;
+    private double price;
+    private String category;
+    private Addon[] addons;
+    private int imageRes;
+    private int amount;
 
-public class Product implements Parcelable {
+    public Product()
+    {
 
-    @DrawableRes
-    public final int imageRes;
-    public final String name;
-    public final String description;
-    public final double price;
-    public final boolean supportAddon;
-    public final Addon[] addons;
-
-    public Product(int imageRes, String name, String description, double price,
-                   boolean supportAddon, Addon[] addons) {
-        this.imageRes = imageRes;
+    }
+    
+    public Product(String id, String name, String description, double price, String category, Addon[] addons, int imageRes, int amount)
+    {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.supportAddon = supportAddon;
+        this.category = category;
         this.addons = addons;
+        this.imageRes = imageRes;
+        this.amount = amount;
     }
 
-    public String getPriceText() {
+    public String getPriceText()
+    {
         return "₪" + String.format("%.2f", price);
     }
 
-    // ---- Parcelable ----
-    protected Product(Parcel in) {
-        imageRes = in.readInt();
-        name = in.readString();
-        description = in.readString();
-        price = in.readDouble();
-        supportAddon = in.readByte() != 0;
-        addons = in.createTypedArray(Addon.CREATOR);
+
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(imageRes);
-        dest.writeString(name);
-        dest.writeString(description);
-        dest.writeDouble(price);
-        dest.writeByte((byte) (supportAddon ? 1 : 0));
-        dest.writeTypedArray(addons, flags);
+    public void setId(String id) {
+        this.id = id;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getName() {
+        return name;
     }
 
-    public static final Creator<Product> CREATOR = new Creator<Product>() {
-        @Override
-        public Product createFromParcel(Parcel in) {
-            return new Product(in);
-        }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-        @Override
-        public Product[] newArray(int size) {
-            return new Product[size];
-        }
-    };
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Addon[] getAddons() {
+        return addons;
+    }
+
+    public void setAddons(Addon[] addons) {
+        this.addons = addons;
+    }
+
+    public int getImageRes() {
+        return imageRes;
+    }
+
+    public void setImageRes(int imageRes) {
+        this.imageRes = imageRes;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
 }

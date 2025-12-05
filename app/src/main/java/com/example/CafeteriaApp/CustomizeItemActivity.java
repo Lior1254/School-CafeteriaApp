@@ -38,7 +38,7 @@ public class CustomizeItemActivity extends AppCompatActivity {
         intent = getIntent();
         weddings();
         setUI();
-        price = item.price;
+        price = item.getPrice();
 
 
     }
@@ -68,17 +68,21 @@ public class CustomizeItemActivity extends AppCompatActivity {
         {
             item = intent.getParcelableExtra("item");
         }
-        tvProductName.setText(item.name);
-        tvProductDescription.setText(item.description);
-        ivProductIMG.setImageResource(item.imageRes);
+        
+        if (item == null) return; // Basic null check
+        
+        tvProductName.setText(item.getName());
+        tvProductDescription.setText(item.getDescription());
+        ivProductIMG.setImageResource(item.getImageRes());
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText("הוספה להזמנה   " + item.getPriceText());
 
-        if(item.supportAddon && item.addons != null)
+        if(item.getAddons() != null && item.getAddons().length > 0)
         {
+
             CustomProductOptionRvAdapter ad = new CustomProductOptionRvAdapter(
                     this,
-                    Arrays.asList(item.addons),
+                    Arrays.asList(item.getAddons()),
                     (addon, pos, isChecked) -> updateUI(addon)
             );
             Addons.setLayoutManager(new LinearLayoutManager(this));
@@ -88,20 +92,19 @@ public class CustomizeItemActivity extends AppCompatActivity {
 
     private void updateUI(Addon addon)
     {
-        if(addon.isAddonChecked)
+        // Updated to use new fields
+        if(addon.isSelected())
         {
-            price += addon.price;
+            price += addon.getAddonPrice();
         }
         else
         {
-            price -= addon.price;
+            price -= addon.getAddonPrice();
         }
 
-        totalPrice = price*amount_of_products;
+        totalPrice = price * amount_of_products;
         btn_AddToCart.setText("הוספה להזמנה   " + "₪" + String.format("%.2f", totalPrice) );
     }
-
-
 
 
     public void Plus_btn_Click(View view) {
@@ -121,15 +124,14 @@ public class CustomizeItemActivity extends AppCompatActivity {
 
         if(sign) {
             amount_of_products++;
-            totalPrice = totalPrice + totalPrice;
         }
         else {
             amount_of_products--;
-            totalPrice = totalPrice - totalPrice;
-
         }
 
-
+        // Corrected totalPrice logic (was strange in original code: totalPrice + totalPrice)
+        // totalPrice should be calculated based on the single unit price (including addons) * amount
+        
         if(amount_of_products == 1)
             {
                 ibtn_minus_item.setImageResource(R.drawable.minus_gray);
@@ -149,7 +151,7 @@ public class CustomizeItemActivity extends AppCompatActivity {
         }
 
         tv_amount_of_items.setText(String.valueOf(amount_of_products));
-        totalPrice = price*amount_of_products;
+        totalPrice = price * amount_of_products;
         btn_AddToCart.setText("הוספה להזמנה   " + "₪" + String.format("%.2f", totalPrice) );
     }
 
