@@ -103,11 +103,10 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override public int getItemCount() { return items.size(); }
 
     private static String buildAddonsSummary(@NonNull Product p){
-        if (p.getAddons() == null || p.getAddons().length == 0) return "ללא תוספות";
+        if (p.getAddons() == null || p.getAddons().isEmpty()) return "ללא תוספות";
         
         StringBuilder sb = new StringBuilder();
         for (Addon a : p.getAddons()) {
-            // Updated to check isSelected() and getAddonName()
             if (a != null && a.isSelected()) {
                 if (sb.length() > 0) sb.append(" • ");
                 sb.append(a.getAddonName());

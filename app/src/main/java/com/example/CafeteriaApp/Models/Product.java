@@ -1,6 +1,7 @@
 package com.example.CafeteriaApp.Models;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Product implements Serializable
 {
@@ -9,7 +10,7 @@ public class Product implements Serializable
     private String description;
     private double price;
     private String category;
-    private Addon[] addons;
+    private List<Addon> addons; // Changed from array to List
     private int imageRes;
     private int amount;
 
@@ -18,7 +19,7 @@ public class Product implements Serializable
 
     }
     
-    public Product(String id, String name, String description, double price, String category, Addon[] addons, int imageRes, int amount)
+    public Product(String id, String name, String description, double price, String category, List<Addon> addons, int imageRes, int amount)
     {
         this.id = id;
         this.name = name;
@@ -76,11 +77,11 @@ public class Product implements Serializable
         this.category = category;
     }
 
-    public Addon[] getAddons() {
+    public List<Addon> getAddons() {
         return addons;
     }
 
-    public void setAddons(Addon[] addons) {
+    public void setAddons(List<Addon> addons) {
         this.addons = addons;
     }
 

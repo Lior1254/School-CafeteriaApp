@@ -52,7 +52,7 @@ public class CustomProductOptionRvAdapter
     public void onBindViewHolder(@NonNull Row h, int position) {
         int realPosition = position + 1;
 
-        if (realPosition >= addons.size()) return;
+          if (realPosition >= addons.size()) return;
 
         Addon a = addons.get(realPosition);
 

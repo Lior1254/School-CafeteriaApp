@@ -69,7 +69,7 @@ public class CustomizeItemActivity extends AppCompatActivity {
             item = intent.getParcelableExtra("item");
         }
         
-        if (item == null) return; // Basic null check
+        if (item == null) return; 
         
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
@@ -77,12 +77,12 @@ public class CustomizeItemActivity extends AppCompatActivity {
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText("הוספה להזמנה   " + item.getPriceText());
 
-        if(item.getAddons() != null && item.getAddons().length > 0)
+        // Updated to use List<Addon> instead of array
+        if(item.getAddons() != null && !item.getAddons().isEmpty())
         {
-
             CustomProductOptionRvAdapter ad = new CustomProductOptionRvAdapter(
                     this,
-                    Arrays.asList(item.getAddons()),
+                    item.getAddons(), // List passed directly
                     (addon, pos, isChecked) -> updateUI(addon)
             );
             Addons.setLayoutManager(new LinearLayoutManager(this));
@@ -92,7 +92,6 @@ public class CustomizeItemActivity extends AppCompatActivity {
 
     private void updateUI(Addon addon)
     {
-        // Updated to use new fields
         if(addon.isSelected())
         {
             price += addon.getAddonPrice();
@@ -129,9 +128,6 @@ public class CustomizeItemActivity extends AppCompatActivity {
             amount_of_products--;
         }
 
-        // Corrected totalPrice logic (was strange in original code: totalPrice + totalPrice)
-        // totalPrice should be calculated based on the single unit price (including addons) * amount
-        
         if(amount_of_products == 1)
             {
                 ibtn_minus_item.setImageResource(R.drawable.minus_gray);
