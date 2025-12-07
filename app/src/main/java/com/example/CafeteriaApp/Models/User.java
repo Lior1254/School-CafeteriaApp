@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a user in the system.
+ * Stores user preferences, order history, and favorite products.
+ */
 public class User implements Serializable
 {
     private String uid;
@@ -12,12 +16,15 @@ public class User implements Serializable
     private boolean darkMode;
     private boolean notificationsEnabled;
 
-    public User() {
+    // Empty constructor required for Firebase
+    public User()
+    {
         this.ordersHistory = new ArrayList<>();
         this.favoriteProducts = new ArrayList<>();
     }
 
-    public User(String uid, boolean darkMode, boolean notificationsEnabled) {
+    public User(String uid, boolean darkMode, boolean notificationsEnabled)
+    {
         this.uid = uid;
         this.darkMode = darkMode;
         this.notificationsEnabled = notificationsEnabled;
@@ -25,7 +32,9 @@ public class User implements Serializable
         this.favoriteProducts = new ArrayList<>();
     }
 
-    public User(String uid, List<Order> ordersHistory, List<Product> favoriteProducts, boolean darkMode, boolean notificationsEnabled) {
+    public User(String uid, List<Order> ordersHistory, List<Product> favoriteProducts,
+                boolean darkMode, boolean notificationsEnabled)
+    {
         this.uid = uid;
         this.ordersHistory = ordersHistory;
         this.favoriteProducts = favoriteProducts;
@@ -33,43 +42,53 @@ public class User implements Serializable
         this.notificationsEnabled = notificationsEnabled;
     }
 
-    public String getUid() {
+    public String getUid()
+    {
         return uid;
     }
 
-    public void setUid(String uid) {
+    public void setUid(String uid)
+    {
         this.uid = uid;
     }
 
-    public List<Order> getOrdersHistory() {
+    public List<Order> getOrdersHistory()
+    {
         return ordersHistory;
     }
 
-    public void setOrdersHistory(List<Order> ordersHistory) {
+    public void setOrdersHistory(List<Order> ordersHistory)
+    {
         this.ordersHistory = ordersHistory;
     }
 
-    public List<Product> getFavoriteProducts() {
+    public List<Product> getFavoriteProducts()
+    {
         return favoriteProducts;
     }
 
-    public void setFavoriteProducts(List<Product> favoriteProducts) {
+    public void setFavoriteProducts(List<Product> favoriteProducts)
+    {
         this.favoriteProducts = favoriteProducts;
     }
 
-    public boolean isDarkMode() {
+    public boolean isDarkMode()
+    {
         return darkMode;
     }
 
-    public void setDarkMode(boolean darkMode) {
+    public void setDarkMode(boolean darkMode)
+    {
         this.darkMode = darkMode;
     }
 
-    public boolean isNotificationsEnabled() {
+    public boolean isNotificationsEnabled()
+    {
         return notificationsEnabled;
     }
 
-    public void setNotificationsEnabled(boolean notificationsEnabled) {
+    public void setNotificationsEnabled(boolean notificationsEnabled)
+    {
         this.notificationsEnabled = notificationsEnabled;
     }
 }

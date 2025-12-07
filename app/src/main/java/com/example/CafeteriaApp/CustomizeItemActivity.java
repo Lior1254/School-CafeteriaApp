@@ -13,35 +13,43 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Adapters.CustomProductOptionRvAdapter;
+import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
 
-import java.util.Arrays;
-
-public class CustomizeItemActivity extends AppCompatActivity {
+/**
+ * Activity for customizing a selected product.
+ * Allows users to adjust quantity and select addons before adding to cart.
+ */
+public class CustomizeItemActivity extends AppCompatActivity
+{
 
     Intent intent;
-    TextView tvProductName,tvProductDescription, tv_amount_of_items, tv_price;
+    TextView tvProductName, tvProductDescription, tv_amount_of_items, tv_price;
     ImageView ivProductIMG;
     RecyclerView Addons;
     Button btn_AddToCart;
-    ImageButton ibtn_plus_item,ibtn_minus_item;
+    ImageButton ibtn_plus_item, ibtn_minus_item;
     Product item;
 
     private int amount_of_products = 1;
-    private double totalPrice = 0 , price = 0;
+    private double totalPrice = 0, price = 0;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customize_item);
 
         intent = getIntent();
-        weddings();
-        setUI();
+        initializeViews();
+        setupUI();
     }
 
-    private void weddings()
+    /**
+     * Initializes UI components from the layout.
+     */
+    private void initializeViews()
     {
         tvProductName = findViewById(R.id.tvProductName);
         tvProductDescription = findViewById(R.id.tvProductDescription);
@@ -53,12 +61,14 @@ public class CustomizeItemActivity extends AppCompatActivity {
         ibtn_plus_item = findViewById(R.id.ibtn_plus_item);
         ibtn_minus_item = findViewById(R.id.ibtn_minus_item);
         btn_AddToCart = findViewById(R.id.btn_AddToCart);
-
     }
 
-
-    private void setUI()
+    /**
+     * Sets up the UI with product details and handles logic for addons.
+     */
+    private void setupUI()
     {
+        // Retrieve product object from intent (supports Serializable for newer API levels)
         if (android.os.Build.VERSION.SDK_INT >= 33)
         {
             item = intent.getSerializableExtra("item", Product.class);
@@ -66,14 +76,15 @@ public class CustomizeItemActivity extends AppCompatActivity {
         {
             item = (Product) intent.getSerializableExtra("item");
         }
-        
+
+        // Basic validation to ensure product data is available
         if (item == null)
         {
-            Toast.makeText(this, "שגיאה בטעינת המוצר", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error loading product", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        
+
         price = item.getPrice();
         totalPrice = price * amount_of_products;
 
@@ -81,86 +92,111 @@ public class CustomizeItemActivity extends AppCompatActivity {
         tvProductDescription.setText(item.getDescription());
         ivProductIMG.setImageResource(item.getImageRes());
         tv_price.setText(item.getPriceText());
-        btn_AddToCart.setText("הוספה להזמנה   " + item.getPriceText());
+        btn_AddToCart.setText("Add to Cart   " + item.getPriceText());
 
-        // Updated logic: Hide RecyclerView if no addons, otherwise set adapter
-        if(item.getAddons() != null && !item.getAddons().isEmpty())
+        // Configure addons RecyclerView only if addons exist
+        if (item.getAddons() != null && !item.getAddons().isEmpty())
         {
-            Addons.setVisibility(View.VISIBLE); // Show if has addons
+            Addons.setVisibility(View.VISIBLE);
             CustomProductOptionRvAdapter ad = new CustomProductOptionRvAdapter(
                     this,
                     item.getAddons(),
-                    (addon, pos, isChecked) -> updateUI(addon)
+                    (addon, pos, isChecked) -> updatePriceBasedOnAddons(addon)
             );
             Addons.setLayoutManager(new LinearLayoutManager(this));
             Addons.setAdapter(ad);
-        } else {
-            Addons.setVisibility(View.GONE); // Hide if no addons
+        } else
+        {
+            Addons.setVisibility(View.GONE);
         }
     }
 
-    private void updateUI(Addon addon)
+    /**
+     * Updates the total price when an addon is selected or deselected.
+     *
+     * @param addon The addon that was interacted with.
+     */
+    private void updatePriceBasedOnAddons(Addon addon)
     {
-        if(addon.isSelected())
+        if (addon.isSelected())
         {
             price += addon.getAddonPrice();
-        }
-        else
+        } else
         {
             price -= addon.getAddonPrice();
         }
 
         totalPrice = price * amount_of_products;
-        btn_AddToCart.setText("הוספה להזמנה   " + "₪" + String.format("%.2f", totalPrice) );
+        btn_AddToCart.setText("Add to Cart   " + "₪" + String.format("%.2f", totalPrice));
     }
 
-
-    public void Plus_btn_Click(View view) {
-        updateAmountOfItems(true);
-    }
-
-    public void Minus_btn_Click(View view) {
-        updateAmountOfItems(false);
-    }
-
-    private void updateAmountOfItems(boolean sign)
-            //true - plus
-            //false - minus
+    /**
+     * Increases the quantity of the product.
+     *
+     * @param view The view that was clicked.
+     */
+    public void Plus_btn_Click(View view)
     {
-        if((amount_of_products == 1 && !sign) || (amount_of_products == 9 && sign))
+        updateItemQuantity(true);
+    }
+
+    /**
+     * Decreases the quantity of the product.
+     *
+     * @param view The view that was clicked.
+     */
+    public void Minus_btn_Click(View view)
+    {
+        updateItemQuantity(false);
+    }
+
+    /**
+     * Updates the item quantity and recalculates the total price.
+     *
+     * @param increment True to increase quantity, false to decrease.
+     */
+    private void updateItemQuantity(boolean increment)
+    {
+        if ((amount_of_products == 1 && !increment) || (amount_of_products == 9 && increment))
             return;
 
-        if(sign) {
+        if (increment)
+        {
             amount_of_products++;
-        }
-        else {
+        } else
+        {
             amount_of_products--;
         }
 
-        if(amount_of_products == 1)
-            {
-                ibtn_minus_item.setImageResource(R.drawable.minus_gray);
-            }
-        else
-            {
-                ibtn_minus_item.setImageResource(R.drawable.minus_black);
-            }
+        // Update UI for quantity buttons (gray out if limit reached)
+        if (amount_of_products == 1)
+        {
+            ibtn_minus_item.setImageResource(R.drawable.minus_gray);
+        } else
+        {
+            ibtn_minus_item.setImageResource(R.drawable.minus_black);
+        }
 
-        if(amount_of_products == 9)
+        if (amount_of_products == 9)
         {
             ibtn_plus_item.setImageResource(R.drawable.plus_gray);
-        }
-        else
+        } else
         {
             ibtn_plus_item.setImageResource(R.drawable.plus_black);
         }
 
         tv_amount_of_items.setText(String.valueOf(amount_of_products));
         totalPrice = price * amount_of_products;
-        btn_AddToCart.setText("הוספה להזמנה   " + "₪" + String.format("%.2f", totalPrice) );
+        btn_AddToCart.setText("Add to Cart   " + "₪" + String.format("%.2f", totalPrice));
     }
 
-    public void GoBack_Click(View view) {
+    /**
+     * Closes the activity and returns to the previous screen.
+     *
+     * @param view The view that was clicked.
+     */
+    public void GoBack_Click(View view)
+    {
         finish();
     }
 }

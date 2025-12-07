@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -220,12 +219,19 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowNightMode"
                     style="@style/ProfileRowStyle">
-                    <FrameLayout android:id="@+id/iconBgNight" style="@style/ProfileIconContainerStyle"
+
+                    <FrameLayout
+                        android:id="@+id/iconBgNight"
+                        style="@style/ProfileIconContainerStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent">
-                        <ImageView android:src="@drawable/night_mode_icon" style="@style/ProfileIconStyle"/>
+
+                        <ImageView
+                            android:src="@drawable/night_mode_icon"
+                            style="@style/ProfileIconStyle" />
                     </FrameLayout>
+
                     <TextView
                         android:id="@+id/titleNight"
                         android:text="מצב לילה"
@@ -234,7 +240,8 @@
                         app:layout_constraintStart_toEndOf="@id/iconBgNight"
                         app:layout_constraintEnd_toStartOf="@+id/switchNight"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/switchNight"
                         android:layout_width="wrap_content"
@@ -243,55 +250,77 @@
                         android:paddingEnd="12dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintBottom_toBottomOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <View style="@style/ProfileSeparatorStyle"/>
+                <View style="@style/ProfileSeparatorStyle" />
 
                 <!-- שורה: העדפות תזונה -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowDiet"
                     style="@style/ProfileRowStyle">
-                    <FrameLayout android:id="@+id/iconBgDiet" style="@style/ProfileIconContainerStyle"
+
+                    <FrameLayout
+                        android:id="@+id/iconBgDiet"
+                        style="@style/ProfileIconContainerStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent">
-                        <ImageView  style="@style/ProfileIconStyle"/>
+
+                        <ImageView style="@style/ProfileIconStyle" />
                     </FrameLayout>
-                    <TextView android:text="העדפות תזונה" style="@style/ProfileTextStyle"
+
+                    <TextView
+                        android:text="העדפות תזונה"
+                        style="@style/ProfileTextStyle"
                         android:layout_marginEnd="8dp"
                         app:layout_constraintStart_toEndOf="@id/iconBgDiet"
                         app:layout_constraintEnd_toStartOf="@+id/arrowDiet"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
-                    <ImageView android:id="@+id/arrowDiet" style="@style/ProfileArrowStyle"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/arrowDiet"
+                        style="@style/ProfileArrowStyle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintBottom_toBottomOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <View style="@style/ProfileSeparatorStyle"/>
+                <View style="@style/ProfileSeparatorStyle" />
 
                 <!-- שורה: שפה -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowLanguage"
                     style="@style/ProfileRowStyle">
-                    <FrameLayout android:id="@+id/iconBgLang" style="@style/ProfileIconContainerStyle"
+
+                    <FrameLayout
+                        android:id="@+id/iconBgLang"
+                        style="@style/ProfileIconContainerStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent">
-                        <ImageView android:src="@drawable/language_icon" style="@style/ProfileIconStyle"/>
+
+                        <ImageView
+                            android:src="@drawable/language_icon"
+                            style="@style/ProfileIconStyle" />
                     </FrameLayout>
-                    <TextView android:text="שפה" style="@style/ProfileTextStyle"
+
+                    <TextView
+                        android:text="שפה"
+                        style="@style/ProfileTextStyle"
                         android:layout_marginEnd="8dp"
                         app:layout_constraintStart_toEndOf="@id/iconBgLang"
                         app:layout_constraintEnd_toStartOf="@+id/arrowLang"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
-                    <ImageView android:id="@+id/arrowLang" style="@style/ProfileArrowStyle"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/arrowLang"
+                        style="@style/ProfileArrowStyle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintBottom_toBottomOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
@@ -326,13 +355,17 @@
                     android:id="@+id/rowLogout"
                     style="@style/ProfileRowStyle">
 
-                    <FrameLayout android:id="@+id/iconBgLogout" style="@style/ProfileIconContainerStyle"
+                    <FrameLayout
+                        android:id="@+id/iconBgLogout"
+                        style="@style/ProfileIconContainerStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent">
+
                         <ImageView
                             style="@style/ProfileIconStyle"
-                            app:tint="@color/white" />                           app:tint="@color/white" />
+                            app:tint="@color/white" />
+                        app:tint="@color/white" />
 
                     </FrameLayout>
 

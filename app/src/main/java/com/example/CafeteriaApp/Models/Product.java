@@ -3,6 +3,10 @@ package com.example.CafeteriaApp.Models;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Represents a product in the cafeteria menu.
+ * Implements Serializable for easy data passing between Android components and Firebase compatibility.
+ */
 public class Product implements Serializable
 {
     private String id;
@@ -10,16 +14,18 @@ public class Product implements Serializable
     private String description;
     private double price;
     private String category;
-    private List<Addon> addons; // Changed from array to List
-    private int imageRes;
-    private int amount;
+    private List<Addon> addons; // List of available addons for this product
+    private int imageRes; // Resource ID for the product image
+    private int amount; // Quantity of the product in cart/order
 
+    // Empty constructor required for Firebase Realtime Database
     public Product()
     {
 
     }
-    
-    public Product(String id, String name, String description, double price, String category, List<Addon> addons, int imageRes, int amount)
+
+    public Product(String id, String name, String description, double price, String category,
+                   List<Addon> addons, int imageRes, int amount)
     {
         this.id = id;
         this.name = name;
@@ -31,73 +37,92 @@ public class Product implements Serializable
         this.amount = amount;
     }
 
+    /**
+     * Returns the formatted price string (e.g., "₪15.00").
+     */
     public String getPriceText()
     {
         return "₪" + String.format("%.2f", price);
     }
 
 
-    public String getId() {
+    public String getId()
+    {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(String id)
+    {
         this.id = id;
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(String name)
+    {
         this.name = name;
     }
 
-    public String getDescription() {
+    public String getDescription()
+    {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(String description)
+    {
         this.description = description;
     }
 
-    public double getPrice() {
+    public double getPrice()
+    {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(double price)
+    {
         this.price = price;
     }
 
-    public String getCategory() {
+    public String getCategory()
+    {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(String category)
+    {
         this.category = category;
     }
 
-    public List<Addon> getAddons() {
+    public List<Addon> getAddons()
+    {
         return addons;
     }
 
-    public void setAddons(List<Addon> addons) {
+    public void setAddons(List<Addon> addons)
+    {
         this.addons = addons;
     }
 
-    public int getImageRes() {
+    public int getImageRes()
+    {
         return imageRes;
     }
 
-    public void setImageRes(int imageRes) {
+    public void setImageRes(int imageRes)
+    {
         this.imageRes = imageRes;
     }
 
-    public int getAmount() {
+    public int getAmount()
+    {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(int amount)
+    {
         this.amount = amount;
     }
 }

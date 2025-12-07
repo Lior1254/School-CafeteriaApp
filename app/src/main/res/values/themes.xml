@@ -29,7 +29,6 @@
     </style>
 
 
-
     <!-- ===================================== -->
     <!--      Styles for Profile Screen        -->
     <!-- ===================================== -->
@@ -73,7 +72,8 @@
     <style name="ProfileArrowStyle">
         <item name="android:layout_width">22dp</item>
         <item name="android:layout_height">22dp</item>
-        <item name="android:src">@drawable/forward_arrow</item> <!-- או @drawable/ic_arrow_forward -->
+        <item name="android:src">@drawable/forward_arrow
+        </item> <!-- או @drawable/ic_arrow_forward -->
         <item name="android:layout_marginEnd">12dp</item> <!-- שיניתי מ-padding ל-margin -->
         <item name="android:tint">@android:color/black</item>
     </style>
@@ -87,10 +87,6 @@
         <item name="android:layout_marginEnd">12dp</item>
         <item name="android:background">#1A000000</item> <!-- שחור עם שקיפות נמוכה -->
     </style>
-
-
-
-
 
 
 </resources>

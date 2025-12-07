@@ -4,23 +4,23 @@
         android:id="@+id/nav_home"
         android:title="תפריט"
         android:textColor="@color/mc_text_primary"
-        android:icon="@drawable/bottom_bar_menu"/>
+        android:icon="@drawable/bottom_bar_menu" />
 
     <item
         android:id="@+id/nav_cart"
         android:textColor="@color/mc_text_primary"
         android:title="סל קניות"
-        android:icon="@drawable/bottom_bar_cart"/>
+        android:icon="@drawable/bottom_bar_cart" />
 
     <item
         android:id="@+id/nav_orders"
         android:textColor="@color/mc_text_primary"
         android:title="הזמנות שלי"
-        android:icon="@drawable/bottom_bar_orders"/>
+        android:icon="@drawable/bottom_bar_orders" />
 
     <item
         android:id="@+id/nav_profile"
         android:textColor="@color/mc_text_primary"
         android:title="אזור אישי"
-        android:icon="@drawable/bottom_bar_profile"/>
+        android:icon="@drawable/bottom_bar_profile" />
 </menu>

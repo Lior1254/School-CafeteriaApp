@@ -6,34 +6,51 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast; // Import Toast
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.R;
+
 import java.util.List;
 
-public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder> {
+/**
+ * Adapter for the Orders RecyclerView.
+ * Binds order data to the view holder and manages the order status timeline UI.
+ */
+public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder>
+{
 
     private final Context context;
     private final List<Order> orderList;
 
-    public OrdersAdapter(Context context, List<Order> orderList) {
+    /**
+     * Constructor for the OrdersAdapter.
+     *
+     * @param context   Context for inflating layouts and accessing resources.
+     * @param orderList List of orders to display.
+     */
+    public OrdersAdapter(Context context, List<Order> orderList)
+    {
         this.context = context;
         this.orderList = orderList;
     }
 
     @NonNull
     @Override
-    public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.custom_rv_order_item, parent, false);
+    public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    {
+        View view = LayoutInflater.from(context).inflate(R.layout.custom_rv_order_item, parent,
+                                                         false);
         return new OrderViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull OrderViewHolder holder, int position)
+    {
         Order currentOrder = orderList.get(position);
 
         holder.tvOrderNumber.setText("הזמנה #" + currentOrder.getId());
@@ -45,25 +62,36 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
 
         updateStatusUI(holder, currentOrder.getStatusCode());
 
-        // --- הוספת OnClickListener ---
-        holder.itemView.setOnClickListener(v -> {
-            Toast.makeText(context, "נלחצה הזמנה מספר: " + currentOrder.getId(), Toast.LENGTH_SHORT).show();
-            // כאן בעתיד תוכל לפתוח מסך חדש עם פרטי ההזמנה
-        });
+        // Set click listener for the entire item
+        holder.itemView.setOnClickListener(v ->
+                                           {
+                                               Toast.makeText(context,
+                                                              "נלחצה הזמנה מספר: " + currentOrder.getId(),
+                                                              Toast.LENGTH_SHORT).show();
+                                               // TODO: Open order details screen here
+                                           });
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return orderList.size();
     }
 
-    private void updateStatusUI(OrderViewHolder holder, int statusCode) {
-        // שינוי קטן: colorActive הוא צהוב, כי זה הצבע העיקרי של "בתהליך"
+    /**
+     * Updates the UI of the timeline steps based on the current order status.
+     *
+     * @param holder     The ViewHolder containing the UI elements.
+     * @param statusCode The status code of the order (1-4).
+     */
+    private void updateStatusUI(OrderViewHolder holder, int statusCode)
+    {
+        // Define colors for active, completed, and inactive states
         int colorActive = ContextCompat.getColor(context, R.color.status_in_progress_yellow);
         int colorCompleted = ContextCompat.getColor(context, R.color.status_ready_green);
         int colorInactive = ContextCompat.getColor(context, R.color.status_received_grey);
 
-        // --- איפוס כל השלבים ---
+        // --- Reset all steps to inactive state ---
         ((GradientDrawable) holder.step1_icon.getBackground()).setColor(colorInactive);
         ((GradientDrawable) holder.step2_icon.getBackground()).setColor(colorInactive);
         ((GradientDrawable) holder.step3_icon.getBackground()).setColor(colorInactive);
@@ -80,59 +108,76 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
         holder.step3_text.setTextColor(colorInactive);
         holder.step4_text.setTextColor(colorInactive);
 
-        // --- עדכון לפי הסטטוס הנוכחי ---
-        if (statusCode >= 1) {
+        // --- Update UI based on completed steps ---
+        if (statusCode >= 1)
+        {
             ((GradientDrawable) holder.step1_icon.getBackground()).setColor(colorCompleted);
             holder.step1_icon.setText("✓");
             holder.step1_text.setTextColor(colorCompleted);
         }
-        if (statusCode >= 2) {
+        if (statusCode >= 2)
+        {
             holder.line1.setBackgroundColor(colorCompleted);
             ((GradientDrawable) holder.step2_icon.getBackground()).setColor(colorCompleted);
             holder.step2_icon.setText("✓");
             holder.step2_text.setTextColor(colorCompleted);
         }
-        if (statusCode >= 3) {
+        if (statusCode >= 3)
+        {
             holder.line2.setBackgroundColor(colorCompleted);
             ((GradientDrawable) holder.step3_icon.getBackground()).setColor(colorCompleted);
             holder.step3_icon.setText("✓");
             holder.step3_text.setTextColor(colorCompleted);
         }
-        if (statusCode >= 4) {
+        if (statusCode >= 4)
+        {
             holder.line3.setBackgroundColor(colorCompleted);
             ((GradientDrawable) holder.step4_icon.getBackground()).setColor(colorCompleted);
             holder.step4_icon.setText("✓");
             holder.step4_text.setTextColor(colorCompleted);
         }
 
-        // --- צביעת השלב הפעיל והסטטוס הראשי ---
+        // --- Highlight current active step and set status label background ---
         GradientDrawable statusBackground = (GradientDrawable) holder.tvOrderStatus.getBackground();
-        if (statusCode == 1) {
-            ((GradientDrawable) holder.step1_icon.getBackground()).setColor(colorActive); // שלב 1 פעיל
+        if (statusCode == 1)
+        {
+            ((GradientDrawable) holder.step1_icon.getBackground()).setColor(
+                    colorActive); // Step 1 is active
             holder.step1_text.setTextColor(colorActive);
-            statusBackground.setColor(colorInactive); // צבע הסטטוס הכללי אפור
-        } else if (statusCode == 2) {
-            ((GradientDrawable) holder.step2_icon.getBackground()).setColor(colorActive); // שלב 2 פעיל
+            statusBackground.setColor(colorInactive); // General status background gray
+        } else if (statusCode == 2)
+        {
+            ((GradientDrawable) holder.step2_icon.getBackground()).setColor(
+                    colorActive); // Step 2 is active
             holder.step2_text.setTextColor(colorActive);
-            statusBackground.setColor(colorActive); // צבע הסטטוס הכללי צהוב
-        } else if (statusCode == 3) {
-            ((GradientDrawable) holder.step3_icon.getBackground()).setColor(colorActive); // שלב 3 פעיל
+            statusBackground.setColor(colorActive); // General status background yellow
+        } else if (statusCode == 3)
+        {
+            ((GradientDrawable) holder.step3_icon.getBackground()).setColor(
+                    colorActive); // Step 3 is active
             holder.step3_text.setTextColor(colorActive);
-            statusBackground.setColor(colorCompleted); // צבע הסטטוס הכללי ירוק
-        } else if (statusCode >= 4) {
-            // אין שלב "פעיל", הכל הושלם
-            statusBackground.setColor(ContextCompat.getColor(context, R.color.status_collected_purple)); // הנה השינוי
+            statusBackground.setColor(colorCompleted); // General status background green
+        } else if (statusCode >= 4)
+        {
+            // Order collected, set background to purple
+            statusBackground.setColor(
+                    ContextCompat.getColor(context, R.color.status_collected_purple));
         }
     }
 
-    public static class OrderViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * ViewHolder class to hold references to the views for each list item.
+     */
+    public static class OrderViewHolder extends RecyclerView.ViewHolder
+    {
         TextView tvOrderNumber, tvOrderStatus, tvOrderSummary, tvTotalPrice;
         TextView step1_icon, step2_icon, step3_icon, step4_icon;
         TextView step1_text, step2_text, step3_text, step4_text;
         View line1, line2, line3;
         TextView tvEstimatedTimeValue, tvOrderReceivedTime;
 
-        public OrderViewHolder(@NonNull View itemView) {
+        public OrderViewHolder(@NonNull View itemView)
+        {
             super(itemView);
             tvOrderNumber = itemView.findViewById(R.id.tvOrderNumber);
             tvOrderStatus = itemView.findViewById(R.id.tvOrderStatus);

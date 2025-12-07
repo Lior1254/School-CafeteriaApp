@@ -3,7 +3,6 @@ package com.example.CafeteriaApp.Fragments;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,25 +38,34 @@ public class MenuFragment extends Fragment
     private RecyclerView RV_items, RV_categories;
     private List<Product> allProducts = new ArrayList<>();
     private List<CategoryItem> categories = new ArrayList<>();
-    
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater i,
                              @Nullable ViewGroup c,
-                             @Nullable Bundle b) {
+                             @Nullable Bundle b)
+    {
         return i.inflate(R.layout.fragment_menu, c, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
+    public void onViewCreated(@NonNull View v, @Nullable Bundle b)
+    {
         super.onViewCreated(v, b);
         RV_items = v.findViewById(R.id.RV_items);
         RV_categories = v.findViewById(R.id.RV_categories);
 
         RV_items.setLayoutManager(new LinearLayoutManager(requireContext()));
         // Set up horizontal layout manager for categories
-        RV_categories.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        RV_categories.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
+        // --- Fix: Set empty Adapter initially ---
+        // This prevents the "No adapter attached" error while data is downloading from Firebase
+        RV_items.setAdapter(new CustomProductAdapterRV(new ArrayList<>(), null));
+        RV_categories.setAdapter(new CategoryAdapter(new ArrayList<>(), null));
+
+        // Download data from Firebase
         DownloadData();
     }
 
@@ -65,7 +73,8 @@ public class MenuFragment extends Fragment
     {
         CustomProductAdapterRV adp = new CustomProductAdapterRV(
                 products,
-                item -> {
+                item ->
+                {
                     Intent intent = new Intent(requireContext(), CustomizeItemActivity.class);
                     intent.putExtra("item", item);
                     startActivity(intent);
@@ -81,25 +90,35 @@ public class MenuFragment extends Fragment
         pd.setMessage("Please wait...");
         pd.show();
 
-        FBRef.refProducts.addListenerForSingleValueEvent(new ValueEventListener() {
+        FBRef.refProducts.addListenerForSingleValueEvent(new ValueEventListener()
+        {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
                 allProducts.clear();
                 categories.clear();
 
+                // Add "All" category by default
                 int PH = R.drawable.ic_launcher_foreground;
                 categories.add(new CategoryItem("הכל", PH));
 
-                for (DataSnapshot categorySnapshot : snapshot.getChildren()) {
+                for (DataSnapshot categorySnapshot : snapshot.getChildren())
+                {
                     String categoryName = categorySnapshot.getKey();
 
+                    // Skip Categories folder if it exists inside Products
                     if (categoryName == null || categoryName.equals("Categories")) continue;
 
+                    // Add category to list (can be improved with specific icons if desired)
                     categories.add(new CategoryItem(categoryName, PH));
 
-                    for (DataSnapshot productSnapshot : categorySnapshot.getChildren()) {
+                    // Iterate over all products in the category
+                    for (DataSnapshot productSnapshot : categorySnapshot.getChildren())
+                    {
                         Product p = productSnapshot.getValue(Product.class);
-                        if (p != null) {
+                        if (p != null)
+                        {
+                            // Ensure category is updated within the product
                             p.setCategory(categoryName);
                             allProducts.add(p);
                         }
@@ -110,6 +129,7 @@ public class MenuFragment extends Fragment
 
                 chooseProducts(allProducts);
 
+                // Set up Adapter for categories with filtering logic
                 CategoryAdapter categoryAdapter = new CategoryAdapter(categories, categoryName ->
                 {
                     if (categoryName.equals("הכל"))
@@ -132,13 +152,16 @@ public class MenuFragment extends Fragment
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error)
+            {
                 pd.dismiss();
-                Toast.makeText(requireContext(), "Failed to download data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Failed to download data: " + error.getMessage(),
+                               Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    // This function is used for initial upload only (currently unused unless uncommented)
     private void UploadData()
     {
         // Placeholders
@@ -154,8 +177,9 @@ public class MenuFragment extends Fragment
         tempCategories.add(new CategoryItem("קינוחים", PH));
         tempCategories.add(new CategoryItem("מאפים", PH));
 
+        // --- Define Addons ---
         Addon dfa = new Addon("DFA", "DFA", -1, PH);
-        
+
         List<Addon> toastAddons = Arrays.asList(
                 dfa,
                 new Addon("add_olives", "זיתים", 1.00, PH),
@@ -191,31 +215,55 @@ public class MenuFragment extends Fragment
 
         List<Addon> dfaArr = Arrays.asList(dfa);
 
+        // --- Add products ---
         List<Product> tempProducts = new ArrayList<>();
 
-        // כריכים
-        tempProducts.add(new Product("101", "טוסט", "לחם טרי, גבינה צהובה", 8.00, "כריכים", toastAddons, PH, 0));
-        tempProducts.add(new Product("102", "טוסט גדול", "לחם כפול, גבינה נדיבה", 10.00, "כריכים", toastAddons, TOAST, 0));
-        tempProducts.add(new Product("103", "כריך טונה", "לבחירה: לבן/מלא", 10.00, "כריכים", sandwichAddons, TOAST, 0));
-        tempProducts.add(new Product("104", "כריך שקשוקה", "שקשוקה עדינה בלחם טרי", 10.00, "כריכים", sandwichAddons, PH, 0));
+        // Sandwiches
+        tempProducts.add(
+                new Product("101", "טוסט", "לחם טרי, גבינה צהובה", 8.00, "כריכים", toastAddons, PH,
+                            0));
+        tempProducts.add(new Product("102", "טוסט גדול", "לחם כפול, גבינה נדיבה", 10.00, "כריכים",
+                                     toastAddons, TOAST, 0));
+        tempProducts.add(
+                new Product("103", "כריך טונה", "לבחירה: לבן/מלא", 10.00, "כריכים", sandwichAddons,
+                            TOAST, 0));
+        tempProducts.add(new Product("104", "כריך שקשוקה", "שקשוקה עדינה בלחם טרי", 10.00, "כריכים",
+                                     sandwichAddons, PH, 0));
 
-        // פסטה
-        tempProducts.add(new Product("201", "פסטה פנה ברוטב עגבניות", "פנה, רוטב עגבניות עדין", 12.00, "פסטה", pastaAddons, PH, 0));
+        // Pasta
+        tempProducts.add(
+                new Product("201", "פסטה פנה ברוטב עגבניות", "פנה, רוטב עגבניות עדין", 12.00,
+                            "פסטה", pastaAddons, PH, 0));
 
-        // משקאות
-        tempProducts.add(new Product("301", "קולה זירו (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
-        tempProducts.add(new Product("302", "קוקה-קולה (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
-        tempProducts.add(new Product("303", "ספרייט (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
-        tempProducts.add(new Product("304", "פאנטה תפוז (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
-        tempProducts.add(new Product("305", "סודה (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
-        tempProducts.add(new Product("306", "ברד", "טעמים לבחירה", 9.00, "משקאות קרים", dfaArr, PH, 0));
+        // Cold Drinks
+        tempProducts.add(
+                new Product("301", "קולה זירו (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH,
+                            0));
+        tempProducts.add(
+                new Product("302", "קוקה-קולה (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH,
+                            0));
+        tempProducts.add(
+                new Product("303", "ספרייט (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
+        tempProducts.add(
+                new Product("304", "פאנטה תפוז (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH,
+                            0));
+        tempProducts.add(
+                new Product("305", "סודה (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
+        tempProducts.add(
+                new Product("306", "ברד", "טעמים לבחירה", 9.00, "משקאות קרים", dfaArr, PH, 0));
 
-        // קינוחים
-        tempProducts.add(new Product("401", "קינדר", "שוקולד חלב", 5.00, "קינוחים (שוקולדים)", dfaArr, PH, 0));
-        tempProducts.add(new Product("402", "בואנו", "שוקולד/וופלים", 5.00, "קינוחים (שוקולדים)", dfaArr, PH, 0));
+        // Desserts
+        tempProducts.add(
+                new Product("401", "קינדר", "שוקולד חלב", 5.00, "קינוחים (שוקולדים)", dfaArr, PH,
+                            0));
+        tempProducts.add(
+                new Product("402", "בואנו", "שוקולד/וופלים", 5.00, "קינוחים (שוקולדים)", dfaArr, PH,
+                            0));
 
-        // מאפים
-        tempProducts.add(new Product("501", "בורקס תפוחי אדמה", "פריך וחם", 8.00, "מאפים", pastryAddons, PH, 0));
+        // Bakery
+        tempProducts.add(
+                new Product("501", "בורקס תפוחי אדמה", "פריך וחם", 8.00, "מאפים", pastryAddons, PH,
+                            0));
 
 
         ProgressDialog pd = new ProgressDialog(requireContext());
@@ -225,18 +273,25 @@ public class MenuFragment extends Fragment
 
         List<Task<Void>> tasks = new ArrayList<>();
 
-        for(Product p : tempProducts) {
+        for (Product p : tempProducts)
+        {
             tasks.add(FBRef.refProducts.child(p.getCategory()).child(p.getId()).setValue(p));
         }
 
-        Tasks.whenAll(tasks).addOnCompleteListener(new OnCompleteListener<Void>() {
+        Tasks.whenAll(tasks).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
+            public void onComplete(@NonNull Task<Void> task)
+            {
                 pd.dismiss();
-                if (task.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Data uploaded successfully", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(requireContext(), "Failed to upload data", Toast.LENGTH_SHORT).show();
+                if (task.isSuccessful())
+                {
+                    Toast.makeText(requireContext(), "Data uploaded successfully",
+                                   Toast.LENGTH_SHORT).show();
+                } else
+                {
+                    Toast.makeText(requireContext(), "Failed to upload data",
+                                   Toast.LENGTH_SHORT).show();
                 }
             }
         });

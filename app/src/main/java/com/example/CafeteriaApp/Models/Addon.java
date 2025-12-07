@@ -2,19 +2,23 @@ package com.example.CafeteriaApp.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import java.io.Serializable;
 
-public class Addon implements Serializable {
+public class Addon implements Serializable
+{
     private String addonId;
     private String addonName;
     private double addonPrice;
     private boolean isSelected;
     private int imgRes;
 
-    public Addon() {
+    public Addon()
+    {
     }
 
-    public Addon(String addonId, String addonName, double addonPrice, int imgRes) {
+    public Addon(String addonId, String addonName, double addonPrice, int imgRes)
+    {
         this.addonId = addonId;
         this.addonName = addonName;
         this.addonPrice = addonPrice;
@@ -22,7 +26,9 @@ public class Addon implements Serializable {
         this.isSelected = false;
     }
 
-    public Addon(String addonId, String addonName, double addonPrice, int imgRes, boolean isSelected) {
+    public Addon(String addonId, String addonName, double addonPrice, int imgRes,
+                 boolean isSelected)
+    {
         this.addonId = addonId;
         this.addonName = addonName;
         this.addonPrice = addonPrice;
@@ -33,7 +39,7 @@ public class Addon implements Serializable {
     Addon[] withOutDefault(Addon[] addons)
     {
         Addon[] newAddon = new Addon[addons.length - 1];
-        for(int i = 1; i < addons.length; i++)
+        for (int i = 1; i < addons.length; i++)
         {
             newAddon[i - 1] = addons[i];
         }
@@ -41,22 +47,58 @@ public class Addon implements Serializable {
     }
 
     // Getters and Setters
-    public String getAddonId() { return addonId; }
-    public void setAddonId(String addonId) { this.addonId = addonId; }
+    public String getAddonId()
+    {
+        return addonId;
+    }
 
-    public String getAddonName() { return addonName; }
-    public void setAddonName(String addonName) { this.addonName = addonName; }
+    public void setAddonId(String addonId)
+    {
+        this.addonId = addonId;
+    }
 
-    public double getAddonPrice() { return addonPrice; }
-    public void setAddonPrice(double addonPrice) { this.addonPrice = addonPrice; }
+    public String getAddonName()
+    {
+        return addonName;
+    }
 
-    public boolean isSelected() { return isSelected; }
-    public void setSelected(boolean selected) { isSelected = selected; }
+    public void setAddonName(String addonName)
+    {
+        this.addonName = addonName;
+    }
 
-    public int getImgRes() { return imgRes; }
-    public void setImgRes(int imgRes) { this.imgRes = imgRes; }
+    public double getAddonPrice()
+    {
+        return addonPrice;
+    }
 
-    public String getPriceText() {
+    public void setAddonPrice(double addonPrice)
+    {
+        this.addonPrice = addonPrice;
+    }
+
+    public boolean isSelected()
+    {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected)
+    {
+        isSelected = selected;
+    }
+
+    public int getImgRes()
+    {
+        return imgRes;
+    }
+
+    public void setImgRes(int imgRes)
+    {
+        this.imgRes = imgRes;
+    }
+
+    public String getPriceText()
+    {
         return "₪" + String.format("%.2f", addonPrice);
     }
 
