@@ -231,6 +231,10 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
     public void SignUpGoogle_Click(View view) {
 
     }
+    public void MoveTo_Login_Click(View view)
+    {
+        finish();
+    }
 
 
     //Spinner input

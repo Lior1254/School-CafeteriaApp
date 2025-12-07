@@ -61,7 +61,8 @@ public class MenuFragment extends Fragment
         DownloadData();
     }
 
-    private void showProducts(List<Product> products) {
+    private void chooseProducts(List<Product> products)
+    {
         CustomProductAdapterRV adp = new CustomProductAdapterRV(
                 products,
                 item -> {
@@ -107,12 +108,13 @@ public class MenuFragment extends Fragment
 
                 pd.dismiss();
 
-                showProducts(allProducts);
+                chooseProducts(allProducts);
 
-                CategoryAdapter categoryAdapter = new CategoryAdapter(categories, categoryName -> {
+                CategoryAdapter categoryAdapter = new CategoryAdapter(categories, categoryName ->
+                {
                     if (categoryName.equals("הכל"))
                     {
-                        showProducts(allProducts);
+                        chooseProducts(allProducts);
                     } else
                     {
                         List<Product> filteredList = new ArrayList<>();
@@ -123,7 +125,7 @@ public class MenuFragment extends Fragment
                                 filteredList.add(p);
                             }
                         }
-                        showProducts(filteredList);
+                        chooseProducts(filteredList);
                     }
                 });
                 RV_categories.setAdapter(categoryAdapter);

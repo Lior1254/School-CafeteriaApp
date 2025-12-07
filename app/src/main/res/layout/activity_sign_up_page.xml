@@ -175,7 +175,7 @@
                         android:id="@+id/signup_login_link"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:onClick="Login_Click"
+                        android:onClick="MoveTo_Login_Click"
                         android:text=" Log in"
                         android:textColor="#008080"
                         android:textSize="11sp"

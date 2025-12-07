@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -38,9 +39,6 @@ public class CustomizeItemActivity extends AppCompatActivity {
         intent = getIntent();
         weddings();
         setUI();
-        price = item.getPrice();
-
-
     }
 
     private void weddings()
@@ -63,30 +61,41 @@ public class CustomizeItemActivity extends AppCompatActivity {
     {
         if (android.os.Build.VERSION.SDK_INT >= 33)
         {
-            item = intent.getParcelableExtra("item", Product.class);
+            item = intent.getSerializableExtra("item", Product.class);
         } else
         {
-            item = intent.getParcelableExtra("item");
+            item = (Product) intent.getSerializableExtra("item");
         }
         
-        if (item == null) return; 
+        if (item == null)
+        {
+            Toast.makeText(this, "שגיאה בטעינת המוצר", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         
+        price = item.getPrice();
+        totalPrice = price * amount_of_products;
+
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
         ivProductIMG.setImageResource(item.getImageRes());
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText("הוספה להזמנה   " + item.getPriceText());
 
-        // Updated to use List<Addon> instead of array
+        // Updated logic: Hide RecyclerView if no addons, otherwise set adapter
         if(item.getAddons() != null && !item.getAddons().isEmpty())
         {
+            Addons.setVisibility(View.VISIBLE); // Show if has addons
             CustomProductOptionRvAdapter ad = new CustomProductOptionRvAdapter(
                     this,
-                    item.getAddons(), // List passed directly
+                    item.getAddons(),
                     (addon, pos, isChecked) -> updateUI(addon)
             );
             Addons.setLayoutManager(new LinearLayoutManager(this));
             Addons.setAdapter(ad);
+        } else {
+            Addons.setVisibility(View.GONE); // Hide if no addons
         }
     }
 
@@ -151,7 +160,7 @@ public class CustomizeItemActivity extends AppCompatActivity {
         btn_AddToCart.setText("הוספה להזמנה   " + "₪" + String.format("%.2f", totalPrice) );
     }
 
-    public void Close_btn_Click(View view) {
+    public void GoBack_Click(View view) {
         finish();
     }
 }

@@ -18,11 +18,10 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/imageButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:onClick="Close_btn_Click"
+            android:onClick="GoBack_Click"
             android:padding="8dp"
             android:scaleType="centerInside"
             android:src="@drawable/back_arrow" />
@@ -98,6 +97,7 @@
                 android:paddingBottom="8dp"
                 android:scrollbars="vertical"
                 android:fadeScrollbars="false"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
