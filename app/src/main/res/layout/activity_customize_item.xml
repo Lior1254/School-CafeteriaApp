@@ -191,6 +191,7 @@
             android:insetLeft="0dp"
             android:insetRight="0dp"
             android:letterSpacing="0.02"
+            android:onClick="AddToCart_Click"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="הוספה להזמנה"

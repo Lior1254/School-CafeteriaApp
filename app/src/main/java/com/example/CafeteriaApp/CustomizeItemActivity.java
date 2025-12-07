@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.CustomProductOptionRvAdapter;
+import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
 
@@ -34,6 +35,7 @@ public class CustomizeItemActivity extends AppCompatActivity
 
     private int amount_of_products = 1;
     private double totalPrice = 0, price = 0;
+    private String AddBtnText = "הוסף לסל";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -92,7 +94,7 @@ public class CustomizeItemActivity extends AppCompatActivity
         tvProductDescription.setText(item.getDescription());
         ivProductIMG.setImageResource(item.getImageRes());
         tv_price.setText(item.getPriceText());
-        btn_AddToCart.setText("Add to Cart   " + item.getPriceText());
+        btn_AddToCart.setText(AddBtnText + "   " + item.getPriceText());
 
         // Configure addons RecyclerView only if addons exist
         if (item.getAddons() != null && !item.getAddons().isEmpty())
@@ -127,7 +129,7 @@ public class CustomizeItemActivity extends AppCompatActivity
         }
 
         totalPrice = price * amount_of_products;
-        btn_AddToCart.setText("Add to Cart   " + "₪" + String.format("%.2f", totalPrice));
+        btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
     }
 
     /**
@@ -187,7 +189,35 @@ public class CustomizeItemActivity extends AppCompatActivity
 
         tv_amount_of_items.setText(String.valueOf(amount_of_products));
         totalPrice = price * amount_of_products;
-        btn_AddToCart.setText("Add to Cart   " + "₪" + String.format("%.2f", totalPrice));
+        btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
+    }
+
+    public void AddToCart_Click(View view)
+    {
+        item.setPrice(price);
+        item.setAmount(amount_of_products);
+        // Save to Firebase Carts
+        String uid = FBRef.refAuth.getUid();
+        if (uid != null)
+        {
+            FBRef.refCarts.child(uid).push().setValue(item)
+                    .addOnCompleteListener(task ->
+                                           {
+                                               if (task.isSuccessful())
+                                               {
+                                                   Toast.makeText(this, "נוסף לסל בהצלחה",
+                                                                  Toast.LENGTH_SHORT).show();
+                                                   finish(); // Close activity and go back
+                                               } else
+                                               {
+                                                   Toast.makeText(this, "שגיאה בהוספה לסל",
+                                                                  Toast.LENGTH_SHORT).show();
+                                               }
+                                           });
+        } else
+        {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
