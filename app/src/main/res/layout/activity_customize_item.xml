@@ -147,7 +147,7 @@
                     android:onClick="Plus_btn_Click"
                     android:padding="8dp"
                     android:scaleType="centerInside"
-                    app:srcCompat="@drawable/plus_black" />
+                    app:srcCompat="@drawable/ic_plus_black" />
 
 
                 <!-- מונה כמות -->
@@ -171,7 +171,7 @@
                     android:onClick="Minus_btn_Click"
                     android:padding="8dp"
                     android:scaleType="centerInside"
-                    app:srcCompat="@drawable/minus_gray" />
+                    app:srcCompat="@drawable/ic_minus_gray" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

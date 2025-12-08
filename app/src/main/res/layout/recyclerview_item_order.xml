@@ -72,10 +72,10 @@
                 android:id="@+id/btn_minus"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/bg_quantity_button"
+                android:background="@drawable/bg_quantity_button_light_red"
                 android:padding="8dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/minus_black" />
+                android:src="@drawable/ic_bin" />
 
             <TextView
                 android:id="@+id/tv_quantity"
@@ -91,10 +91,10 @@
                 android:id="@+id/btn_plus"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/bg_quantity_button"
+                android:background="@drawable/bg_quantity_button_light_blue"
                 android:padding="8dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/plus_black" />
+                android:src="@drawable/ic_plus_black" />
 
         </LinearLayout>
 

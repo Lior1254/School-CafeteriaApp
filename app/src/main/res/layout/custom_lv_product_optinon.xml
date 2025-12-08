@@ -21,7 +21,7 @@
         android:textColor="@color/mc_text_primary"
         android:textSize="20sp"
 
-        app:buttonCompat="@drawable/cb_circle_selector"
+        app:buttonCompat="@drawable/bg_circle_selector"
         app:buttonTint="@null" />
 
 

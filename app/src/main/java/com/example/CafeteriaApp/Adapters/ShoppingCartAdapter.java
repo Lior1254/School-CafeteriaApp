@@ -1,6 +1,5 @@
 package com.example.CafeteriaApp.Adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,15 +7,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -76,24 +72,33 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
             holder.ivImg.setImageResource(R.drawable.ic_launcher_background); // Placeholder
         }
 
+        // Set the correct icon based on the current quantity
+        if (item.getAmount() == 1) {
+            holder.btnMinus.setImageResource(R.drawable.ic_bin);
+        } else {
+            holder.btnMinus.setImageResource(R.drawable.ic_minus_black);
+        }
+
         // Plus button click
         holder.btnPlus.setOnClickListener(v ->
-                                          {
-                                              if (quantityListener != null)
-                                              {
-                                                  quantityListener.onQuantityChange(position, item.getAmount() + 1);
-                                              }
-                                          });
+        {
+            if (quantityListener != null && item.getAmount() < 9)
+            {
+                quantityListener.onQuantityChange(position, item.getAmount() + 1);
+            }
+        });
 
         // Minus button click
         holder.btnMinus.setOnClickListener(v ->
-                                           {
-                                               if (quantityListener != null && item.getAmount() > 1)
-                                               {
-                                                   quantityListener.onQuantityChange(position,
-                                                                                 item.getAmount() - 1);
-                                               }
-                                           });
+        {
+            if (quantityListener != null)
+            {
+                if (item.getAmount() > 1)
+                {
+                    quantityListener.onQuantityChange(position, item.getAmount() - 1);
+                }
+            }
+        });
     }
 
     @Override

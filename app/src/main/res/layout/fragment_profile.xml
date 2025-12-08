@@ -228,7 +228,7 @@
                         app:layout_constraintBottom_toBottomOf="parent">
 
                         <ImageView
-                            android:src="@drawable/night_mode_icon"
+                            android:src="@drawable/ic_night_mode_icon"
                             style="@style/ProfileIconStyle" />
                     </FrameLayout>
 
@@ -302,7 +302,7 @@
                         app:layout_constraintBottom_toBottomOf="parent">
 
                         <ImageView
-                            android:src="@drawable/language_icon"
+                            android:src="@drawable/ic_language_icon"
                             style="@style/ProfileIconStyle" />
                     </FrameLayout>
 

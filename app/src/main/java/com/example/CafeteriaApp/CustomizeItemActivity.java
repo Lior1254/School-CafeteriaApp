@@ -173,18 +173,18 @@ public class CustomizeItemActivity extends AppCompatActivity
         // Update UI for quantity buttons (gray out if limit reached)
         if (amount_of_products == 1)
         {
-            ibtn_minus_item.setImageResource(R.drawable.minus_gray);
+            ibtn_minus_item.setImageResource(R.drawable.ic_minus_gray);
         } else
         {
-            ibtn_minus_item.setImageResource(R.drawable.minus_black);
+            ibtn_minus_item.setImageResource(R.drawable.ic_minus_black);
         }
 
         if (amount_of_products == 9)
         {
-            ibtn_plus_item.setImageResource(R.drawable.plus_gray);
+            ibtn_plus_item.setImageResource(R.drawable.ic_plus_gray);
         } else
         {
-            ibtn_plus_item.setImageResource(R.drawable.plus_black);
+            ibtn_plus_item.setImageResource(R.drawable.ic_plus_black);
         }
 
         tv_amount_of_items.setText(String.valueOf(amount_of_products));
