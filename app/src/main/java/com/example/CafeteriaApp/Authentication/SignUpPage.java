@@ -2,7 +2,6 @@ package com.example.CafeteriaApp.Authentication;
 
 import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.User;
-import com.example.CafeteriaApp.Models.UserData;
 import com.example.CafeteriaApp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -206,12 +204,12 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
                                 String classRoom = Spin_signup_class.getSelectedItem().toString();
 
                                 // Create UserData object
-                                UserData userData = new UserData(user.getUid(), name, email,
-                                                                 username, phoneNumber, school,
-                                                                 classRoom);
+                                User user1 = new User(user.getUid(), name, email,
+                                                      username, phoneNumber, school,
+                                                      classRoom);
 
                                 // Save UserData to Realtime Database
-                                FBRef.refUsers.child(user.getUid()).setValue(userData)
+                                FBRef.refUsers.child(user.getUid()).setValue(user1)
                                         .addOnCompleteListener(new OnCompleteListener<Void>()
                                         {
                                             @Override

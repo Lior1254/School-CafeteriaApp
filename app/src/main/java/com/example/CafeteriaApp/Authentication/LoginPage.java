@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.MainPage;
-import com.example.CafeteriaApp.Models.UserData;
+import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -151,11 +151,11 @@ public class LoginPage extends AppCompatActivity
                                                 if (taskSnapshot.isSuccessful())
                                                 {
                                                     DataSnapshot snapshot = taskSnapshot.getResult();
-                                                    UserData userData = snapshot.getValue(
-                                                            UserData.class);
-                                                    if (userData != null)
+                                                    User user = snapshot.getValue(
+                                                            User.class);
+                                                    if (user != null)
                                                     {
-                                                        intent.putExtra("userData", userData);
+                                                        intent.putExtra("userData", user);
                                                         startActivity(intent);
                                                     }
                                                 } else

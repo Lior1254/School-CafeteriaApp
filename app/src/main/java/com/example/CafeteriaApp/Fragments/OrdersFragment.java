@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Models.Order;
-import com.example.CafeteriaApp.Adapters.OrdersAdapter;
 import com.example.CafeteriaApp.R;
 
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ public class OrdersFragment extends Fragment
 {
 
     private RecyclerView recyclerView;
-    private OrdersAdapter adapter;
+    //private OrdersAdapter adapter;
     private List<Order> orderList;
 
     @Nullable
@@ -44,15 +43,15 @@ public class OrdersFragment extends Fragment
         recyclerView = view.findViewById(R.id.rvOrders);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        // 3. יצירת רשימת הזמנות לדוגמה (בפועל, הנתונים יגיעו מבסיס נתונים)
-        loadDummyData();
+
+        //loadDummyData();
 
         // 4. יצירת ה-Adapter וחיבורו ל-RecyclerView
-        adapter = new OrdersAdapter(requireContext(), orderList);
-        recyclerView.setAdapter(adapter);
+        //adapter = new OrdersAdapter(requireContext(), orderList);
+        //recyclerView.setAdapter(adapter);
     }
 
-
+    /*
     private void loadDummyData()
     {
         orderList = new ArrayList<>();
@@ -66,5 +65,7 @@ public class OrdersFragment extends Fragment
         orderList.add(
                 new Order("1027", "קפה הפוך ומאפה", 24.00, 4, "נאספה", "13:20", "13:18", "13:15"));
     }
+
+     */
 
 }

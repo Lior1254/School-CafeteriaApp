@@ -1,84 +1,94 @@
 package com.example.CafeteriaApp.Models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Represents the user's profile data stored in the database.
- * Includes personal information like name, email, and school details.
+ * Represents a user in the system.
+ * Stores user preferences, order history, and favorite products.
  */
 public class UserData implements Serializable
 {
     private String uid;
-    private String name;
-    private String email;
-    private String username;
-    private String phoneNumber;
-    private String school;
-    private String classRoom;
+    private List<Order> ordersHistory;
+    private List<Product> favoriteProducts;
+    private boolean darkMode;
+    private boolean notificationsEnabled;
 
-    /**
-     * Default constructor required for Firebase.
-     */
+    // Empty constructor required for Firebase
     public UserData()
     {
+        this.ordersHistory = new ArrayList<>();
+        this.favoriteProducts = new ArrayList<>();
     }
 
-    /**
-     * Constructs a UserData object with all details.
-     *
-     * @param uid         Unique user ID from authentication.
-     * @param name        Full name of the user.
-     * @param email       Email address.
-     * @param username    Chosen username.
-     * @param phoneNumber Contact phone number.
-     * @param school      Name of the school.
-     * @param classRoom   Classroom identifier (e.g., "12-A").
-     */
-    public UserData(String uid, String name, String email, String username, String phoneNumber,
-                    String school, String classRoom)
+    public UserData(String uid, boolean darkMode, boolean notificationsEnabled)
     {
         this.uid = uid;
-        this.name = name;
-        this.email = email;
-        this.username = username;
-        this.phoneNumber = phoneNumber;
-        this.school = school;
-        this.classRoom = classRoom;
+        this.darkMode = darkMode;
+        this.notificationsEnabled = notificationsEnabled;
+        this.ordersHistory = new ArrayList<>();
+        this.favoriteProducts = new ArrayList<>();
     }
 
-    // Getters
+    public UserData(String uid, List<Order> ordersHistory, List<Product> favoriteProducts,
+                    boolean darkMode, boolean notificationsEnabled)
+    {
+        this.uid = uid;
+        this.ordersHistory = ordersHistory;
+        this.favoriteProducts = favoriteProducts;
+        this.darkMode = darkMode;
+        this.notificationsEnabled = notificationsEnabled;
+    }
+
     public String getUid()
     {
         return uid;
     }
 
-    public String getName()
+    public void setUid(String uid)
     {
-        return name;
+        this.uid = uid;
     }
 
-    public String getEmail()
+    public List<Order> getOrdersHistory()
     {
-        return email;
+        return ordersHistory;
     }
 
-    public String getUsername()
+    public void setOrdersHistory(List<Order> ordersHistory)
     {
-        return username;
+        this.ordersHistory = ordersHistory;
     }
 
-    public String getPhoneNumber()
+    public List<Product> getFavoriteProducts()
     {
-        return phoneNumber;
+        return favoriteProducts;
     }
 
-    public String getSchool()
+    public void setFavoriteProducts(List<Product> favoriteProducts)
     {
-        return school;
+        this.favoriteProducts = favoriteProducts;
     }
 
-    public String getClassRoom()
+    public boolean isDarkMode()
     {
-        return classRoom;
+        return darkMode;
+    }
+
+    public void setDarkMode(boolean darkMode)
+    {
+        this.darkMode = darkMode;
+    }
+
+    public boolean isNotificationsEnabled()
+    {
+        return notificationsEnabled;
+    }
+
+    public void setNotificationsEnabled(boolean notificationsEnabled)
+    {
+        this.notificationsEnabled = notificationsEnabled;
     }
 }
