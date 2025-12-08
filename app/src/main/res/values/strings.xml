@@ -1,17 +1,16 @@
 <resources>
 
-    <!-- כל הטקסטים בעברית -->
-    <string name="app_name">האפליקציה שלי</string>
-    <string name="logo_cd">לוגו האפליקציה</string>
+    <!-- General -->
+    <string name="app_name">הקפיטריה שלי</string>
 
-    <!-- התחברות -->
+    <!-- Login Screen -->
     <string name="login_title">התחברות</string>
     <string name="login_email_hint">אימייל</string>
     <string name="login_password_hint">סיסמה</string>
     <string name="login_button">התחבר</string>
     <string name="login_signup_cta">עדיין לא נרשמת? להרשמה</string>
 
-    <!-- הרשמה -->
+    <!-- Sign-up Screen -->
     <string name="signup_title">הרשמה</string>
     <string name="signup_name_hint">שם</string>
     <string name="signup_email_hint">אימייל</string>
@@ -21,19 +20,23 @@
     <string name="signup_button">הרשמה</string>
     <string name="signup_login_cta">כבר יש משתמש? התחברות</string>
 
+    <!-- Cart Screen -->
+    <string name="cart_title">העגלה שלי</string>
+    <string name="cart_promo_code_hint">הוסף קוד קופון</string>
+    <string name="cart_order_summary">סיכום הזמנה</string>
+    <string name="cart_subtotal">סכום ביניים</string>
+    <string name="cart_taxes_and_fees">מיסים ועמלות</string>
+    <string name="cart_total">סה\"כ</string>
+    <string name="cart_proceed_to_checkout">לתשלום</string>
 
-
-
+    <!-- Arrays -->
     <string-array name="school_names">
-
         <item>בית ספר</item>
         <item>מקיף ז</item>
     </string-array>
 
     <string-array name="class_names">
-        <!-- ז -->
         <item>כיתה</item>
-
         <item>ז׳1</item>
         <item>ז׳2</item>
         <item>ז׳3</item>
@@ -42,8 +45,6 @@
         <item>ז׳6</item>
         <item>ז׳7</item>
         <item>ז׳8</item>
-
-        <!-- ח -->
         <item>ח׳1</item>
         <item>ח׳2</item>
         <item>ח׳3</item>
@@ -52,8 +53,6 @@
         <item>ח׳6</item>
         <item>ח׳7</item>
         <item>ח׳8</item>
-
-        <!-- ט -->
         <item>ט׳1</item>
         <item>ט׳2</item>
         <item>ט׳3</item>
@@ -62,8 +61,6 @@
         <item>ט׳6</item>
         <item>ט׳7</item>
         <item>ט׳8</item>
-
-        <!-- י -->
         <item>י׳1</item>
         <item>י׳2</item>
         <item>י׳3</item>
@@ -72,8 +69,6 @@
         <item>י׳6</item>
         <item>י׳7</item>
         <item>י׳8</item>
-
-        <!-- י״א -->
         <item>י״א1</item>
         <item>י״א2</item>
         <item>י״א3</item>
@@ -82,8 +77,6 @@
         <item>י״א6</item>
         <item>י״א7</item>
         <item>י״א8</item>
-
-        <!-- י״ב -->
         <item>י״ב1</item>
         <item>י״ב2</item>
         <item>י״ב3</item>
@@ -92,11 +85,7 @@
         <item>י״ב6</item>
         <item>י״ב7</item>
         <item>י״ב8</item>
-
         <item>בוגר</item>
     </string-array>
-
-
-    <string name="app_name_cafeteria">הקפיטקיה של ליאור</string>
 
 </resources>

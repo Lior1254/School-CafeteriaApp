@@ -59,5 +59,10 @@
     <color name="forest">#2D5C50</color>
     <color name="sunset">#FFB38A</color>
 
+    <!-- New Colors for Cart Screen -->
+    <color name="cart_background">#F5F5F5</color>
+    <color name="checkout_button_orange">#FF9800</color>
+    <color name="quantity_button_bg">#F0F0F0</color>
+
 </resources>
 

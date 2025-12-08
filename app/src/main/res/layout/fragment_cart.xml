@@ -1,104 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:layoutDirection="rtl"
-    android:orientation="vertical"
-    android:padding="12dp"
+    android:background="@color/cart_background"
     tools:context=".Fragments.CartFragment">
 
-    <!-- כותרת עליונה -->
-    <LinearLayout
+    <!-- Top Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:background="@android:color/white"
+        app:elevation="0dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="12dp"
-            android:text="המגש שלי"
-            android:textColor="@color/mc_text_primary"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tv_amount_of_items"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:text="0 מוצרים"
-            android:textColor="@color/md_text_dark" />
-    </LinearLayout>
-
-    <!-- אזור הרשימה (RecyclerView) -->
-    <FrameLayout
-        android:id="@+id/list_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layoutDirection="ltr">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvOrders"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:layoutDirection="ltr"
-            android:overScrollMode="never"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/recyclerview_item_order" />
-    </FrameLayout>
+            android:layout_height="50dp"
+            android:background="@android:color/white"
+            app:title="@string/cart_title"
+            app:titleCentered="true" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- סרגל כפתורים תחתון -->
-    <LinearLayout
+    <!-- Nested Scroll for content below RecyclerView -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="8dp">
+        android:layout_alignParentBottom="true">
 
-        <!-- שני כפתורים משניים -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_edit_tray"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="12dp"
-                android:layout_weight="1"
-                android:text="עריכת מגש"
-                app:strokeColor="@color/md_border"
-                app:strokeWidth="1dp" />
+            <!-- Promo Code -->
 
+            <!-- Order Summary Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/cart_order_summary"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textStyle="bold" />
+
+            <!-- Subtotal -->
+
+            <!-- Taxes & Fees -->
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="#E0E0E0" />
+
+            <!-- Total -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/cart_total"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="₪0.00"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <!-- Checkout Button -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_add_item"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="הוספת מוצר" />
+                android:id="@+id/btn_checkout"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="@color/checkout_button_orange"
+                android:text="@string/cart_proceed_to_checkout"
+                app:cornerRadius="28dp" />
+
         </LinearLayout>
 
-        <!-- כפתור ראשי גדול צהוב -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_checkout"
-            style="@style/Widget.Material3.Button.ElevatedButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="10dp"
-            android:text="סיום ותשלום • ₪100"
-            android:textStyle="bold"
-            app:backgroundTint="@color/md_yellow" />
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-</LinearLayout>
+    <!-- Cart Items RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOrders"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/nestedScrollView"
+        android:layout_below="@id/appBarLayout"
+        android:background="@color/white"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/recyclerview_item_order" />
+
+</RelativeLayout>

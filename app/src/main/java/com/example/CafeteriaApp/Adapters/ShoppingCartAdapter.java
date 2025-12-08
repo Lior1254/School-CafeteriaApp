@@ -21,117 +21,79 @@ import java.util.List;
 
 /**
  * Adapter for the Shopping Cart RecyclerView.
- * Handles displaying products added to the cart, including their addons.
+ * Handles displaying products and their quantities.
  */
-public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapter.ViewHolder>
 {
 
-    private final LayoutInflater inflater;
-    private final List<Product> items = new ArrayList<>();
-    @LayoutRes
-    private final int rowLayoutId;
+    private final List<Product> items;
 
-    boolean isFavorit = false;
+    /**
+     * Interface for quantity change events.
+     */
+    public interface OnQuantityChangeListener
+    {
+        void onQuantityChange(int position, int newQuantity);
+    }
+
+    private final OnQuantityChangeListener quantityListener;
 
     /**
      * Constructor for ShoppingCartAdapter.
      *
-     * @param ctx         The context of the calling activity/fragment.
-     * @param start       Initial list of products in the cart.
-     * @param rowLayoutId Layout resource ID for a single row (cart item).
+     * @param items            List of products in the cart.
+     * @param quantityListener Listener for quantity changes.
      */
-    public ShoppingCartAdapter(@NonNull Context ctx, @NonNull List<Product> start,
-                               @LayoutRes int rowLayoutId)
+    public ShoppingCartAdapter(List<Product> items, OnQuantityChangeListener quantityListener)
     {
-        this.inflater = LayoutInflater.from(ctx);
-        this.items.addAll(start);
-        this.rowLayoutId = rowLayoutId;
-    }
-
-    /**
-     * Updates the list of items in the adapter.
-     *
-     * @param data The new list of products.
-     */
-    public void setItems(List<Product> data)
-    {
-        items.clear();
-        if (data != null) items.addAll(data);
-        notifyDataSetChanged();
+        this.items = items;
+        this.quantityListener = quantityListener;
     }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        View v = inflater.inflate(rowLayoutId, parent, false);
-        return new RecyclerView.ViewHolder(v)
-        {
-        };
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.recyclerview_item_order, parent, false);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder h, int position)
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        Product it = items.get(position);
-        View v = h.itemView;
+        Product item = items.get(position);
 
-        // Bind UI components
-        TextView tvName = v.findViewById(R.id.tv_item_name);
-        TextView tvAddon = v.findViewById(R.id.tv_item_addon);
-        TextView tvPrice = v.findViewById(R.id.tv_item_price);
-        ImageView ivImg = v.findViewById(R.id.item_img);
-        ImageButton btnFav = v.findViewById(R.id.item_favorit_img_btn);
+        holder.tvName.setText(item.getName());
+        holder.tvPrice.setText(String.format("₪%.2f", item.getPrice()));
+        holder.tvQuantity.setText(String.valueOf(item.getAmount()));
 
-        if (tvName != null) tvName.setText(it.getName());
-        if (tvAddon != null) tvAddon.setText(buildAddonsSummary(it));
-        if (tvPrice != null) tvPrice.setText(it.getPriceText());
-        if (ivImg != null)
+        if (item.getImageRes() != 0)
         {
-            if (it.getImageRes() != 0) ivImg.setImageResource(it.getImageRes());
-            else ivImg.setImageResource(android.R.color.transparent);
+            holder.ivImg.setImageResource(item.getImageRes());
+        } else
+        {
+            holder.ivImg.setImageResource(R.drawable.ic_launcher_background); // Placeholder
         }
 
-        // Handle favorite button click with animation
-        if (btnFav != null)
-        {
-            btnFav.setOnClickListener(v1 ->
-                                      {
-                                          isFavorit = !isFavorit;
-
-                                          if (isFavorit)
+        // Plus button click
+        holder.btnPlus.setOnClickListener(v ->
                                           {
-                                              btnFav.setImageResource(R.drawable.favoirt_turn_on);
-                                          } else
-                                          {
-                                              btnFav.setImageResource(R.drawable.favorit_turn_off);
-                                          }
+                                              if (quantityListener != null)
+                                              {
+                                                  quantityListener.onQuantityChange(position, item.getAmount() + 1);
+                                              }
+                                          });
 
-                                          // Add bounce animation
-                                          btnFav.setScaleX(0.85f);
-                                          btnFav.setScaleY(0.85f);
-                                          btnFav.setAlpha(0.9f);
-
-                                          btnFav.animate()
-                                                  .scaleX(1.15f)
-                                                  .scaleY(1.15f)
-                                                  .alpha(1f)
-                                                  .setDuration(120)
-                                                  .withEndAction(() -> btnFav.animate()
-                                                          .scaleX(1f)
-                                                          .scaleY(1f)
-                                                          .setDuration(120)
-                                                          .setInterpolator(
-                                                                  new android.view.animation.OvershootInterpolator())
-                                                          .start())
-                                                  .start();
-                                      });
-        }
-
-        v.setOnClickListener(v12 ->
-                             {
-                                 // Optional: Handle click on the entire row
-                             });
+        // Minus button click
+        holder.btnMinus.setOnClickListener(v ->
+                                           {
+                                               if (quantityListener != null && item.getAmount() > 1)
+                                               {
+                                                   quantityListener.onQuantityChange(position,
+                                                                                 item.getAmount() - 1);
+                                               }
+                                           });
     }
 
     @Override
@@ -141,24 +103,23 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     /**
-     * Builds a string summary of selected addons for a product.
-     *
-     * @param p The product to check for addons.
-     * @return A string listing the names of selected addons, separated by dots.
+     * ViewHolder for a single cart item.
      */
-    private static String buildAddonsSummary(@NonNull Product p)
+    static class ViewHolder extends RecyclerView.ViewHolder
     {
-        if (p.getAddons() == null || p.getAddons().isEmpty()) return "ללא תוספות";
+        ImageView ivImg;
+        TextView tvName, tvPrice, tvQuantity;
+        ImageButton btnMinus, btnPlus;
 
-        StringBuilder sb = new StringBuilder();
-        for (Addon a : p.getAddons())
+        ViewHolder(@NonNull View itemView)
         {
-            if (a != null && a.isSelected())
-            {
-                if (sb.length() > 0) sb.append(" • ");
-                sb.append(a.getAddonName());
-            }
+            super(itemView);
+            ivImg = itemView.findViewById(R.id.item_img);
+            tvName = itemView.findViewById(R.id.tv_item_name);
+            tvPrice = itemView.findViewById(R.id.tv_item_price);
+            tvQuantity = itemView.findViewById(R.id.tv_quantity);
+            btnMinus = itemView.findViewById(R.id.btn_minus);
+            btnPlus = itemView.findViewById(R.id.btn_plus);
         }
-        return sb.length() == 0 ? "ללא תוספות" : sb.toString();
     }
 }

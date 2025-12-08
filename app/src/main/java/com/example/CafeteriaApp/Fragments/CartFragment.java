@@ -1,12 +1,12 @@
 package com.example.CafeteriaApp.Fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,30 +15,32 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.ShoppingCartAdapter;
-import com.example.CafeteriaApp.MainPage;
+import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fragment displaying the user's shopping cart.
- * Allows users to view selected items, see the total price, and proceed to checkout.
+ * Fragment for displaying the user's shopping cart.
  */
 public class CartFragment extends Fragment
 {
-    private TextView tv_amount_of_items;
-    private Button btn_checkout;
-    private RecyclerView rv;
+    private RecyclerView rvCartItems;
+    private TextView tvSubtotal, tvTaxes, tvTotal;
+    private Button btnCheckout;
+    private ShoppingCartAdapter adapter;
+    private final List<Product> cartItems = new ArrayList<>();
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater i,
-                             @Nullable ViewGroup c,
-                             @Nullable Bundle b)
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        return i.inflate(R.layout.fragment_cart, c, false);
+        return inflater.inflate(R.layout.fragment_cart, container, false);
     }
 
     @Override
@@ -46,62 +48,85 @@ public class CartFragment extends Fragment
     {
         super.onViewCreated(view, savedInstanceState);
 
-        // Setup click listener for adding new items (navigates back to MainPage)
-        view.findViewById(R.id.btn_add_item).setOnClickListener(v ->
-                                                                {
-                                                                    Intent intent = new Intent(
-                                                                            requireContext(),
-                                                                            MainPage.class);
-                                                                    intent.addFlags(
-                                                                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                    startActivity(intent);
-                                                                });
-
-        // Dummy data for demonstration purposes
-        List<Product> products = new ArrayList<>();
-        products.add(new Product("1001", "ארוחת ריב", "צ'יפס • קולה זירו", 59.0, "עיקריות", null,
-                                 R.drawable.ic_launcher_background, 1));
-        products.add(
-                new Product("1002", "צ'יפס", "רגיל", 18.0, "תוספות", null, R.drawable.images, 1));
-
         initializeViews(view);
-        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-        ShoppingCartAdapter adapter = new ShoppingCartAdapter(requireContext(), products,
-                                                              R.layout.recyclerview_item_order);
-        rv.setAdapter(adapter);
-
-        updateData(products);
+        setupRecyclerView();
+        loadCartData();
     }
 
     /**
-     * Updates the UI with the current cart data (item count and total price).
-     *
-     * @param data List of products currently in the cart.
+     * Initializes the views from the layout.
      */
-    public void updateData(List<Product> data)
+    private void initializeViews(View view)
     {
-        tv_amount_of_items.setText(data.size() + " מוצרים");
-
-        double cartPrice = 0;
-        for (Product p : data)
-        {
-            cartPrice += p.getPrice();
-        }
-        if (cartPrice != 0)
-        {
-            btn_checkout.setText("סיום ותשלום • ₪" + cartPrice);
-        }
+        rvCartItems = view.findViewById(R.id.rvOrders);
+        tvTotal = view.findViewById(R.id.tv_total);
+        btnCheckout = view.findViewById(R.id.btn_checkout);
     }
 
     /**
-     * Initializes UI components from the view layout.
-     *
-     * @param view The root view of the fragment.
+     * Sets up the RecyclerView with its adapter.
      */
-    public void initializeViews(@NonNull View view)
+    private void setupRecyclerView()
     {
-        tv_amount_of_items = view.findViewById(R.id.tv_amount_of_items);
-        btn_checkout = view.findViewById(R.id.btn_checkout);
-        rv = view.findViewById(R.id.rvOrders);
+        rvCartItems.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new ShoppingCartAdapter(cartItems, (position, newQuantity) -> {
+            // Handle quantity changes
+            Product item = cartItems.get(position);
+            item.setAmount(newQuantity);
+            // TODO: Update the item in Firebase if needed
+            adapter.notifyItemChanged(position);
+            updateOrderSummary();
+        });
+        rvCartItems.setAdapter(adapter);
+    }
+
+    /**
+     * Loads cart data from Firebase Realtime Database.
+     */
+    private void loadCartData()
+    {
+        String uid = FBRef.refAuth.getUid();
+        if (uid == null) return;
+
+        FBRef.refCarts.child(uid).addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
+                cartItems.clear();
+                for (DataSnapshot itemSnapshot : snapshot.getChildren())
+                {
+                    Product product = itemSnapshot.getValue(Product.class);
+                    if (product != null)
+                    {
+                        cartItems.add(product);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+                updateOrderSummary();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error)
+            {
+                Toast.makeText(getContext(), "Failed to load cart.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Recalculates and updates the order summary fields (subtotal, total, etc.).
+     */
+    private void updateOrderSummary()
+    {
+        double total = 0;
+        for (Product item : cartItems)
+        {
+            total += item.getPrice() * item.getAmount();
+        }
+
+        tvTotal.setText(String.format("₪%.2f", total));
+
+        btnCheckout.setText(String.format("%s - ₪%.2f", getString(R.string.cart_proceed_to_checkout), total));
     }
 }
