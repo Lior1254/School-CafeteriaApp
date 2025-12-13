@@ -1,6 +1,8 @@
 package com.example.CafeteriaApp;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +19,7 @@ import com.example.CafeteriaApp.Adapters.CustomProductOptionRvAdapter;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
+import com.google.firebase.storage.StorageReference;
 
 /**
  * Activity for customizing a selected product.
@@ -24,6 +27,7 @@ import com.example.CafeteriaApp.Models.Product;
  */
 public class CustomizeItemActivity extends AppCompatActivity
 {
+    public static Bitmap selectedImageBitmap = null;
 
     Intent intent;
     TextView tvProductName, tvProductDescription, tv_amount_of_items, tv_price;
@@ -92,7 +96,38 @@ public class CustomizeItemActivity extends AppCompatActivity
 
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
-        ivProductIMG.setImageResource(item.getImageRes());
+
+        // Image Loading Logic
+        if (item.getId() != null && !item.getId().isEmpty())
+        {
+            if (selectedImageBitmap != null)
+            {
+                ivProductIMG.setImageBitmap(selectedImageBitmap);
+                item.setImageBitmap(selectedImageBitmap);
+                selectedImageBitmap = null;
+            } else
+            {
+                // Set placeholder (Green)
+                ivProductIMG.setImageResource(R.drawable.ic_launcher_background);
+
+                // Changed to look inside "Products" folder
+                StorageReference imageRef = FBRef.refStorage.child("Products").child(item.getId() + ".jpg");
+                final long MAX_SIZE = 5 * 1024 * 1024;
+                imageRef.getBytes(MAX_SIZE).addOnSuccessListener(bytes ->
+                {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    ivProductIMG.setImageBitmap(bitmap);
+                }).addOnFailureListener(e ->
+                {
+                    // If download fails, ensure placeholder is shown
+                    ivProductIMG.setImageResource(R.drawable.ic_launcher_background);
+                });
+            }
+        } else
+        {
+            ivProductIMG.setImageResource(R.drawable.ic_launcher_background);
+        }
+
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText(AddBtnText + "   " + item.getPriceText());
 

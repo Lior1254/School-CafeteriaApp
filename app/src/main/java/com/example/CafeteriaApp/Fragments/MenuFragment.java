@@ -70,6 +70,8 @@ public class MenuFragment extends Fragment
                 products,
                 item ->
                 {
+                    // Pass the already downloaded image to the activity to avoid re-downloading
+                    CustomizeItemActivity.selectedImageBitmap = item.getImageBitmap();
                     Intent intent = new Intent(requireContext(), CustomizeItemActivity.class);
                     intent.putExtra("item", item);
                     startActivity(intent);

@@ -66,11 +66,12 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
         if (p.getImageBitmap() != null)
         {
             iv.setImageBitmap(p.getImageBitmap());
-        } else if (!p.getId().isEmpty())
+        } else if (p.getId() != null && !p.getId().isEmpty())
         {
-            iv.setImageResource(R.drawable.ic_launcher_background); // Placeholder
+            iv.setImageResource(R.drawable.ic_launcher_background); // Placeholder (Green)
 
-            StorageReference imageRef = FBRef.refStorage.child(p.getId() + ".jpg");
+            // Changed to look inside "Products" folder
+            StorageReference imageRef = FBRef.refStorage.child("Products").child(p.getId() + ".jpg");
 
             final long MAX_SIZE = 5 * 1024 * 1024;
             imageRef.getBytes(MAX_SIZE).addOnSuccessListener(bytes ->
@@ -78,6 +79,9 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 p.setImageBitmap(bitmap);
                 iv.setImageBitmap(bitmap);
+            }).addOnFailureListener(e -> {
+                // On failure, set the green default image
+                iv.setImageResource(R.drawable.ic_launcher_background);
             });
         } else
         {
