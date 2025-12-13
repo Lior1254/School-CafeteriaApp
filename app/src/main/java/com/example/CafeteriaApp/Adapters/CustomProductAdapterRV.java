@@ -1,5 +1,7 @@
 package com.example.CafeteriaApp.Adapters;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,23 +11,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
 /**
  * RecyclerView adapter for displaying a list of products.
- * Uses an anonymous ViewHolder to bind data to the custom product layout.
+ * Handles loading images from Firebase Storage and displaying them.
  */
 public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
 
     private final List<Product> items;
 
-    /**
-     * Interface for handling item click events.
-     */
     public interface OnItemClick
     {
         void onClick(Product item);
@@ -33,12 +34,6 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
 
     private final OnItemClick listener;
 
-    /**
-     * Constructor for CustomProductAdapterRV.
-     *
-     * @param items    List of Product objects to display.
-     * @param listener Listener for item click events.
-     */
     public CustomProductAdapterRV(List<Product> items, OnItemClick listener)
     {
         this.items = items;
@@ -51,7 +46,6 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
     {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.custom_product_lv_layout, parent, false);
-        // Anonymous ViewHolder (no separate VH class)
         return new RecyclerView.ViewHolder(v)
         {
         };
@@ -60,7 +54,6 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
-        // Find views each bind (simple; you asked to avoid VH fields)
         View itemView = holder.itemView;
         ImageView iv = itemView.findViewById(R.id.lv_item_img);
         TextView tvN = itemView.findViewById(R.id.lv_item_name);
@@ -69,18 +62,32 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
 
         Product p = items.get(position);
 
-        // Check if a downloaded bitmap exists
-        if (p.getImageBitmap() != null) {
+        // --- Image Loading Logic ---
+        if (p.getImageBitmap() != null)
+        {
             iv.setImageBitmap(p.getImageBitmap());
-        } else {
-            iv.setImageResource(R.drawable.ic_launcher_foreground);//default
+        } else if (!p.getId().isEmpty())
+        {
+            iv.setImageResource(R.drawable.ic_launcher_background); // Placeholder
+
+            StorageReference imageRef = FBRef.refStorage.child(p.getId() + ".jpg");
+
+            final long MAX_SIZE = 5 * 1024 * 1024;
+            imageRef.getBytes(MAX_SIZE).addOnSuccessListener(bytes ->
+            {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                p.setImageBitmap(bitmap);
+                iv.setImageBitmap(bitmap);
+            });
+        } else
+        {
+            iv.setImageResource(R.drawable.ic_launcher_background);
         }
 
         tvN.setText(p.getName());
         tvD.setText(p.getDescription());
         tvP.setText("₪" + String.format("%.2f", p.getPrice()));
 
-        // Item click (same behavior as ListView's OnItemClickListener)
         itemView.setOnClickListener(v ->
                                     {
                                         if (listener != null) listener.onClick(p);

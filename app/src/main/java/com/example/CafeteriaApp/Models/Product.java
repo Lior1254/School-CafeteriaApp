@@ -17,18 +17,20 @@ public class Product implements Serializable
     private double price;
     private String category;
     private List<Addon> addons; // List of available addons for this product
-    private int imageRes; // Resource ID for the product image (Placeholder)
+    private int imageRes; // Local drawable resource for placeholder
     private int amount; // Quantity of the product in cart/order
 
     @Exclude
-    private transient Bitmap imageBitmap; // The downloaded image
+    private transient Bitmap imageBitmap; // The downloaded image, excluded from Firebase
 
     // Empty constructor required for Firebase Realtime Database
     public Product()
     {
-
     }
 
+    /**
+     * Full constructor for creating a Product.
+     */
     public Product(String id, String name, String description, double price, String category,
                    List<Addon> addons, int imageRes, int amount)
     {
@@ -50,7 +52,7 @@ public class Product implements Serializable
         return "₪" + String.format("%.2f", price);
     }
 
-
+    //<editor-fold desc="Getters and Setters">
     public String getId()
     {
         return id;
@@ -132,12 +134,14 @@ public class Product implements Serializable
     }
 
     @Exclude
-    public Bitmap getImageBitmap() {
+    public Bitmap getImageBitmap()
+    {
         return imageBitmap;
     }
 
     @Exclude
-    public void setImageBitmap(Bitmap imageBitmap) {
+    public void setImageBitmap(Bitmap imageBitmap)
+    {
         this.imageBitmap = imageBitmap;
     }
 }

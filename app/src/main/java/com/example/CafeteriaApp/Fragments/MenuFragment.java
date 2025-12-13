@@ -2,10 +2,7 @@ package com.example.CafeteriaApp.Fragments;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,17 +22,12 @@ import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.CategoryItem;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageReference;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,16 +55,12 @@ public class MenuFragment extends Fragment
         RV_categories = v.findViewById(R.id.RV_categories);
 
         RV_items.setLayoutManager(new LinearLayoutManager(requireContext()));
-        // Set up horizontal layout manager for categories
         RV_categories.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        // --- Fix: Set empty Adapter initially ---
-        // This prevents the "No adapter attached" error while data is downloading from Firebase
         RV_items.setAdapter(new CustomProductAdapterRV(new ArrayList<>(), null));
         RV_categories.setAdapter(new CategoryAdapter(new ArrayList<>(), null));
 
-        // Download data from Firebase
         DownloadData();
     }
 
@@ -105,7 +93,6 @@ public class MenuFragment extends Fragment
                 allProducts.clear();
                 categories.clear();
 
-                // Add "All" category by default
                 int PH = R.drawable.ic_launcher_foreground;
                 categories.add(new CategoryItem("הכל", PH));
 
@@ -113,19 +100,15 @@ public class MenuFragment extends Fragment
                 {
                     String categoryName = categorySnapshot.getKey();
 
-                    // Skip Categories folder if it exists inside Products
                     if (categoryName == null || categoryName.equals("Categories")) continue;
 
-                    // Add category to list (can be improved with specific icons if desired)
                     categories.add(new CategoryItem(categoryName, PH));
 
-                    // Iterate over all products in the category
                     for (DataSnapshot productSnapshot : categorySnapshot.getChildren())
                     {
                         Product p = productSnapshot.getValue(Product.class);
                         if (p != null)
                         {
-                            // Ensure category is updated within the product
                             p.setCategory(categoryName);
                             allProducts.add(p);
                         }
@@ -136,7 +119,6 @@ public class MenuFragment extends Fragment
 
                 chooseProducts(allProducts);
 
-                // Set up Adapter for categories with filtering logic
                 CategoryAdapter categoryAdapter = new CategoryAdapter(categories, categoryName ->
                 {
                     if (categoryName.equals("הכל"))
@@ -168,110 +150,53 @@ public class MenuFragment extends Fragment
         });
     }
 
-    // This function is used for initial upload only (currently unused unless uncommented)
     private void UploadData()
     {
-        // Placeholders
         int PH = R.drawable.ic_launcher_foreground;
-        int TOAST = R.drawable.toast;
 
-        // Create categories
-        List<CategoryItem> tempCategories = new ArrayList<>();
-        tempCategories.add(new CategoryItem("הכל", PH));
-        tempCategories.add(new CategoryItem("כריכים", PH));
-        tempCategories.add(new CategoryItem("פסטה", PH));
-        tempCategories.add(new CategoryItem("משקאות קרים", PH));
-        tempCategories.add(new CategoryItem("קינוחים", PH));
-        tempCategories.add(new CategoryItem("מאפים", PH));
-
-        // --- Define Addons ---
         Addon dfa = new Addon("DFA", "DFA", -1, PH);
+        List<Addon> generalAddons = Arrays.asList(dfa,
+                new Addon("add_tahini", "טחינה", 0.00, PH),
+                new Addon("add_spicy", "חריף", 0.00, PH),
+                new Addon("add_garlic", "שום", 0.00, PH),
+                new Addon("add_onion", "בצל מטוגן", 1.00, PH),
+                new Addon("add_pickles", "חמוצים", 0.00, PH));
 
-        List<Addon> toastAddons = Arrays.asList(
-                dfa,
-                new Addon("add_olives", "זיתים", 1.00, PH),
-                new Addon("add_corn", "תירס", 1.00, PH),
-                new Addon("add_onion", "בצל", 0.00, PH),
-                new Addon("add_bulgarit", "גבינה בולגרית", 2.00, PH),
-                new Addon("add_extra_cheese", "תוספת גבינה", 2.50, PH),
-                new Addon("add_pizza_sauce", "רוטב פיצה", 0.00, PH)
-        );
-
-        List<Addon> sandwichAddons = Arrays.asList(
-                dfa,
-                new Addon("add_egg", "ביצה קשה", 1.50, PH),
-                new Addon("add_pickles", "מלפפון חמוץ", 0.00, PH),
-                new Addon("add_tomato", "עגבנייה", 0.00, PH),
-                new Addon("add_lettuce", "חסה", 0.00, PH),
-                new Addon("add_spicy", "חריף", 0.00, PH)
-        );
-
-        List<Addon> pastaAddons = Arrays.asList(
-                dfa,
-                new Addon("add_parmesan", "תוספת פרמזן", 3.00, PH),
-                new Addon("add_extra_sauce", "תוספת רוטב", 1.00, PH),
-                new Addon("add_spicy_sauce", "רוטב חריף", 0.00, PH)
-        );
-
-        List<Addon> pastryAddons = Arrays.asList(
-                dfa,
-                new Addon("add_egg", "ביצה קשה", 1.50, PH),
-                new Addon("add_pickles", "מלפפון חמוץ", 0.50, PH),
-                new Addon("add_tahini", "טחינה בצד", 0.00, PH)
-        );
-
-        List<Addon> dfaArr = Arrays.asList(dfa);
-
-        // --- Add products ---
         List<Product> tempProducts = new ArrayList<>();
 
-        // Sandwiches
-        tempProducts.add(
-                new Product("101", "טוסט", "לחם טרי, גבינה צהובה", 8.00, "כריכים", toastAddons, PH,
-                            0));
-        tempProducts.add(new Product("102", "טוסט גדול", "לחם כפול, גבינה נדיבה", 10.00, "כריכים",
-                                     toastAddons, TOAST, 0));
-        tempProducts.add(
-                new Product("103", "כריך טונה", "לבחירה: לבן/מלא", 10.00, "כריכים", sandwichAddons,
-                            TOAST, 0));
-        tempProducts.add(new Product("104", "כריך שקשוקה", "שקשוקה עדינה בלחם טרי", 10.00, "כריכים",
-                                     sandwichAddons, PH, 0));
+        // מוקפץ
+        tempProducts.add(new Product("101", "מוקפץ (ירקות)", "", 12.00, "מוקפץ", generalAddons, PH, 0));
+        tempProducts.add(new Product("102", "מוקפץ (עוף)", "", 16.00, "מוקפץ", generalAddons, PH, 0));
 
-        // Pasta
-        tempProducts.add(
-                new Product("201", "פסטה פנה ברוטב עגבניות", "פנה, רוטב עגבניות עדין", 12.00,
-                            "פסטה", pastaAddons, PH, 0));
+        // אורז
+        tempProducts.add(new Product("201", "אורז בקערה", "", 10.00, "אורז", generalAddons, PH, 0));
 
-        // Cold Drinks
-        tempProducts.add(
-                new Product("301", "קולה זירו (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH,
-                            0));
-        tempProducts.add(
-                new Product("302", "קוקה-קולה (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH,
-                            0));
-        tempProducts.add(
-                new Product("303", "ספרייט (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
-        tempProducts.add(
-                new Product("304", "פאנטה תפוז (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH,
-                            0));
-        tempProducts.add(
-                new Product("305", "סודה (פחית)", "330 מ״ל", 6.00, "משקאות קרים", dfaArr, PH, 0));
-        tempProducts.add(
-                new Product("306", "ברד", "טעמים לבחירה", 9.00, "משקאות קרים", dfaArr, PH, 0));
+        // קוסקוס
+        tempProducts.add(new Product("301", "קוסקוס צמחוני קטן", "", 13.00, "קוסקוס", generalAddons, PH, 0));
+        tempProducts.add(new Product("302", "קוסקוס צמחוני גדול", "", 19.00, "קוסקוס", generalAddons, PH, 0));
 
-        // Desserts
-        tempProducts.add(
-                new Product("401", "קינדר", "שוקולד חלב", 5.00, "קינוחים (שוקולדים)", dfaArr, PH,
-                            0));
-        tempProducts.add(
-                new Product("402", "בואנו", "שוקולד/וופלים", 5.00, "קינוחים (שוקולדים)", dfaArr, PH,
-                            0));
+        // כריכים
+        tempProducts.add(new Product("401", "כריך קטן", "חביתה / טונה / סביח", 10.00, "כריכים", generalAddons, PH, 0));
+        tempProducts.add(new Product("402", "כריך גדול", "חביתה / טונה / סביח", 12.00, "כריכים", generalAddons, PH, 0));
+        tempProducts.add(new Product("403", "באגט שקשוקה / חביתה", "", 15.00, "כריכים", generalAddons, PH, 0));
+        tempProducts.add(new Product("404", "טוסט קטן (לחמניה)", "", 9.00, "כריכים", generalAddons, PH, 0));
+        tempProducts.add(new Product("405", "טוסט גדול (באגט)", "", 15.00, "כריכים", generalAddons, PH, 0));
 
-        // Bakery
-        tempProducts.add(
-                new Product("501", "בורקס תפוחי אדמה", "פריך וחם", 8.00, "מאפים", pastryAddons, PH,
-                            0));
+        // לחמניות
+        tempProducts.add(new Product("501", "לחמניה 3 באגט 5", "", 3.00, "לחמניות", null, PH, 0));
 
+        // תוספות
+        tempProducts.add(new Product("601", "שקשוקה חמה", "", 7.00, "תוספות", null, PH, 0));
+        tempProducts.add(new Product("602", "צ׳יפס קטן", "", 7.00, "תוספות", null, PH, 0));
+        tempProducts.add(new Product("603", "צ׳יפס גדול", "", 13.00, "תוספות", null, PH, 0));
+
+        // סלטים
+        tempProducts.add(new Product("701", "סלט בהרכבה אישית", "ירקות, רטבים, טונה, ביצה, בולגרית, פטריות", 12.00, "סלטים", null, PH, 0));
+        tempProducts.add(new Product("702", "סלט + רוטב ישראלי", "", 18.00, "סלטים", null, PH, 0));
+
+        // מרק היום
+        tempProducts.add(new Product("801", "מרק קטן (כוס)", "משתנה עם בורקסונים בצד", 7.00, "מרק היום", null, PH, 0));
+        tempProducts.add(new Product("802", "מרק גדול (קערה)", "משתנה עם בורקסונים בצד", 10.00, "מרק היום", null, PH, 0));
 
         ProgressDialog pd = new ProgressDialog(requireContext());
         pd.setTitle("Uploading Data");
@@ -279,55 +204,21 @@ public class MenuFragment extends Fragment
         pd.show();
 
         List<Task<Void>> tasks = new ArrayList<>();
-
         for (Product p : tempProducts)
         {
             tasks.add(FBRef.refProducts.child(p.getCategory()).child(p.getId()).setValue(p));
         }
 
-        Tasks.whenAll(tasks).addOnCompleteListener(new OnCompleteListener<Void>()
-        {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
-            {
-                pd.dismiss();
-                if (task.isSuccessful())
-                {
-                    Toast.makeText(requireContext(), "Data uploaded successfully",
-                                   Toast.LENGTH_SHORT).show();
-                } else
-                {
-                    Toast.makeText(requireContext(), "Failed to upload data",
-                                   Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        Tasks.whenAll(tasks).addOnCompleteListener(task ->
+                                                 {
+                                                     pd.dismiss();
+                                                     if (task.isSuccessful())
+                                                     {
+                                                         Toast.makeText(requireContext(), "Data uploaded successfully", Toast.LENGTH_SHORT).show();
+                                                     } else
+                                                     {
+                                                         Toast.makeText(requireContext(), "Failed to upload data", Toast.LENGTH_SHORT).show();
+                                                     }
+                                                 });
     }
-    private int getProductUri(Product p)
-    {
-        StorageReference fileToDownload = FBRef.refStorage.child("images/Products");
-
-        // Set up a ProgressDialog.
-        ProgressDialog pd = new ProgressDialog(this);
-        // Define the maximum size of the image to download (e.g., 5MB).
-        final long MAX_SIZE = 5 * 255 * 255;
-
-        fileToDownload.getBytes(MAX_SIZE)
-                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
-                        // Decode the byte array into a Bitmap and set it on the ImageView.
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        p.setImageBitmap();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("FirebaseStorage", "Failed to download image: " + e.getMessage())
-                    }
-                });
-        return R.drawable.ic_launcher_foreground;//default
-    }
-
 }
