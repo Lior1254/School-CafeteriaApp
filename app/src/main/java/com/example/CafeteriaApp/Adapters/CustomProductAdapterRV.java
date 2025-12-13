@@ -1,7 +1,5 @@
 package com.example.CafeteriaApp.Adapters;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -62,31 +59,8 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
 
         Product p = items.get(position);
 
-        // --- Image Loading Logic ---
-        if (p.getImageBitmap() != null)
-        {
-            iv.setImageBitmap(p.getImageBitmap());
-        } else if (p.getId() != null && !p.getId().isEmpty())
-        {
-            iv.setImageResource(R.drawable.ic_launcher_background); // Placeholder (Green)
-
-            // Changed to look inside "Products" folder
-            StorageReference imageRef = FBRef.refStorage.child("Products").child(p.getId() + ".jpg");
-
-            final long MAX_SIZE = 5 * 1024 * 1024;
-            imageRef.getBytes(MAX_SIZE).addOnSuccessListener(bytes ->
-            {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                p.setImageBitmap(bitmap);
-                iv.setImageBitmap(bitmap);
-            }).addOnFailureListener(e -> {
-                // On failure, set the green default image
-                iv.setImageResource(R.drawable.ic_launcher_background);
-            });
-        } else
-        {
-            iv.setImageResource(R.drawable.ic_launcher_background);
-        }
+        // --- Use Centralized Image Loading ---
+        FBRef.loadProductImage(p, iv);
 
         tvN.setText(p.getName());
         tvD.setText(p.getDescription());

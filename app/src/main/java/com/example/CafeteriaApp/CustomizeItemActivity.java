@@ -1,8 +1,6 @@
 package com.example.CafeteriaApp;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +17,6 @@ import com.example.CafeteriaApp.Adapters.CustomProductOptionRvAdapter;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
-import com.google.firebase.storage.StorageReference;
 
 /**
  * Activity for customizing a selected product.
@@ -27,7 +24,11 @@ import com.google.firebase.storage.StorageReference;
  */
 public class CustomizeItemActivity extends AppCompatActivity
 {
-    public static Bitmap selectedImageBitmap = null;
+    // Note: We can remove selectedImageBitmap if we rely solely on FBRef.loadProductImage
+    // which checks product.getImageBitmap() internally.
+    // However, if we want to pass the bitmap explicitly between activities without static fields,
+    // the product object (if Serializable/Parcelable) might already carry it, but Bitmap isn't Serializable by default.
+    // Since the user asked to centralize logic in FBRef, let's use that.
 
     Intent intent;
     TextView tvProductName, tvProductDescription, tv_amount_of_items, tv_price;
@@ -74,7 +75,7 @@ public class CustomizeItemActivity extends AppCompatActivity
      */
     private void setupUI()
     {
-        // Retrieve product object from intent (supports Serializable for newer API levels)
+        // Retrieve product object from intent
         if (android.os.Build.VERSION.SDK_INT >= 33)
         {
             item = intent.getSerializableExtra("item", Product.class);
@@ -83,7 +84,6 @@ public class CustomizeItemActivity extends AppCompatActivity
             item = (Product) intent.getSerializableExtra("item");
         }
 
-        // Basic validation to ensure product data is available
         if (item == null)
         {
             Toast.makeText(this, "Error loading product", Toast.LENGTH_SHORT).show();
@@ -97,41 +97,20 @@ public class CustomizeItemActivity extends AppCompatActivity
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
 
-        // Image Loading Logic
-        if (item.getId() != null && !item.getId().isEmpty())
-        {
-            if (selectedImageBitmap != null)
-            {
-                ivProductIMG.setImageBitmap(selectedImageBitmap);
-                item.setImageBitmap(selectedImageBitmap);
-                selectedImageBitmap = null;
-            } else
-            {
-                // Set placeholder (Green)
-                ivProductIMG.setImageResource(R.drawable.ic_launcher_background);
-
-                // Changed to look inside "Products" folder
-                StorageReference imageRef = FBRef.refStorage.child("Products").child(item.getId() + ".jpg");
-                final long MAX_SIZE = 5 * 1024 * 1024;
-                imageRef.getBytes(MAX_SIZE).addOnSuccessListener(bytes ->
-                {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    ivProductIMG.setImageBitmap(bitmap);
-                }).addOnFailureListener(e ->
-                {
-                    // If download fails, ensure placeholder is shown
-                    ivProductIMG.setImageResource(R.drawable.ic_launcher_background);
-                });
-            }
-        } else
-        {
-            ivProductIMG.setImageResource(R.drawable.ic_launcher_background);
+        // --- Use Centralized Image Loading ---
+        // If the static bitmap was set in MenuFragment, we can manually set it to the item here if needed,
+        // or just rely on the fact that if it's the same object instance in memory (unlikely across activities without static),
+        // we might need to re-fetch or use a static helper.
+        // Assuming the static trick from before is still desired or we just use the clean load function:
+        if (item.getImageBitmap() == null && CustomizeItemActivity.selectedImageBitmap != null) {
+             item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
+             CustomizeItemActivity.selectedImageBitmap = null; // Clear after use
         }
+        FBRef.loadProductImage(item, ivProductIMG);
 
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText(AddBtnText + "   " + item.getPriceText());
 
-        // Configure addons RecyclerView only if addons exist
         if (item.getAddons() != null && !item.getAddons().isEmpty())
         {
             Addons.setVisibility(View.VISIBLE);
@@ -148,11 +127,9 @@ public class CustomizeItemActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Updates the total price when an addon is selected or deselected.
-     *
-     * @param addon The addon that was interacted with.
-     */
+    // Static field to hold the bitmap temporarily if needed, though FBRef logic handles it if set on Product
+    public static android.graphics.Bitmap selectedImageBitmap = null;
+
     private void updatePriceBasedOnAddons(Addon addon)
     {
         if (addon.isSelected())
@@ -167,31 +144,16 @@ public class CustomizeItemActivity extends AppCompatActivity
         btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
     }
 
-    /**
-     * Increases the quantity of the product.
-     *
-     * @param view The view that was clicked.
-     */
     public void Plus_btn_Click(View view)
     {
         updateItemQuantity(true);
     }
 
-    /**
-     * Decreases the quantity of the product.
-     *
-     * @param view The view that was clicked.
-     */
     public void Minus_btn_Click(View view)
     {
         updateItemQuantity(false);
     }
 
-    /**
-     * Updates the item quantity and recalculates the total price.
-     *
-     * @param increment True to increase quantity, false to decrease.
-     */
     private void updateItemQuantity(boolean increment)
     {
         if ((amount_of_products == 1 && !increment) || (amount_of_products == 9 && increment))
@@ -205,7 +167,6 @@ public class CustomizeItemActivity extends AppCompatActivity
             amount_of_products--;
         }
 
-        // Update UI for quantity buttons (gray out if limit reached)
         if (amount_of_products == 1)
         {
             ibtn_minus_item.setImageResource(R.drawable.ic_minus_gray);
@@ -231,7 +192,6 @@ public class CustomizeItemActivity extends AppCompatActivity
     {
         item.setPrice(price);
         item.setAmount(amount_of_products);
-        // Save to Firebase Carts
         String uid = FBRef.refAuth.getUid();
         if (uid != null)
         {
@@ -242,7 +202,7 @@ public class CustomizeItemActivity extends AppCompatActivity
                                                {
                                                    Toast.makeText(this, "נוסף לסל בהצלחה",
                                                                   Toast.LENGTH_SHORT).show();
-                                                   finish(); // Close activity and go back
+                                                   finish();
                                                } else
                                                {
                                                    Toast.makeText(this, "שגיאה בהוספה לסל",
@@ -255,11 +215,6 @@ public class CustomizeItemActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Closes the activity and returns to the previous screen.
-     *
-     * @param view The view that was clicked.
-     */
     public void GoBack_Click(View view)
     {
         finish();

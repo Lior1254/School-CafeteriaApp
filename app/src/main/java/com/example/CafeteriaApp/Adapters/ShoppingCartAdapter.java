@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
 
@@ -64,13 +65,8 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         holder.tvPrice.setText(String.format("₪%.2f", item.getPrice()));
         holder.tvQuantity.setText(String.valueOf(item.getAmount()));
 
-        if (item.getImageRes() != 0)
-        {
-            holder.ivImg.setImageResource(item.getImageRes());
-        } else
-        {
-            holder.ivImg.setImageResource(R.drawable.ic_launcher_background); // Placeholder
-        }
+        // --- Use Centralized Image Loading ---
+        FBRef.loadProductImage(item, holder.ivImg);
 
         // Set the correct icon based on the current quantity
         if (item.getAmount() == 1) {
