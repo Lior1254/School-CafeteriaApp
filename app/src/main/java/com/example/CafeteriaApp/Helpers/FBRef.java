@@ -3,6 +3,8 @@ package com.example.CafeteriaApp.Helpers;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class FBRef
 {
@@ -14,4 +16,7 @@ public class FBRef
     public static DatabaseReference refCarts = FBDB.getReference("Carts");
     public static DatabaseReference refOrders = FBDB.getReference("Orders");
     public static DatabaseReference refHistoryOrders = FBDB.getReference("HistoryOrders");
+
+    public static FirebaseStorage storage = FirebaseStorage.getInstance();
+    public static StorageReference refStorage = storage.getReference();
 }

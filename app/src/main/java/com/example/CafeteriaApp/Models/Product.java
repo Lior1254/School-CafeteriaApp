@@ -1,5 +1,7 @@
 package com.example.CafeteriaApp.Models;
 
+import android.graphics.Bitmap;
+import com.google.firebase.database.Exclude;
 import java.io.Serializable;
 import java.util.List;
 
@@ -15,8 +17,11 @@ public class Product implements Serializable
     private double price;
     private String category;
     private List<Addon> addons; // List of available addons for this product
-    private int imageRes; // Resource ID for the product image
+    private int imageRes; // Resource ID for the product image (Placeholder)
     private int amount; // Quantity of the product in cart/order
+
+    @Exclude
+    private transient Bitmap imageBitmap; // The downloaded image
 
     // Empty constructor required for Firebase Realtime Database
     public Product()
@@ -124,5 +129,15 @@ public class Product implements Serializable
     public void setAmount(int amount)
     {
         this.amount = amount;
+    }
+
+    @Exclude
+    public Bitmap getImageBitmap() {
+        return imageBitmap;
+    }
+
+    @Exclude
+    public void setImageBitmap(Bitmap imageBitmap) {
+        this.imageBitmap = imageBitmap;
     }
 }

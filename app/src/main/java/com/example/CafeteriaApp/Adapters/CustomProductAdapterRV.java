@@ -68,7 +68,14 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
         TextView tvP = itemView.findViewById(R.id.lv_item_price);
 
         Product p = items.get(position);
-        iv.setImageResource(p.getImageRes());
+
+        // Check if a downloaded bitmap exists
+        if (p.getImageBitmap() != null) {
+            iv.setImageBitmap(p.getImageBitmap());
+        } else {
+            iv.setImageResource(R.drawable.ic_launcher_foreground);//default
+        }
+
         tvN.setText(p.getName());
         tvD.setText(p.getDescription());
         tvP.setText("₪" + String.format("%.2f", p.getPrice()));

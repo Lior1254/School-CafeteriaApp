@@ -2,7 +2,10 @@ package com.example.CafeteriaApp.Fragments;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,12 +26,16 @@ import com.example.CafeteriaApp.Models.CategoryItem;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -296,4 +303,31 @@ public class MenuFragment extends Fragment
             }
         });
     }
+    private int getProductUri(Product p)
+    {
+        StorageReference fileToDownload = FBRef.refStorage.child("images/Products");
+
+        // Set up a ProgressDialog.
+        ProgressDialog pd = new ProgressDialog(this);
+        // Define the maximum size of the image to download (e.g., 5MB).
+        final long MAX_SIZE = 5 * 255 * 255;
+
+        fileToDownload.getBytes(MAX_SIZE)
+                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        // Decode the byte array into a Bitmap and set it on the ImageView.
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        p.setImageBitmap();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("FirebaseStorage", "Failed to download image: " + e.getMessage())
+                    }
+                });
+        return R.drawable.ic_launcher_foreground;//default
+    }
+
 }
