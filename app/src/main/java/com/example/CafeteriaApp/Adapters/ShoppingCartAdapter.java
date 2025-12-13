@@ -80,7 +80,11 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         {
             if (quantityListener != null && item.getAmount() < 9)
             {
-                quantityListener.onQuantityChange(position, item.getAmount() + 1);
+                // getAdapterPosition() is the older method but works for all API levels needed
+                int currentPos = holder.getAdapterPosition();
+                if (currentPos != RecyclerView.NO_POSITION) {
+                    quantityListener.onQuantityChange(currentPos, item.getAmount() + 1);
+                }
             }
         });
 
@@ -89,9 +93,10 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         {
             if (quantityListener != null)
             {
-                if (item.getAmount() > 1)
-                {
-                    quantityListener.onQuantityChange(position, item.getAmount() - 1);
+                int currentPos = holder.getAdapterPosition();
+                if (currentPos != RecyclerView.NO_POSITION) {
+                     // Always callback, even if going to 0 (which means remove)
+                    quantityListener.onQuantityChange(currentPos, item.getAmount() - 1);
                 }
             }
         });

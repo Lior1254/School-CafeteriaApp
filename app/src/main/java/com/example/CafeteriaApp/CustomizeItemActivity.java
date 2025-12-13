@@ -15,21 +15,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.CustomProductOptionRvAdapter;
 import com.example.CafeteriaApp.Helpers.FBRef;
+import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
 
-/**
- * Activity for customizing a selected product.
- * Allows users to adjust quantity and select addons before adding to cart.
- */
+import java.util.List;
+
 public class CustomizeItemActivity extends AppCompatActivity
 {
-    // Note: We can remove selectedImageBitmap if we rely solely on FBRef.loadProductImage
-    // which checks product.getImageBitmap() internally.
-    // However, if we want to pass the bitmap explicitly between activities without static fields,
-    // the product object (if Serializable/Parcelable) might already carry it, but Bitmap isn't Serializable by default.
-    // Since the user asked to centralize logic in FBRef, let's use that.
-
     Intent intent;
     TextView tvProductName, tvProductDescription, tv_amount_of_items, tv_price;
     ImageView ivProductIMG;
@@ -42,6 +35,9 @@ public class CustomizeItemActivity extends AppCompatActivity
     private double totalPrice = 0, price = 0;
     private String AddBtnText = "הוסף לסל";
 
+    // Static field to hold the bitmap temporarily if needed
+    public static android.graphics.Bitmap selectedImageBitmap = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -53,9 +49,6 @@ public class CustomizeItemActivity extends AppCompatActivity
         setupUI();
     }
 
-    /**
-     * Initializes UI components from the layout.
-     */
     private void initializeViews()
     {
         tvProductName = findViewById(R.id.tvProductName);
@@ -70,12 +63,8 @@ public class CustomizeItemActivity extends AppCompatActivity
         btn_AddToCart = findViewById(R.id.btn_AddToCart);
     }
 
-    /**
-     * Sets up the UI with product details and handles logic for addons.
-     */
     private void setupUI()
     {
-        // Retrieve product object from intent
         if (android.os.Build.VERSION.SDK_INT >= 33)
         {
             item = intent.getSerializableExtra("item", Product.class);
@@ -97,14 +86,9 @@ public class CustomizeItemActivity extends AppCompatActivity
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
 
-        // --- Use Centralized Image Loading ---
-        // If the static bitmap was set in MenuFragment, we can manually set it to the item here if needed,
-        // or just rely on the fact that if it's the same object instance in memory (unlikely across activities without static),
-        // we might need to re-fetch or use a static helper.
-        // Assuming the static trick from before is still desired or we just use the clean load function:
         if (item.getImageBitmap() == null && CustomizeItemActivity.selectedImageBitmap != null) {
              item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
-             CustomizeItemActivity.selectedImageBitmap = null; // Clear after use
+             CustomizeItemActivity.selectedImageBitmap = null;
         }
         FBRef.loadProductImage(item, ivProductIMG);
 
@@ -126,9 +110,6 @@ public class CustomizeItemActivity extends AppCompatActivity
             Addons.setVisibility(View.GONE);
         }
     }
-
-    // Static field to hold the bitmap temporarily if needed, though FBRef logic handles it if set on Product
-    public static android.graphics.Bitmap selectedImageBitmap = null;
 
     private void updatePriceBasedOnAddons(Addon addon)
     {
@@ -192,27 +173,13 @@ public class CustomizeItemActivity extends AppCompatActivity
     {
         item.setPrice(price);
         item.setAmount(amount_of_products);
-        String uid = FBRef.refAuth.getUid();
-        if (uid != null)
-        {
-            FBRef.refCarts.child(uid).push().setValue(item)
-                    .addOnCompleteListener(task ->
-                                           {
-                                               if (task.isSuccessful())
-                                               {
-                                                   Toast.makeText(this, "נוסף לסל בהצלחה",
-                                                                  Toast.LENGTH_SHORT).show();
-                                                   finish();
-                                               } else
-                                               {
-                                                   Toast.makeText(this, "שגיאה בהוספה לסל",
-                                                                  Toast.LENGTH_SHORT).show();
-                                               }
-                                           });
-        } else
-        {
-            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
-        }
+
+        List<Product> currentCart = FileManager.loadCart(this);
+        currentCart.add(item);
+        FileManager.saveCart(this, currentCart);
+
+        Toast.makeText(this, "Added! Cart size: " + currentCart.size(), Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     public void GoBack_Click(View view)

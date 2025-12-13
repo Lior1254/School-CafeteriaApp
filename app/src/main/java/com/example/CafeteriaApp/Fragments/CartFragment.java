@@ -15,12 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.ShoppingCartAdapter;
-import com.example.CafeteriaApp.Helpers.FBRef;
+import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +31,7 @@ public class CartFragment extends Fragment
     private TextView tvSubtotal, tvTaxes, tvTotal;
     private Button btnCheckout;
     private ShoppingCartAdapter adapter;
-    private final List<Product> cartItems = new ArrayList<>();
+    private List<Product> cartItems = new ArrayList<>();
 
     @Nullable
     @Override
@@ -70,48 +67,43 @@ public class CartFragment extends Fragment
     {
         rvCartItems.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new ShoppingCartAdapter(cartItems, (position, newQuantity) -> {
-            // Handle quantity changes
-            Product item = cartItems.get(position);
-            item.setAmount(newQuantity);
-            // TODO: Update the item in Firebase if needed
-            adapter.notifyItemChanged(position);
+            
+            if (newQuantity <= 0) {
+                // Remove item if quantity is 0 or less
+                cartItems.remove(position);
+                adapter.notifyItemRemoved(position);
+                adapter.notifyItemRangeChanged(position, cartItems.size());
+            } else {
+                // Update quantity
+                Product item = cartItems.get(position);
+                item.setAmount(newQuantity);
+                adapter.notifyItemChanged(position);
+            }
+            
+            // Update local file for both cases (modification or removal)
+            FileManager.saveCart(requireContext(), cartItems);
             updateOrderSummary();
         });
         rvCartItems.setAdapter(adapter);
     }
 
     /**
-     * Loads cart data from Firebase Realtime Database.
+     * Loads cart data from Internal Storage (JSON file).
      */
     private void loadCartData()
     {
-        String uid = FBRef.refAuth.getUid();
-        if (uid == null) return;
+        cartItems.clear();
+        List<Product> loadedItems = FileManager.loadCart(requireContext());
+        
+        // Removed Toast to avoid cluttering UI on every resume, uncomment if needed for debugging
+        // Toast.makeText(requireContext(), "Loaded " + loadedItems.size() + " items from cart", Toast.LENGTH_SHORT).show();
 
-        FBRef.refCarts.child(uid).addValueEventListener(new ValueEventListener()
-        {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                cartItems.clear();
-                for (DataSnapshot itemSnapshot : snapshot.getChildren())
-                {
-                    Product product = itemSnapshot.getValue(Product.class);
-                    if (product != null)
-                    {
-                        cartItems.add(product);
-                    }
-                }
-                adapter.notifyDataSetChanged();
-                updateOrderSummary();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error)
-            {
-                Toast.makeText(getContext(), "Failed to load cart.", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (loadedItems != null) {
+            cartItems.addAll(loadedItems);
+        }
+        
+        adapter.notifyDataSetChanged();
+        updateOrderSummary();
     }
 
     /**
@@ -128,5 +120,12 @@ public class CartFragment extends Fragment
         tvTotal.setText(String.format("₪%.2f", total));
 
         btnCheckout.setText(String.format("%s - ₪%.2f", getString(R.string.cart_proceed_to_checkout), total));
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Reload in case changes were made elsewhere
+        loadCartData();
     }
 }
