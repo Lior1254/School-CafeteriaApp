@@ -9,8 +9,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.CafeteriaApp.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.MainPage;
 import com.example.CafeteriaApp.Models.User;
@@ -26,11 +26,7 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
-/**
- * Activity for user login.
- * Handles authentication with Firebase Auth and retrieves user data from Realtime Database.
- */
-public class LoginPage extends AppCompatActivity
+public class LoginPage extends BaseActivity
 {
     private TextView tv_login_warning;
     private EditText ED_login_email, ED_login_password;
@@ -45,9 +41,6 @@ public class LoginPage extends AppCompatActivity
         initializeViews();
     }
 
-    /**
-     * Initializes UI components.
-     */
     public void initializeViews()
     {
         ED_login_email = findViewById(R.id.ED_login_email);
@@ -55,71 +48,46 @@ public class LoginPage extends AppCompatActivity
         tv_login_warning = findViewById(R.id.tv_login_warning);
     }
 
-    /**
-     * Navigates to the Sign Up page.
-     *
-     * @param view The view that was clicked.
-     */
     public void SignUp_Click(View view)
     {
         intent = new Intent(this, SignUpPage.class);
         startActivity(intent);
     }
 
-    /**
-     * Displays a warning message with a shake animation.
-     *
-     * @param warning The warning text to display.
-     */
     private void showWarning(String warning)
     {
         tv_login_warning.setVisibility(View.VISIBLE);
         tv_login_warning.setText(warning);
 
-        // Add a shake animation to grab the user's attention
         ObjectAnimator animator = ObjectAnimator.ofFloat(tv_login_warning, "translationX", 0f, 25f,
                                                          -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f);
-        animator.setDuration(500); // milliseconds
+        animator.setDuration(500); 
         animator.start();
     }
 
-    /**
-     * Validates the user input (email and password).
-     *
-     * @return True if input is valid, false otherwise.
-     */
     public boolean checkInput()
     {
-        // Get texts from fields
         email = ED_login_email.getText().toString().trim();
         password = ED_login_password.getText().toString().trim();
 
-        // Check email (not empty and valid format)
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
         {
             showWarning("  Please enter a valid email address");
             return false;
         }
 
-        // Check password (must be longer than 6 characters)
         if (password.length() <= 6)
         {
             showWarning("  Password must be longer than 6 characters");
             return false;
         }
 
-        // If everything is valid, hide the warning message and return true
         tv_login_warning.setVisibility(View.GONE);
         return true;
     }
 
-    /**
-     * Authenticates the user with Firebase.
-     * If successful, retrieves user data and navigates to the main page.
-     */
     public void loginUser()
     {
-        // As requested: Sign out the previous user before creating a new one.
         if (FBRef.refAuth.getCurrentUser() != null)
         {
             FBRef.refAuth.signOut();
@@ -171,7 +139,6 @@ public class LoginPage extends AppCompatActivity
                         } else
                         {
                             pd.dismiss();
-                            // Handle specific exceptions
                             Exception exp = task.getException();
                             if (exp instanceof FirebaseAuthInvalidUserException)
                             {
@@ -192,23 +159,19 @@ public class LoginPage extends AppCompatActivity
                             {
                                 showWarning("  An error occurred. Please try again later.");
                             }
-                        }
-                    }
+                        }                    }
                 });
     }
 
-    /**
-     * Handles the login button click event.
-     *
-     * @param view The view that was clicked.
-     */
     public void Login_Click(View view)
     {
         if (checkInput())
         {
-            intent = new Intent(this, MainPage.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            loginUser();
+            executeFirebaseOperation(() -> {
+                intent = new Intent(this, MainPage.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                loginUser();
+            });
         }
     }
 }

@@ -12,8 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.CafeteriaApp.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
@@ -26,12 +26,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
-/**
- * Activity for new user registration.
- * Handles user input validation, Firebase Authentication account creation,
- * and storing user details in the Realtime Database.
- */
-public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemSelectedListener
+public class SignUpPage extends BaseActivity implements AdapterView.OnItemSelectedListener
 {
     private TextView tv_signup_warning;
     private EditText ET_signup_password, ET_signup_username, ET_signup_email, ET_signup_name,
@@ -49,9 +44,6 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
         setupSpinners();
     }
 
-    /**
-     * Initializes UI components.
-     */
     public void initializeViews()
     {
         ET_signup_name = findViewById(R.id.ET_signup_name);
@@ -64,12 +56,8 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
         tv_signup_warning = findViewById(R.id.tv_signup_warning);
     }
 
-    /**
-     * Sets up the school and class spinners with data from resources.
-     */
     public void setupSpinners()
     {
-        // Spin_signup_School
         schools = getResources().getStringArray(R.array.school_names);
         Spin_signup_School.setOnItemSelectedListener(this);
         ArrayAdapter<String> adpSchool = new ArrayAdapter<>(
@@ -89,97 +77,73 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
         Spin_signup_class.setAdapter(adpClass);
     }
 
-    /**
-     * Displays a warning message with a shake animation.
-     *
-     * @param warning The warning text to display.
-     */
     private void showWarning(String warning)
     {
         tv_signup_warning.setVisibility(View.VISIBLE);
         tv_signup_warning.setText(warning);
 
-        // Add a shake animation to grab the user's attention
         ObjectAnimator animator = ObjectAnimator.ofFloat(tv_signup_warning, "translationX", 0f, 25f,
                                                          -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f);
-        animator.setDuration(500); // milliseconds
+        animator.setDuration(500); 
         animator.start();
     }
 
-    /**
-     * Validates all input fields.
-     *
-     * @return True if all inputs are valid, false otherwise.
-     */
     public boolean checkInput()
     {
-        // Get texts from fields
         name = ET_signup_name.getText().toString().trim();
         username = ET_signup_username.getText().toString().trim();
         email = ET_signup_email.getText().toString().trim();
         password = ET_signup_password.getText().toString().trim();
         phoneNumber = ET_signup_phoneNumber.getText().toString().trim();
 
-        // Check name
         if (name.isEmpty())
         {
             showWarning("  Please enter your name");
             return false;
         }
 
-        // Check email (not empty and valid format)
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
         {
             showWarning("  Please enter a valid email address");
             return false;
         }
 
-        // Check phone number
         if (phoneNumber.length() != 10 || !phoneNumber.startsWith("05"))
         {
             showWarning("  Please enter a valid phone number\n  (10 digits, starts with 05)");
             return false;
         }
 
-        // Check username (must be longer than 4 characters)
         if (username.length() <= 4)
         {
             showWarning("  Username must be longer than 4 characters");
             return false;
         }
 
-        // Check password (must be longer than 6 characters)
         if (password.length() <= 6)
         {
             showWarning("  Password must be longer than 6 characters");
             return false;
         }
 
-        // Check school spinner (the first option is usually a title like "Select school")
         if (Spin_signup_School.getSelectedItemPosition() == 0)
         {
             showWarning("   Please select a school");
             return false;
         }
 
-        // Check class spinner
         if (Spin_signup_class.getSelectedItemPosition() == 0)
         {
             showWarning("  Please select a class");
             return false;
         }
 
-        // If everything is valid, hide the warning message and return true
         tv_signup_warning.setVisibility(View.GONE);
         return true;
     }
 
-    /**
-     * Creates a new user account in Firebase Auth and saves details to Realtime Database.
-     */
     public void createAccount()
     {
-        // As requested: Sign out the previous user before creating a new one.
         if (FBRef.refAuth.getCurrentUser() != null)
         {
             FBRef.refAuth.signOut();
@@ -203,12 +167,10 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
                                 String school = Spin_signup_School.getSelectedItem().toString();
                                 String classRoom = Spin_signup_class.getSelectedItem().toString();
 
-                                // Create UserData object
                                 User user1 = new User(user.getUid(), name, email,
                                                       username, phoneNumber, school,
                                                       classRoom);
 
-                                // Save UserData to Realtime Database
                                 FBRef.refUsers.child(user.getUid()).setValue(user1)
                                         .addOnCompleteListener(new OnCompleteListener<Void>()
                                         {
@@ -236,7 +198,6 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
                         } else
                         {
                             pd.dismiss();
-                            // Handle specific exceptions
                             Exception exp = task.getException();
                             if (exp instanceof FirebaseAuthWeakPasswordException)
                             {
@@ -265,50 +226,30 @@ public class SignUpPage extends AppCompatActivity implements AdapterView.OnItemS
                 });
     }
 
-    /**
-     * Handles the Sign Up button click.
-     *
-     * @param view The view that was clicked.
-     */
     public void SignUp_Click(View view)
     {
         if (checkInput())
         {
-            createAccount();
+            executeFirebaseOperation(this::createAccount);
         }
     }
 
-    /**
-     * Handles the Google Sign Up button click.
-     *
-     * @param view The view that was clicked.
-     */
     public void SignUpGoogle_Click(View view)
     {
-        // TODO: Implement Google Sign-In logic
     }
 
-    /**
-     * Navigates back to the Login page.
-     *
-     * @param view The view that was clicked.
-     */
     public void Login_Click(View view)
     {
         finish();
     }
 
-
-    // Spinner input listeners
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
     {
-        // Callback method to be invoked when an item in this view has been selected.
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView)
     {
-        // Callback method to be invoked when the selection disappears from this view.
     }
 }

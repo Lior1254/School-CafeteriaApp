@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.CategoryAdapter;
 import com.example.CafeteriaApp.Adapters.CustomProductAdapterRV;
+import com.example.CafeteriaApp.BaseActivity;
 import com.example.CafeteriaApp.CustomizeItemActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Addon;
@@ -58,7 +59,7 @@ public class MenuFragment extends Fragment
         RV_categories.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        RV_items.setAdapter(new CustomProductAdapterRV(new ArrayList<>(), null));
+        RV_items.setAdapter(new CustomProductAdapterRV(requireContext(), new ArrayList<>(), null));
         RV_categories.setAdapter(new CategoryAdapter(new ArrayList<>(), null));
 
         DownloadData();
@@ -67,6 +68,7 @@ public class MenuFragment extends Fragment
     private void chooseProducts(List<Product> products)
     {
         CustomProductAdapterRV adp = new CustomProductAdapterRV(
+                requireContext(),
                 products,
                 item ->
                 {
@@ -87,69 +89,73 @@ public class MenuFragment extends Fragment
         pd.setMessage("Please wait...");
         pd.show();
 
-        FBRef.refProducts.addListenerForSingleValueEvent(new ValueEventListener()
-        {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                allProducts.clear();
-                categories.clear();
-
-                int PH = R.drawable.ic_launcher_foreground;
-                categories.add(new CategoryItem("הכל", PH));
-
-                for (DataSnapshot categorySnapshot : snapshot.getChildren())
+        if (getActivity() instanceof BaseActivity) {
+            ((BaseActivity) getActivity()).executeFirebaseOperation(() -> {
+                FBRef.refProducts.addListenerForSingleValueEvent(new ValueEventListener()
                 {
-                    String categoryName = categorySnapshot.getKey();
-
-                    if (categoryName == null || categoryName.equals("Categories")) continue;
-
-                    categories.add(new CategoryItem(categoryName, PH));
-
-                    for (DataSnapshot productSnapshot : categorySnapshot.getChildren())
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot)
                     {
-                        Product p = productSnapshot.getValue(Product.class);
-                        if (p != null)
+                        allProducts.clear();
+                        categories.clear();
+
+                        int PH = R.drawable.ic_launcher_foreground;
+                        categories.add(new CategoryItem("הכל", PH));
+
+                        for (DataSnapshot categorySnapshot : snapshot.getChildren())
                         {
-                            p.setCategory(categoryName);
-                            allProducts.add(p);
-                        }
-                    }
-                }
+                            String categoryName = categorySnapshot.getKey();
 
-                pd.dismiss();
+                            if (categoryName == null || categoryName.equals("Categories")) continue;
 
-                chooseProducts(allProducts);
+                            categories.add(new CategoryItem(categoryName, PH));
 
-                CategoryAdapter categoryAdapter = new CategoryAdapter(categories, categoryName ->
-                {
-                    if (categoryName.equals("הכל"))
-                    {
-                        chooseProducts(allProducts);
-                    } else
-                    {
-                        List<Product> filteredList = new ArrayList<>();
-                        for (Product p : allProducts)
-                        {
-                            if (p.getCategory() != null && p.getCategory().contains(categoryName))
+                            for (DataSnapshot productSnapshot : categorySnapshot.getChildren())
                             {
-                                filteredList.add(p);
+                                Product p = productSnapshot.getValue(Product.class);
+                                if (p != null)
+                                {
+                                    p.setCategory(categoryName);
+                                    allProducts.add(p);
+                                }
                             }
                         }
-                        chooseProducts(filteredList);
+
+                        pd.dismiss();
+
+                        chooseProducts(allProducts);
+
+                        CategoryAdapter categoryAdapter = new CategoryAdapter(categories, categoryName ->
+                        {
+                            if (categoryName.equals("הכל"))
+                            {
+                                chooseProducts(allProducts);
+                            } else
+                            {
+                                List<Product> filteredList = new ArrayList<>();
+                                for (Product p : allProducts)
+                                {
+                                    if (p.getCategory() != null && p.getCategory().contains(categoryName))
+                                    {
+                                        filteredList.add(p);
+                                    }
+                                }
+                                chooseProducts(filteredList);
+                            }
+                        });
+                        RV_categories.setAdapter(categoryAdapter);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error)
+                    {
+                        pd.dismiss();
+                        Toast.makeText(requireContext(), "Failed to download data: " + error.getMessage(),
+                                       Toast.LENGTH_SHORT).show();
                     }
                 });
-                RV_categories.setAdapter(categoryAdapter);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error)
-            {
-                pd.dismiss();
-                Toast.makeText(requireContext(), "Failed to download data: " + error.getMessage(),
-                               Toast.LENGTH_SHORT).show();
-            }
-        });
+            });
+        }
     }
 
     private void UploadData()
@@ -205,22 +211,26 @@ public class MenuFragment extends Fragment
         pd.setMessage("Please wait...");
         pd.show();
 
-        List<Task<Void>> tasks = new ArrayList<>();
-        for (Product p : tempProducts)
-        {
-            tasks.add(FBRef.refProducts.child(p.getCategory()).child(p.getId()).setValue(p));
-        }
+        if (getActivity() instanceof BaseActivity) {
+            ((BaseActivity) getActivity()).executeFirebaseOperation(() -> {
+                List<Task<Void>> tasks = new ArrayList<>();
+                for (Product p : tempProducts)
+                {
+                    tasks.add(FBRef.refProducts.child(p.getCategory()).child(p.getId()).setValue(p));
+                }
 
-        Tasks.whenAll(tasks).addOnCompleteListener(task ->
-                                                 {
-                                                     pd.dismiss();
-                                                     if (task.isSuccessful())
-                                                     {
-                                                         Toast.makeText(requireContext(), "Data uploaded successfully", Toast.LENGTH_SHORT).show();
-                                                     } else
-                                                     {
-                                                         Toast.makeText(requireContext(), "Failed to upload data", Toast.LENGTH_SHORT).show();
-                                                     }
-                                                 });
+                Tasks.whenAll(tasks).addOnCompleteListener(task ->
+                                                         {
+                                                             pd.dismiss();
+                                                             if (task.isSuccessful())
+                                                             {
+                                                                 Toast.makeText(requireContext(), "Data uploaded successfully", Toast.LENGTH_SHORT).show();
+                                                             } else
+                                                             {
+                                                                 Toast.makeText(requireContext(), "Failed to upload data", Toast.LENGTH_SHORT).show();
+                                                             }
+                                                         });
+            });
+        }
     }
 }

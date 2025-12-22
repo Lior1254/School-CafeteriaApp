@@ -66,7 +66,7 @@ public class CartFragment extends Fragment
     private void setupRecyclerView()
     {
         rvCartItems.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new ShoppingCartAdapter(cartItems, (position, newQuantity) -> {
+        adapter = new ShoppingCartAdapter(requireContext(), cartItems, (position, newQuantity) -> {
             
             if (newQuantity <= 0) {
                 // Remove item if quantity is 0 or less

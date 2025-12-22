@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,7 +20,7 @@ import com.example.CafeteriaApp.Models.Product;
 
 import java.util.List;
 
-public class CustomizeItemActivity extends AppCompatActivity
+public class CustomizeItemActivity extends BaseActivity
 {
     Intent intent;
     TextView tvProductName, tvProductDescription, tv_amount_of_items, tv_price;
@@ -90,7 +89,7 @@ public class CustomizeItemActivity extends AppCompatActivity
              item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
              CustomizeItemActivity.selectedImageBitmap = null;
         }
-        FBRef.loadProductImage(item, ivProductIMG);
+        executeFirebaseOperation(() -> FBRef.loadProductImage(item, ivProductIMG));
 
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText(AddBtnText + "   " + item.getPriceText());

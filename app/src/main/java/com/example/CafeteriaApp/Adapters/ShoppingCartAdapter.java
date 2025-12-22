@@ -1,5 +1,8 @@
 package com.example.CafeteriaApp.Adapters;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,7 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
 {
 
     private final List<Product> items;
+    private final Context context;
 
     /**
      * Interface for quantity change events.
@@ -38,11 +42,13 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
     /**
      * Constructor for ShoppingCartAdapter.
      *
+     * @param context          The context of the calling activity/fragment.
      * @param items            List of products in the cart.
      * @param quantityListener Listener for quantity changes.
      */
-    public ShoppingCartAdapter(List<Product> items, OnQuantityChangeListener quantityListener)
+    public ShoppingCartAdapter(Context context, List<Product> items, OnQuantityChangeListener quantityListener)
     {
+        this.context = context;
         this.items = items;
         this.quantityListener = quantityListener;
     }
@@ -66,7 +72,9 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         holder.tvQuantity.setText(String.valueOf(item.getAmount()));
 
         // --- Use Centralized Image Loading ---
-        FBRef.loadProductImage(item, holder.ivImg);
+        if (isNetworkAvailable()) {
+            FBRef.loadProductImage(item, holder.ivImg);
+        }
 
         // Set the correct icon based on the current quantity
         if (item.getAmount() == 1) {
@@ -127,5 +135,15 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
             btnMinus = itemView.findViewById(R.id.btn_minus);
             btnPlus = itemView.findViewById(R.id.btn_plus);
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
+        return false;
     }
 }

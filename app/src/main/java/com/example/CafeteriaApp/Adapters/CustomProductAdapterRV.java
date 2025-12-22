@@ -1,5 +1,8 @@
 package com.example.CafeteriaApp.Adapters;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +26,7 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
 {
 
     private final List<Product> items;
+    private final Context context;
 
     public interface OnItemClick
     {
@@ -31,8 +35,9 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
 
     private final OnItemClick listener;
 
-    public CustomProductAdapterRV(List<Product> items, OnItemClick listener)
+    public CustomProductAdapterRV(Context context, List<Product> items, OnItemClick listener)
     {
+        this.context = context;
         this.items = items;
         this.listener = listener;
     }
@@ -60,7 +65,9 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
         Product p = items.get(position);
 
         // --- Use Centralized Image Loading ---
-        FBRef.loadProductImage(p, iv);
+        if (isNetworkAvailable()) {
+            FBRef.loadProductImage(p, iv);
+        }
 
         tvN.setText(p.getName());
         tvD.setText(p.getDescription());
@@ -76,5 +83,15 @@ public class CustomProductAdapterRV extends RecyclerView.Adapter<RecyclerView.Vi
     public int getItemCount()
     {
         return items.size();
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
+        return false;
     }
 }
