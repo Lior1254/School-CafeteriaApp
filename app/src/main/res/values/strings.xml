@@ -1,7 +1,7 @@
 <resources>
 
     <!-- General -->
-    <string name="app_name">הקפיטריה שלי</string>
+    <string name="app_name">CafeteriaApp</string>
 
     <!-- Login Screen -->
     <string name="login_title">התחברות</string>
