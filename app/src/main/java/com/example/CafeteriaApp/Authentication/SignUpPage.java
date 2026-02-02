@@ -228,9 +228,9 @@ public class SignUpPage extends BaseActivity implements AdapterView.OnItemSelect
 
     public void SignUp_Click(View view)
     {
-        if (checkInput())
+        if (checkInput() && checkNetworkAndShowDialog())
         {
-            executeFirebaseOperation(this::createAccount);
+            createAccount();
         }
     }
 

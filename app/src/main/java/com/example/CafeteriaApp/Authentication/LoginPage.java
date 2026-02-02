@@ -167,11 +167,10 @@ public class LoginPage extends BaseActivity
     {
         if (checkInput())
         {
-            executeFirebaseOperation(() -> {
-                intent = new Intent(this, MainPage.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            if(checkNetworkAndShowDialog())
+            {
                 loginUser();
-            });
+            }
         }
     }
 }

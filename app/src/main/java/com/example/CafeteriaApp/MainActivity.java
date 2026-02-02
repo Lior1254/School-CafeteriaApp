@@ -23,7 +23,7 @@ public class MainActivity extends BaseActivity
         networkCheckRunnable = new Runnable() {
             @Override
             public void run() {
-                if (isNetworkAvailable()) {
+                if (checkNetworkAndShowDialog()) {
                     handler.removeCallbacks(this); // Stop the loop
                     proceedToLogin();
                 } else {

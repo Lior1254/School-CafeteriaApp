@@ -89,7 +89,12 @@ public class CustomizeItemActivity extends BaseActivity
              item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
              CustomizeItemActivity.selectedImageBitmap = null;
         }
-        executeFirebaseOperation(() -> FBRef.loadProductImage(item, ivProductIMG));
+        
+        // Changed from executeFirebaseOperation to manual if check
+        if (checkNetworkAndShowDialog())
+        {
+            FBRef.loadProductImage(item, ivProductIMG);
+        }
 
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText(AddBtnText + "   " + item.getPriceText());

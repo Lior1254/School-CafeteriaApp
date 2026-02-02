@@ -1,33 +1,41 @@
 package com.example.CafeteriaApp;
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    protected boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    /**
+     * Checks for internet connection and shows a dialog if disconnected.
+     * @return true if connected, false otherwise.
+     */
+    protected boolean checkNetworkAndShowDialog() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = (cm != null) ? cm.getActiveNetworkInfo() : null;
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnected();
+
+        if (!isConnected) {
+            showNoInternetDialog();
         }
-        return false;
+
+        return isConnected;
     }
 
-    protected void executeFirebaseOperation(Runnable operation) {
-        if (isNetworkAvailable()) {
-            operation.run();
-        } else {
-            Toast.makeText(this, "No internet connection. Please try again later.", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        }
+    private void showNoInternetDialog() {
+        AlertDialog.Builder adb = new AlertDialog.Builder(this);
+        adb.setTitle("שגיאת חיבור");
+        adb.setMessage("פעולה זו דורשת חיבור לאינטרנט. אנא בדוק את ההגדרות שלך.");
+        adb.setIcon(android.R.drawable.ic_dialog_alert);
+        adb.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        adb.create().show();
     }
 }
