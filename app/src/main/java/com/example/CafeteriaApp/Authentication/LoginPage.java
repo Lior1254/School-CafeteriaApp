@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 
 import com.example.CafeteriaApp.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
+import com.example.CafeteriaApp.Helpers.FileManager;
+import com.example.CafeteriaApp.Helpers.Utils;
 import com.example.CafeteriaApp.MainPage;
 import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
@@ -26,6 +28,10 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
+/**
+ * Activity for user login.
+ * Handles authentication with Firebase Auth and manages session persistence.
+ */
 public class LoginPage extends BaseActivity
 {
     private TextView tv_login_warning;
@@ -39,8 +45,61 @@ public class LoginPage extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
         initializeViews();
+
+        // 1. Check if Firebase remembers the session
+        FirebaseUser currentUser = FBRef.refAuth.getCurrentUser();
+        if (currentUser != null)
+        {
+            // 2. Fetch stored authentication string (UID#ExpiryTime)
+            String str = FileManager.getUserAuthentication(this);
+            if (!str.isEmpty())
+            {
+                String[] strs = str.split("#"); // Expected format: uid#expiry_time
+                if (strs.length == 2 && currentUser.getUid().equals(strs[0]))
+                {
+                    // 3. Check if current time is before the saved expiry time
+                    long expiryTime = Utils.dateStringToLong(strs[1]);
+                    long currentTime = System.currentTimeMillis();
+
+                    if (currentTime < expiryTime)
+                    {
+                        // 4. Session is still valid - proceed to automatic login
+                        autoLogin(currentUser.getUid());
+                    }
+                }
+            }
+        }
     }
 
+    /**
+     * Performs automatic login by fetching user data and navigating to the main page.
+     * @param uid The authenticated user's ID.
+     */
+    private void autoLogin(String uid) {
+        ProgressDialog pd = new ProgressDialog(this);
+        pd.setTitle("Connecting");
+        pd.setMessage("Logging in automatically...");
+        pd.show();
+
+        FBRef.refUsers.child(uid).get().addOnCompleteListener(task -> {
+            pd.dismiss();
+            if (task.isSuccessful()) {
+                DataSnapshot snapshot = task.getResult();
+                User userModel = snapshot.getValue(User.class);
+                if (userModel != null) {
+                    Intent mainIntent = new Intent(this, MainPage.class);
+                    mainIntent.putExtra("userData", userModel);
+                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(mainIntent);
+                    finish();
+                }
+            }
+        });
+    }
+
+    /**
+     * Initializes UI components from layout.
+     */
     public void initializeViews()
     {
         ED_login_email = findViewById(R.id.ED_login_email);
@@ -48,12 +107,19 @@ public class LoginPage extends BaseActivity
         tv_login_warning = findViewById(R.id.tv_login_warning);
     }
 
+    /**
+     * Navigates to the Sign Up page.
+     */
     public void SignUp_Click(View view)
     {
         intent = new Intent(this, SignUpPage.class);
         startActivity(intent);
     }
 
+    /**
+     * Displays a warning message with a visual shake animation.
+     * @param warning Text message to be displayed.
+     */
     private void showWarning(String warning)
     {
         tv_login_warning.setVisibility(View.VISIBLE);
@@ -65,6 +131,10 @@ public class LoginPage extends BaseActivity
         animator.start();
     }
 
+    /**
+     * Validates user input for email and password.
+     * @return true if input is valid, false otherwise.
+     */
     public boolean checkInput()
     {
         email = ED_login_email.getText().toString().trim();
@@ -86,6 +156,9 @@ public class LoginPage extends BaseActivity
         return true;
     }
 
+    /**
+     * Performs standard login with Firebase Authentication.
+     */
     public void loginUser()
     {
         if (FBRef.refAuth.getCurrentUser() != null)
@@ -105,10 +178,13 @@ public class LoginPage extends BaseActivity
                     {
                         if (task.isSuccessful())
                         {
-                            FirebaseUser user = FBRef.refAuth.getCurrentUser();
-                            if (user != null)
+                            FirebaseUser firebaseUser = FBRef.refAuth.getCurrentUser();
+                            if (firebaseUser != null)
                             {
-                                FBRef.refUsers.child(user.getUid()).get().addOnCompleteListener(
+                                // Store current UID and login expiry time (7 days from now)
+                                FileManager.saveUserAuthentication(LoginPage.this);
+
+                                FBRef.refUsers.child(firebaseUser.getUid()).get().addOnCompleteListener(
                                         new OnCompleteListener<DataSnapshot>()
                                         {
                                             @Override
@@ -119,16 +195,18 @@ public class LoginPage extends BaseActivity
                                                 if (taskSnapshot.isSuccessful())
                                                 {
                                                     DataSnapshot snapshot = taskSnapshot.getResult();
-                                                    User user = snapshot.getValue(
-                                                            User.class);
-                                                    if (user != null)
+                                                    User userModel = snapshot.getValue(User.class);
+                                                    if (userModel != null)
                                                     {
-                                                        intent.putExtra("userData", user);
-                                                        startActivity(intent);
+                                                        Intent mainIntent = new Intent(LoginPage.this, MainPage.class);
+                                                        mainIntent.putExtra("userData", userModel);
+                                                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                        startActivity(mainIntent);
+                                                        finish();
                                                     }
                                                 } else
                                                 {
-                                                    showWarning("  Error reading user data.");
+                                                    showWarning("  שגיאה בקריאת נתוני המשתמש.");
                                                 }
                                             }
                                         });
@@ -163,14 +241,15 @@ public class LoginPage extends BaseActivity
                 });
     }
 
+    /**
+     * Handles the login button click event.
+     */
     public void Login_Click(View view)
     {
         if (checkInput())
         {
-            if(checkNetworkAndShowDialog())
-            {
-                loginUser();
-            }
+            // Executes login with network validation from BaseActivity
+            executeFirebaseOperation(this::loginUser);
         }
     }
 }

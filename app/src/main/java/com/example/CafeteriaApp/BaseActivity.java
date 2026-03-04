@@ -25,6 +25,28 @@ public abstract class BaseActivity extends AppCompatActivity {
         return isConnected;
     }
 
+    /**
+     * Executes a Firebase operation if internet is available.
+     * @param operation The operation to execute.
+     */
+    protected void executeFirebaseOperation(Runnable operation) {
+        if (isNetworkAvailable()) {
+            operation.run();
+        } else {
+            showNoInternetDialog();
+        }
+    }
+
+    /**
+     * Checks if the network is available.
+     * @return true if available, false otherwise.
+     */
+    protected boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = (cm != null) ? cm.getActiveNetworkInfo() : null;
+        return activeNetwork != null && activeNetwork.isConnected();
+    }
+
     private void showNoInternetDialog() {
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
         adb.setTitle("שגיאת חיבור");
