@@ -29,6 +29,20 @@
     <string name="cart_total">סה\"כ</string>
     <string name="cart_proceed_to_checkout">לתשלום</string>
 
+    <!-- Payment Screen -->
+    <string name="payment_title">אמצעי תשלום</string>
+    <string name="payment_total_amount">סה\"כ לתשלום</string>
+    <string name="payment_subtotal">סכום ביניים</string>
+    <string name="payment_service_fee">עמלת שירות</string>
+    <string name="payment_select_method">בחר אמצעי תשלום</string>
+    <string name="payment_google_pay">Google Pay</string>
+    <string name="payment_gpay_subtitle">תשלום מהיר ומאובטח</string>
+    <string name="payment_credit_card">כרטיס אשראי / דביט</string>
+    <string name="payment_credit_subtitle">תשלום באמצעות הכרטיס שלך</string>
+    <string name="payment_counter">תשלום בקופה / קופון</string>
+    <string name="payment_counter_subtitle">שלם בעת איסוף ההזמנה</string>
+    <string name="payment_confirm_order">אשר הזמנה</string>
+
     <!-- Arrays -->
     <string-array name="school_names">
         <item>בית ספר</item>
