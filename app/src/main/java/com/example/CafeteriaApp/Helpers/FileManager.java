@@ -71,6 +71,17 @@ public class FileManager {
         return sharedPreferences.getString(KEY_AUTH_TIME, "");
     }
 
+    /**
+     * Clears the stored authentication data (for logout).
+     */
+    public static void clearUserAuthentication(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(KEY_AUTH_TIME);
+        editor.commit();
+        Log.d(TAG, "Cleared user authentication from SharedPreferences");
+    }
+
     public static void saveCart(Context context, List<Product> cartItems) {
         String key = getCartKey();
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

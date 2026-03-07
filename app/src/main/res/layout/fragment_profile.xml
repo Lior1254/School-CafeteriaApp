@@ -12,11 +12,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp"> <!-- מרווח בתחתית הגלילה -->
+        android:paddingBottom="16dp">
 
-        <!-- ===================================== -->
-        <!--      חלק עליון (נגלל)               -->
-        <!-- ===================================== -->
         <ImageView
             android:id="@+id/profileImg"
             android:layout_width="84dp"
@@ -62,10 +59,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:tint="@color/white" />
 
-
-        <!-- ===================================== -->
-        <!--      כרטיס 1: ניהול חשבון           -->
-        <!-- ===================================== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/accountCard"
             android:layout_width="0dp"
@@ -88,7 +81,6 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp">
 
-                <!-- שורה: ערוך פרופיל -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowEditProfile"
                     style="@style/ProfileRowStyle">
@@ -122,7 +114,6 @@
 
                 <View style="@style/ProfileSeparatorStyle" />
 
-                <!-- שורה: היסטוריית הזמנות -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowOrderHistory"
                     style="@style/ProfileRowStyle">
@@ -156,7 +147,6 @@
 
                 <View style="@style/ProfileSeparatorStyle" />
 
-                <!-- שורה: אמצעי תשלום -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowPaymentMethods"
                     style="@style/ProfileRowStyle">
@@ -191,9 +181,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ===================================== -->
-        <!--      כרטיס 2: הגדרות ומידע          -->
-        <!-- ===================================== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/settingsCard"
             android:layout_width="0dp"
@@ -215,7 +202,6 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp">
 
-                <!-- שורה: מצב לילה -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowNightMode"
                     style="@style/ProfileRowStyle">
@@ -255,7 +241,6 @@
 
                 <View style="@style/ProfileSeparatorStyle" />
 
-                <!-- שורה: העדפות תזונה -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowDiet"
                     style="@style/ProfileRowStyle">
@@ -289,7 +274,6 @@
 
                 <View style="@style/ProfileSeparatorStyle" />
 
-                <!-- שורה: שפה -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/rowLanguage"
                     style="@style/ProfileRowStyle">
@@ -326,15 +310,15 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ===================================== -->
-        <!--      כרטיס 3: יציאה מהמערכת         -->
-        <!-- ===================================== -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/logoutCard"
+            android:id="@+id/btn_logout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             app:cardBackgroundColor="@color/logout_red_foreground"
             app:cardCornerRadius="24dp"
             app:cardElevation="6dp"
@@ -350,22 +334,19 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp">
 
-                <!-- שורה: התנתק -->
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/rowLogout"
                     style="@style/ProfileRowStyle">
 
                     <FrameLayout
                         android:id="@+id/iconBgLogout"
                         style="@style/ProfileIconContainerStyle"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
+                        app:layout_constraintTop_toTopOf="parent">
 
                         <ImageView
                             style="@style/ProfileIconStyle"
                             app:tint="@color/white" />
-                        app:tint="@color/white" />
 
                     </FrameLayout>
 
