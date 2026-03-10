@@ -1,5 +1,8 @@
 package com.example.CafeteriaApp;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -7,13 +10,25 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.CafeteriaApp.Helpers.FBRef;
+import com.example.CafeteriaApp.Helpers.FileManager;
+import com.example.CafeteriaApp.Models.Order;
+import com.example.CafeteriaApp.Models.Product;
+import com.example.CafeteriaApp.Models.User;
 import com.google.android.material.card.MaterialCardView;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class PaymentActivity extends BaseActivity {
 
     private TextView tvTotal, tvSubtotal;
     private MaterialCardView cardGPay, cardCredit, cardCounter;
     private RadioButton radioGPay, radioCredit, radioCounter;
+    private Intent intent;
 
     private double totalAmount = 0;
     private double subtotal = 0;
@@ -24,8 +39,10 @@ public class PaymentActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
+        intent = getIntent();
+
         // Get total from intent
-        totalAmount = getIntent().getDoubleExtra("total_amount", 0);
+        totalAmount = intent.getDoubleExtra("total_amount", 0);
         subtotal = totalAmount - serviceFee;
         if (subtotal < 0) subtotal = 0;
 
@@ -49,21 +66,16 @@ public class PaymentActivity extends BaseActivity {
         radioCounter = findViewById(R.id.radio_counter);
     }
 
-    private void updateUI() {
+    private void updateUI()
+    {
         tvTotal.setText(String.format("₪%.2f", totalAmount));
         tvSubtotal.setText(String.format("₪%.2f", subtotal));
     }
 
-    /**
-     * XML OnClick for back button
-     */
     public void onBackClick(View view) {
         finish();
     }
 
-    /**
-     * XML OnClick for all payment method cards
-     */
     public void onPaymentMethodClick(View view) {
         int id = view.getId();
         int radioIdToSelect = -1;
@@ -77,31 +89,77 @@ public class PaymentActivity extends BaseActivity {
         }
     }
 
-    /**
-     * XML OnClick for confirm order button
-     */
-    public void onConfirmOrderClick(View view) {
+    public void onConfirmOrderClick(View view)
+    {
         String method = "";
         if (radioGPay.isChecked()) method = getString(R.string.payment_google_pay);
         else if (radioCredit.isChecked()) method = getString(R.string.payment_credit_card);
         else if (radioCounter.isChecked()) method = getString(R.string.payment_counter);
 
-        Toast.makeText(this, "ההזמנה אושרה באמצעות: " + method, Toast.LENGTH_LONG).show();
-        // Here you would send the order to Firebase
+        processOrder(method);
     }
 
-    private void updateCardStyles(int selectedRadioId) {
-        // Uncheck all radios
+    private void processOrder(String paymentMethod) {
+        ProgressDialog pd = new ProgressDialog(this);
+        pd.setMessage("שולח הזמנה...");
+        pd.show();
+
+        // 1. Create order object
+        String orderId = FBRef.refOrders.push().getKey();
+        
+        // Using a readable time format as requested
+        String readableTime = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date());
+        String orderStatus = "0"; // 0 = Pending
+        
+        List<Product> cartItems = FileManager.loadCart(this);
+        User user = (User) getIntent().getSerializableExtra("user_data");
+
+        Order order = new Order(
+                orderId,
+                readableTime, // Will be used as the orderTime key
+                orderStatus,
+                readableTime, 
+                cartItems,
+                user,
+                paymentMethod,
+                !paymentMethod.equals(getString(R.string.payment_counter)), // isPaid if not counter
+                totalAmount
+        );
+
+        // 2. Use the centralized FBRef to upload the order
+        FBRef.uploadOrder(order, new FBRef.FBListener() {
+            @Override
+            public void onSuccess() {
+                pd.dismiss();
+                // Clear the cart after successful upload
+                FileManager.saveCart(PaymentActivity.this, new ArrayList<>()); 
+                finalizePayment(paymentMethod);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                pd.dismiss();
+                Toast.makeText(PaymentActivity.this, "שגיאה בשליחת ההזמנה: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void finalizePayment(String method) {
+        Toast.makeText(this, "ההזמנה אושרה באמצעות: " + method, Toast.LENGTH_LONG).show();
+        setResult(Activity.RESULT_OK);
+        finish();
+    }
+
+    private void updateCardStyles(int selectedRadioId)
+    {
         radioGPay.setChecked(selectedRadioId == R.id.radio_gpay);
         radioCredit.setChecked(selectedRadioId == R.id.radio_credit);
         radioCounter.setChecked(selectedRadioId == R.id.radio_counter);
 
-        // Reset all card styles
         resetStyle(cardGPay);
         resetStyle(cardCredit);
         resetStyle(cardCounter);
 
-        // Highlight selected
         if (selectedRadioId == R.id.radio_gpay) highlight(cardGPay);
         else if (selectedRadioId == R.id.radio_credit) highlight(cardCredit);
         else if (selectedRadioId == R.id.radio_counter) highlight(cardCounter);

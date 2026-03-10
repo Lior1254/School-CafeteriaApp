@@ -18,6 +18,19 @@
         android:padding="12dp">
 
         <!-- Product Image -->
+
+        <ImageButton
+            android:id="@+id/btn_edit"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="32dp"
+            android:background="@drawable/bg_quantity_button_light_red"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_bin"
+            app:layout_constraintEnd_toStartOf="@+id/quantity_layout"
+            tools:layout_editor_absoluteY="16dp" />
+
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/item_img"
             android:layout_width="64dp"

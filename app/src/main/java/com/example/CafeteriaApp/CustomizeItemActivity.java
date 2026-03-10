@@ -79,11 +79,18 @@ public class CustomizeItemActivity extends BaseActivity
             return;
         }
 
+        if(item.getAmount() != 0)
+        {
+            amount_of_products = item.getAmount();
+        }
         price = item.getPrice();
         totalPrice = price * amount_of_products;
-
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
+        tv_amount_of_items.setText(String.valueOf(amount_of_products));
+        tv_price.setText(item.getPriceText());
+        btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
+
 
         if (item.getImageBitmap() == null && CustomizeItemActivity.selectedImageBitmap != null) {
              item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
@@ -95,9 +102,6 @@ public class CustomizeItemActivity extends BaseActivity
         {
             FBRef.loadProductImage(item, ivProductIMG);
         }
-
-        tv_price.setText(item.getPriceText());
-        btn_AddToCart.setText(AddBtnText + "   " + item.getPriceText());
 
         if (item.getAddons() != null && !item.getAddons().isEmpty())
         {

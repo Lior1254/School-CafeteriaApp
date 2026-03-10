@@ -22,8 +22,8 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_arrow_back"
             android:onClick="onBackClick"
+            android:src="@drawable/back_arrow"
             app:tint="#212121" />
 
         <TextView
@@ -129,7 +129,7 @@
                         android:id="@+id/iv_gpay"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_google_pay" />
+                        android:src="@drawable/ic_google" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -173,7 +173,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         app:tint="#FF6B35"
-                        android:src="@drawable/ic_credit_card" />
+                        android:src="@android:drawable/ic_menu_edit" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -219,7 +219,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         app:tint="#4CAF50"
-                        android:src="@drawable/ic_store" />
+                        android:src="@android:drawable/ic_menu_send" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"

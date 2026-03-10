@@ -5,8 +5,13 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+
+import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -26,6 +31,37 @@ public class FBRef
 
     public static FirebaseStorage storage = FirebaseStorage.getInstance();
     public static StorageReference refStorage = storage.getReference();
+
+    /**
+     * Interface for Firebase operation results.
+     */
+    public interface FBListener {
+        void onSuccess();
+        void onFailure(String error);
+    }
+
+    /**
+     * Uploads an order to the specific tree structure: Orders -> status -> time -> id -> order.
+     */
+    public static void uploadOrder(Order order, FBListener listener) {
+        if (order == null) return;
+
+        // Path structure: Orders -> orderStatus -> orderTime -> orderId
+        refOrders.child(order.getOrderStatus())
+                .child(order.getOrderCode()) // Using orderCode as the time key (YYMMDDhhmmss)
+                .child(order.getOrderId())
+                .setValue(order)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            if (listener != null) listener.onSuccess();
+                        } else {
+                            if (listener != null) listener.onFailure(task.getException().getMessage());
+                        }
+                    }
+                });
+    }
 
     public static void loadProductImage(Product product, ImageView imageView)
     {

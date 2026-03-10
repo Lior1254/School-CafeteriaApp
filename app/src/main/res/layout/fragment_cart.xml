@@ -38,28 +38,41 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Promo Code -->
-
             <!-- Order Summary Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/cart_order_summary"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:textStyle="bold" />
-
-            <!-- Subtotal -->
-
-            <!-- Taxes & Fees -->
 
             <!-- Divider -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="16dp"
                 android:background="#E0E0E0" />
+
+            <!-- Pickup Time Selection -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="בחר שעת איסוף:"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <Spinner
+                android:id="@+id/spin_pickup_time"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_rounded" 
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:spinnerMode="dropdown" />
 
             <!-- Total -->
             <RelativeLayout

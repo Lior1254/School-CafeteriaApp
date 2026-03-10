@@ -30,11 +30,12 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
     private final Context context;
 
     /**
-     * Interface for quantity change events.
+     * Interface for quantity change and edit events.
      */
     public interface OnQuantityChangeListener
     {
         void onQuantityChange(int position, int newQuantity);
+        void onEditClick(Product item); // New method to handle editing
     }
 
     private final OnQuantityChangeListener quantityListener;
@@ -44,7 +45,7 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
      *
      * @param context          The context of the calling activity/fragment.
      * @param items            List of products in the cart.
-     * @param quantityListener Listener for quantity changes.
+     * @param quantityListener Listener for quantity changes and edits.
      */
     public ShoppingCartAdapter(Context context, List<Product> items, OnQuantityChangeListener quantityListener)
     {
@@ -88,10 +89,9 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         {
             if (quantityListener != null && item.getAmount() < 9)
             {
-                // getAdapterPosition() is the older method but works for all API levels needed
                 int currentPos = holder.getAdapterPosition();
                 if (currentPos != RecyclerView.NO_POSITION) {
-                    quantityListener.onQuantityChange(currentPos, item.getAmount() + 1);
+                    quantityListener.onQuantityChange(currentPos, items.get(currentPos).getAmount() + 1);
                 }
             }
         });
@@ -103,8 +103,23 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
             {
                 int currentPos = holder.getAdapterPosition();
                 if (currentPos != RecyclerView.NO_POSITION) {
-                     // Always callback, even if going to 0 (which means remove)
-                    quantityListener.onQuantityChange(currentPos, item.getAmount() - 1);
+                    quantityListener.onQuantityChange(currentPos, items.get(currentPos).getAmount() - 1);
+                }
+            }
+        });
+
+        // Edit button click
+        holder.btnEdit.setOnClickListener(v ->
+        {
+            if (quantityListener != null)
+            {
+                int currentPos = holder.getAdapterPosition();
+                if (currentPos != RecyclerView.NO_POSITION )
+                {
+                    // We identify the object using the list and the current position
+                    Product itemToEdit = items.get(currentPos);
+                    // We send it back to the Fragment to handle navigation
+                    quantityListener.onEditClick(itemToEdit);
                 }
             }
         });
@@ -123,7 +138,7 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
     {
         ImageView ivImg;
         TextView tvName, tvPrice, tvQuantity;
-        ImageButton btnMinus, btnPlus;
+        ImageButton btnMinus, btnPlus, btnEdit;
 
         ViewHolder(@NonNull View itemView)
         {
@@ -134,6 +149,7 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
             tvQuantity = itemView.findViewById(R.id.tv_quantity);
             btnMinus = itemView.findViewById(R.id.btn_minus);
             btnPlus = itemView.findViewById(R.id.btn_plus);
+            btnEdit = itemView.findViewById(R.id.btn_edit); 
         }
     }
 
