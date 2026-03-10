@@ -22,52 +22,48 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class PaymentActivity extends BaseActivity {
 
     private TextView tvTotal, tvSubtotal;
     private MaterialCardView cardGPay, cardCredit, cardCounter;
     private RadioButton radioGPay, radioCredit, radioCounter;
-    private Intent intent;
-
+    
     private double totalAmount = 0;
     private double subtotal = 0;
     private final double serviceFee = 3.50;
+    private String pickupTime = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        intent = getIntent();
-
-        // Get total from intent
-        totalAmount = intent.getDoubleExtra("total_amount", 0);
+        // Get data from intent
+        totalAmount = getIntent().getDoubleExtra("total_amount", 0);
+        pickupTime = getIntent().getStringExtra("pickup_time");
+        
         subtotal = totalAmount - serviceFee;
         if (subtotal < 0) subtotal = 0;
 
         initializeViews();
         updateUI();
-        
-        // Initial style sync
         updateCardStyles(R.id.radio_credit); 
     }
 
     private void initializeViews() {
         tvTotal = findViewById(R.id.tv_total_payment);
         tvSubtotal = findViewById(R.id.tv_subtotal_payment);
-        
         cardGPay = findViewById(R.id.card_gpay);
         cardCredit = findViewById(R.id.card_credit);
         cardCounter = findViewById(R.id.card_counter);
-        
         radioGPay = findViewById(R.id.radio_gpay);
         radioCredit = findViewById(R.id.radio_credit);
         radioCounter = findViewById(R.id.radio_counter);
     }
 
-    private void updateUI()
-    {
+    private void updateUI() {
         tvTotal.setText(String.format("₪%.2f", totalAmount));
         tvSubtotal.setText(String.format("₪%.2f", subtotal));
     }
@@ -78,19 +74,15 @@ public class PaymentActivity extends BaseActivity {
 
     public void onPaymentMethodClick(View view) {
         int id = view.getId();
-        int radioIdToSelect = -1;
+        int radioId = -1;
+        if (id == R.id.card_gpay) radioId = R.id.radio_gpay;
+        else if (id == R.id.card_credit) radioId = R.id.radio_credit;
+        else if (id == R.id.card_counter) radioId = R.id.radio_counter;
 
-        if (id == R.id.card_gpay) radioIdToSelect = R.id.radio_gpay;
-        else if (id == R.id.card_credit) radioIdToSelect = R.id.radio_credit;
-        else if (id == R.id.card_counter) radioIdToSelect = R.id.radio_counter;
-
-        if (radioIdToSelect != -1) {
-            updateCardStyles(radioIdToSelect);
-        }
+        if (radioId != -1) updateCardStyles(radioId);
     }
 
-    public void onConfirmOrderClick(View view)
-    {
+    public void onConfirmOrderClick(View view) {
         String method = "";
         if (radioGPay.isChecked()) method = getString(R.string.payment_google_pay);
         else if (radioCredit.isChecked()) method = getString(R.string.payment_credit_card);
@@ -104,34 +96,38 @@ public class PaymentActivity extends BaseActivity {
         pd.setMessage("שולח הזמנה...");
         pd.show();
 
-        // 1. Create order object
+        // 1. Generate unique identifiers and readable time key
         String orderId = FBRef.refOrders.push().getKey();
         
-        // Using a readable time format as requested
-        String readableTime = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date());
-        String orderStatus = "0"; // 0 = Pending
+        // This key is used for the tree structure: Orders -> Status -> ReadableTimeKey
+        String timeKey = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
         
+        // A shorter random code for the user to see/say at the counter
+        String shortCode = String.valueOf(new Random().nextInt(9000) + 1000);
+
         List<Product> cartItems = FileManager.loadCart(this);
         User user = (User) getIntent().getSerializableExtra("user_data");
 
+        // 2. Create the Order object
         Order order = new Order(
                 orderId,
-                readableTime, // Will be used as the orderTime key
-                orderStatus,
-                readableTime, 
+                timeKey, // orderCode field will hold the readable time for FB tree structure
+                "0", // Status: Pending
+                timeKey, // orderReceivedTime
                 cartItems,
                 user,
                 paymentMethod,
-                !paymentMethod.equals(getString(R.string.payment_counter)), // isPaid if not counter
+                !paymentMethod.equals(getString(R.string.payment_counter)),
                 totalAmount
         );
+        order.setRequestedTime(pickupTime);
+        order.setSummary(shortCode); // Store the random code in summary for now
 
-        // 2. Use the centralized FBRef to upload the order
+        // 3. Upload using FBRef. Note: FBRef.uploadOrder uses order.getOrderCode() as the time node
         FBRef.uploadOrder(order, new FBRef.FBListener() {
             @Override
             public void onSuccess() {
                 pd.dismiss();
-                // Clear the cart after successful upload
                 FileManager.saveCart(PaymentActivity.this, new ArrayList<>()); 
                 finalizePayment(paymentMethod);
             }
@@ -139,39 +135,27 @@ public class PaymentActivity extends BaseActivity {
             @Override
             public void onFailure(String error) {
                 pd.dismiss();
-                Toast.makeText(PaymentActivity.this, "שגיאה בשליחת ההזמנה: " + error, Toast.LENGTH_LONG).show();
+                Toast.makeText(PaymentActivity.this, "שגיאה: " + error, Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void finalizePayment(String method) {
-        Toast.makeText(this, "ההזמנה אושרה באמצעות: " + method, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "ההזמנה אושרה! שעת איסוף: " + pickupTime, Toast.LENGTH_LONG).show();
         setResult(Activity.RESULT_OK);
         finish();
     }
 
-    private void updateCardStyles(int selectedRadioId)
-    {
+    private void updateCardStyles(int selectedRadioId) {
         radioGPay.setChecked(selectedRadioId == R.id.radio_gpay);
         radioCredit.setChecked(selectedRadioId == R.id.radio_credit);
         radioCounter.setChecked(selectedRadioId == R.id.radio_counter);
-
-        resetStyle(cardGPay);
-        resetStyle(cardCredit);
-        resetStyle(cardCounter);
-
+        resetStyle(cardGPay); resetStyle(cardCredit); resetStyle(cardCounter);
         if (selectedRadioId == R.id.radio_gpay) highlight(cardGPay);
         else if (selectedRadioId == R.id.radio_credit) highlight(cardCredit);
         else if (selectedRadioId == R.id.radio_counter) highlight(cardCounter);
     }
 
-    private void resetStyle(MaterialCardView card) {
-        card.setStrokeColor(Color.parseColor("#E0E0E0"));
-        card.setStrokeWidth(1);
-    }
-
-    private void highlight(MaterialCardView card) {
-        card.setStrokeColor(Color.parseColor("#FF6B35"));
-        card.setStrokeWidth(4);
-    }
+    private void resetStyle(MaterialCardView card) { card.setStrokeColor(Color.parseColor("#E0E0E0")); card.setStrokeWidth(1); }
+    private void highlight(MaterialCardView card) { card.setStrokeColor(Color.parseColor("#FF6B35")); card.setStrokeWidth(4); }
 }

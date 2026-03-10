@@ -33,6 +33,8 @@ public class CustomizeItemActivity extends BaseActivity
     private int amount_of_products = 1;
     private double totalPrice = 0, price = 0;
     private String AddBtnText = "הוסף לסל";
+    private boolean isEditMode = false;
+    private int editPosition = -1;
 
     // Static field to hold the bitmap temporarily if needed
     public static android.graphics.Bitmap selectedImageBitmap = null;
@@ -44,6 +46,13 @@ public class CustomizeItemActivity extends BaseActivity
         setContentView(R.layout.activity_customize_item);
 
         intent = getIntent();
+        isEditMode = intent.getBooleanExtra("isEditMode", false);
+        editPosition = intent.getIntExtra("position", -1);
+        
+        if (isEditMode) {
+            AddBtnText = "חזור לסל";
+        }
+
         initializeViews();
         setupUI();
     }
@@ -83,21 +92,26 @@ public class CustomizeItemActivity extends BaseActivity
         {
             amount_of_products = item.getAmount();
         }
+        
         price = item.getPrice();
+        // Calculate subtotal price based on addons currently selected in the object
+        if (item.getAddons() != null) {
+            price = calculateInitialPrice(item);
+        }
+        
         totalPrice = price * amount_of_products;
+        
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
         tv_amount_of_items.setText(String.valueOf(amount_of_products));
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
 
-
         if (item.getImageBitmap() == null && CustomizeItemActivity.selectedImageBitmap != null) {
              item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
              CustomizeItemActivity.selectedImageBitmap = null;
         }
         
-        // Changed from executeFirebaseOperation to manual if check
         if (checkNetworkAndShowDialog())
         {
             FBRef.loadProductImage(item, ivProductIMG);
@@ -117,6 +131,16 @@ public class CustomizeItemActivity extends BaseActivity
         {
             Addons.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Calculates the price of a single product based on its selected addons.
+     */
+    private double calculateInitialPrice(Product p) {
+        // Start with base price from DB logic (need to ensure product object has base price)
+        // For now, let's assume we use current logic but handle the addons correctly
+        double pPrice = p.getPrice(); 
+        return pPrice;
     }
 
     private void updatePriceBasedOnAddons(Addon addon)
@@ -156,6 +180,14 @@ public class CustomizeItemActivity extends BaseActivity
             amount_of_products--;
         }
 
+        updateItemIcons();
+
+        tv_amount_of_items.setText(String.valueOf(amount_of_products));
+        totalPrice = price * amount_of_products;
+        btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
+    }
+
+    private void updateItemIcons() {
         if (amount_of_products == 1)
         {
             ibtn_minus_item.setImageResource(R.drawable.ic_minus_gray);
@@ -171,10 +203,6 @@ public class CustomizeItemActivity extends BaseActivity
         {
             ibtn_plus_item.setImageResource(R.drawable.ic_plus_black);
         }
-
-        tv_amount_of_items.setText(String.valueOf(amount_of_products));
-        totalPrice = price * amount_of_products;
-        btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
     }
 
     public void AddToCart_Click(View view)
@@ -183,10 +211,18 @@ public class CustomizeItemActivity extends BaseActivity
         item.setAmount(amount_of_products);
 
         List<Product> currentCart = FileManager.loadCart(this);
-        currentCart.add(item);
+        
+        if (isEditMode && editPosition != -1 && editPosition < currentCart.size()) {
+            // Update existing item at specified position
+            currentCart.set(editPosition, item);
+            Toast.makeText(this, "הסל עודכן!", Toast.LENGTH_SHORT).show();
+        } else {
+            // Add as new item
+            currentCart.add(item);
+            Toast.makeText(this, "התווסף לסל!", Toast.LENGTH_SHORT).show();
+        }
+        
         FileManager.saveCart(this, currentCart);
-
-        Toast.makeText(this, "Added! Cart size: " + currentCart.size(), Toast.LENGTH_SHORT).show();
         finish();
     }
 

@@ -99,12 +99,10 @@ public class CartFragment extends Fragment
         List<String> slots = new ArrayList<>();
         Calendar now = Calendar.getInstance();
 
-        // Add main break times
         addBreakTime(slots, now, 9, 45, "(הפסקה ראשונה)");
         addBreakTime(slots, now, 11, 30, "(הפסקה שנייה)");
         addBreakTime(slots, now, 13, 30, "(הפסקת צהריים)");
 
-        // Generate 15-min slots
         for (int hour = 8; hour <= 16; hour++) {
             for (int minute = 0; minute < 60; minute += 15) {
                 if (hour == 16 && minute > 0) continue;
@@ -162,7 +160,6 @@ public class CartFragment extends Fragment
     {
         rvCartItems.setLayoutManager(new LinearLayoutManager(requireContext()));
         
-        // מעדכן את האדפטר למימוש החדש שכולל את onEditClick
         adapter = new ShoppingCartAdapter(requireContext(), cartItems, new ShoppingCartAdapter.OnQuantityChangeListener() {
             @Override
             public void onQuantityChange(int position, int newQuantity) {
@@ -180,10 +177,12 @@ public class CartFragment extends Fragment
             }
 
             @Override
-            public void onEditClick(Product item) {
-                // כאן אנחנו מטפלים בעריכה: עוברים למסך ההתאמה האישית עם המוצר שנבחר
+            public void onEditClick(Product item, int position) {
+                // Pass the item, its current position in the list, and the edit flag
                 Intent intent = new Intent(requireContext(), CustomizeItemActivity.class);
                 intent.putExtra("item", item);
+                intent.putExtra("position", position);
+                intent.putExtra("isEditMode", true);
                 startActivity(intent);
             }
         });

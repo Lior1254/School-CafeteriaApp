@@ -21,32 +21,20 @@ import java.util.List;
 
 /**
  * Adapter for the Shopping Cart RecyclerView.
- * Handles displaying products and their quantities.
  */
 public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapter.ViewHolder>
 {
-
     private final List<Product> items;
     private final Context context;
 
-    /**
-     * Interface for quantity change and edit events.
-     */
     public interface OnQuantityChangeListener
     {
         void onQuantityChange(int position, int newQuantity);
-        void onEditClick(Product item); // New method to handle editing
+        void onEditClick(Product item, int position); // Added position
     }
 
     private final OnQuantityChangeListener quantityListener;
 
-    /**
-     * Constructor for ShoppingCartAdapter.
-     *
-     * @param context          The context of the calling activity/fragment.
-     * @param items            List of products in the cart.
-     * @param quantityListener Listener for quantity changes and edits.
-     */
     public ShoppingCartAdapter(Context context, List<Product> items, OnQuantityChangeListener quantityListener)
     {
         this.context = context;
@@ -72,19 +60,16 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         holder.tvPrice.setText(String.format("₪%.2f", item.getPrice()));
         holder.tvQuantity.setText(String.valueOf(item.getAmount()));
 
-        // --- Use Centralized Image Loading ---
         if (isNetworkAvailable()) {
             FBRef.loadProductImage(item, holder.ivImg);
         }
 
-        // Set the correct icon based on the current quantity
         if (item.getAmount() == 1) {
             holder.btnMinus.setImageResource(R.drawable.ic_bin);
         } else {
             holder.btnMinus.setImageResource(R.drawable.ic_minus_black);
         }
 
-        // Plus button click
         holder.btnPlus.setOnClickListener(v ->
         {
             if (quantityListener != null && item.getAmount() < 9)
@@ -96,7 +81,6 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
             }
         });
 
-        // Minus button click
         holder.btnMinus.setOnClickListener(v ->
         {
             if (quantityListener != null)
@@ -108,19 +92,12 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
             }
         });
 
-        // Edit button click
         holder.btnEdit.setOnClickListener(v ->
         {
-            if (quantityListener != null)
+            int currentPos = holder.getAdapterPosition();
+            if (currentPos != RecyclerView.NO_POSITION && quantityListener != null)
             {
-                int currentPos = holder.getAdapterPosition();
-                if (currentPos != RecyclerView.NO_POSITION )
-                {
-                    // We identify the object using the list and the current position
-                    Product itemToEdit = items.get(currentPos);
-                    // We send it back to the Fragment to handle navigation
-                    quantityListener.onEditClick(itemToEdit);
-                }
+                quantityListener.onEditClick(items.get(currentPos), currentPos);
             }
         });
     }
@@ -131,9 +108,6 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
         return items.size();
     }
 
-    /**
-     * ViewHolder for a single cart item.
-     */
     static class ViewHolder extends RecyclerView.ViewHolder
     {
         ImageView ivImg;
@@ -154,12 +128,8 @@ public class ShoppingCartAdapter extends RecyclerView.Adapter<ShoppingCartAdapte
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        }
-        return false;
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = (cm != null) ? cm.getActiveNetworkInfo() : null;
+        return activeNetwork != null && activeNetwork.isConnected();
     }
 }
