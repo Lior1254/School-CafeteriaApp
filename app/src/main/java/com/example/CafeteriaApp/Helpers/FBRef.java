@@ -25,7 +25,6 @@ public class FBRef
     public static FirebaseAuth refAuth = FirebaseAuth.getInstance();
     public static DatabaseReference refUsers = FBDB.getReference("Users");
     public static DatabaseReference refProducts = FBDB.getReference("Products");
-    public static DatabaseReference refCarts = FBDB.getReference("Carts");
     public static DatabaseReference refOrders = FBDB.getReference("Orders");
     public static DatabaseReference refHistoryOrders = FBDB.getReference("HistoryOrders");
 
@@ -35,35 +34,55 @@ public class FBRef
     /**
      * Interface for Firebase operation results.
      */
-    public interface FBListener {
+    public interface FBListener
+    {
         void onSuccess();
+
         void onFailure(String error);
     }
 
     /**
      * Uploads an order to the specific tree structure: Orders -> status -> time -> id -> order.
      */
-    public static void uploadOrder(Order order, FBListener listener) {
+    public static void uploadOrder(Order order, FBListener listener)
+    {
         if (order == null) return;
 
         // Path structure: Orders -> orderStatus -> orderTime -> orderId
         refOrders.child(order.getOrderStatus())
-                .child(order.getOrderCode()) // Using orderCode as the time key (YYMMDDhhmmss)
+                .child(order.getRequestedTime()) // Using orderCode as the time key (YYMMDDhhmmss)
                 .child(order.getOrderId())
                 .setValue(order)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                .addOnCompleteListener(new OnCompleteListener<Void>()
+                {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        if (task.isSuccessful())
+                        {
                             if (listener != null) listener.onSuccess();
-                        } else {
-                            if (listener != null) listener.onFailure(task.getException().getMessage());
+                        } else
+                        {
+                            if (listener != null)
+                                listener.onFailure(task.getException().getMessage());
                         }
                     }
                 });
     }
 
-    public static void loadProductImage(Product product, ImageView imageView)
+    public static void downloadOrderForUser(FBListener listener)
+    {
+        if (refAuth.getCurrentUser() == null)
+        {
+            String uid = refAuth.getUid();
+            if(uid == null) return;
+
+            refOrders.child(uid);
+        }
+    }
+
+
+        public static void loadProductImage(Product product, ImageView imageView)
     {
         String productId = product.getId();
         imageView.setTag(productId);

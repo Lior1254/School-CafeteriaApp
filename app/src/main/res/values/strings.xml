@@ -43,6 +43,16 @@
     <string name="payment_counter_subtitle">שלם בעת איסוף ההזמנה</string>
     <string name="payment_confirm_order">אשר הזמנה</string>
 
+    <!-- Order Item Tracking -->
+    <string name="order_number_label">הזמנה #%s</string>
+    <string name="order_status_received">התקבלה</string>
+    <string name="order_status_preparing">בהכנה</string>
+    <string name="order_status_ready">מוכנה</string>
+    <string name="order_status_collected">נאספה</string>
+    <string name="order_estimated_completion">זמן איסוף משוער</string>
+    <string name="order_items_label">פריטים בהזמנה</string>
+    <string name="order_placed_at">הוזמן בשעה %s</string>
+
     <!-- Arrays -->
     <string-array name="school_names">
         <item>בית ספר</item>

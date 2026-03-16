@@ -43,13 +43,13 @@ public class PaymentActivity extends BaseActivity {
         // Get data from intent
         totalAmount = getIntent().getDoubleExtra("total_amount", 0);
         pickupTime = getIntent().getStringExtra("pickup_time");
-        
+
         subtotal = totalAmount - serviceFee;
         if (subtotal < 0) subtotal = 0;
 
         initializeViews();
         updateUI();
-        updateCardStyles(R.id.radio_credit); 
+        updateCardStyles(R.id.radio_credit);
     }
 
     private void initializeViews() {
@@ -68,9 +68,7 @@ public class PaymentActivity extends BaseActivity {
         tvSubtotal.setText(String.format("₪%.2f", subtotal));
     }
 
-    public void onBackClick(View view) {
-        finish();
-    }
+    public void onBackClick(View view) { finish(); }
 
     public void onPaymentMethodClick(View view) {
         int id = view.getId();
@@ -78,7 +76,6 @@ public class PaymentActivity extends BaseActivity {
         if (id == R.id.card_gpay) radioId = R.id.radio_gpay;
         else if (id == R.id.card_credit) radioId = R.id.radio_credit;
         else if (id == R.id.card_counter) radioId = R.id.radio_counter;
-
         if (radioId != -1) updateCardStyles(radioId);
     }
 
@@ -87,7 +84,6 @@ public class PaymentActivity extends BaseActivity {
         if (radioGPay.isChecked()) method = getString(R.string.payment_google_pay);
         else if (radioCredit.isChecked()) method = getString(R.string.payment_credit_card);
         else if (radioCounter.isChecked()) method = getString(R.string.payment_counter);
-
         processOrder(method);
     }
 
@@ -96,23 +92,22 @@ public class PaymentActivity extends BaseActivity {
         pd.setMessage("שולח הזמנה...");
         pd.show();
 
-        // 1. Generate unique identifiers and readable time key
+        // 1. Generate Identifiers
         String orderId = FBRef.refOrders.push().getKey();
-        
-        // This key is used for the tree structure: Orders -> Status -> ReadableTimeKey
         String timeKey = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-        
-        // A shorter random code for the user to see/say at the counter
         String shortCode = String.valueOf(new Random().nextInt(9000) + 1000);
 
         List<Product> cartItems = FileManager.loadCart(this);
+        String userId = FBRef.refAuth.getUid();
         User user = (User) getIntent().getSerializableExtra("user_data");
 
-        // 2. Create the Order object
+        // 2. Create Order
+        // Here we set pickupTime as the orderCode, so FBRef uses it as the second-level node
         Order order = new Order(
                 orderId,
-                timeKey, // orderCode field will hold the readable time for FB tree structure
-                "0", // Status: Pending
+                userId,
+                shortCode,
+                "0",
                 timeKey, // orderReceivedTime
                 cartItems,
                 user,
@@ -121,17 +116,16 @@ public class PaymentActivity extends BaseActivity {
                 totalAmount
         );
         order.setRequestedTime(pickupTime);
-        order.setSummary(shortCode); // Store the random code in summary for now
+        order.setSummary(shortCode); // Store the random numeric code in the summary field
 
-        // 3. Upload using FBRef. Note: FBRef.uploadOrder uses order.getOrderCode() as the time node
+        // 3. Upload via FBRef
         FBRef.uploadOrder(order, new FBRef.FBListener() {
             @Override
             public void onSuccess() {
                 pd.dismiss();
-                FileManager.saveCart(PaymentActivity.this, new ArrayList<>()); 
+                FileManager.saveCart(PaymentActivity.this, new ArrayList<>());
                 finalizePayment(paymentMethod);
             }
-
             @Override
             public void onFailure(String error) {
                 pd.dismiss();
@@ -155,7 +149,6 @@ public class PaymentActivity extends BaseActivity {
         else if (selectedRadioId == R.id.radio_credit) highlight(cardCredit);
         else if (selectedRadioId == R.id.radio_counter) highlight(cardCounter);
     }
-
     private void resetStyle(MaterialCardView card) { card.setStrokeColor(Color.parseColor("#E0E0E0")); card.setStrokeWidth(1); }
     private void highlight(MaterialCardView card) { card.setStrokeColor(Color.parseColor("#FF6B35")); card.setStrokeWidth(4); }
 }

@@ -3,44 +3,33 @@ package com.example.CafeteriaApp.Models;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * Represents an order placed by a user.
- * Implements Serializable to allow passing between activities via Intent.
- */
 public class Order implements Serializable
 {
-    // Status Constants for easier management
-    public static final String STATUS_RECEIVED = "1";
-    public static final String STATUS_PREPARING = "2";
-    public static final String STATUS_READY = "3";
-    public static final String STATUS_COLLECTED = "4";
+    public static final String STATUS_PENDING = "0";
+    public static final String STATUS_PREPARING = "1";
+    public static final String STATUS_READY = "2";
+    public static final String STATUS_COLLECTED = "3";
 
     private String orderId;
-    private String orderCode;
-    private String orderStatus; // 1=Received, 2=Preparing, 3=Ready, 4=Collected
-    private String orderReceivedTime;
-    private String orderPreparedTime;
-    private String estimatedReadyTime;
-    private String orderCollectedTime;
-    private boolean isOrderCollected;
+    private String userId; // המזהה של המשתמש שביצע את ההזמנה
+    private String orderCode; // מספר רנדומלי קצר (למשל 5967)
+    private String orderStatus; 
+    private String orderReceivedTime; // הזמן שמשמש כמפתח בעץ (YYYY-MM-DD...)
     private List<Product> products;
-    private User user;
-    private String requestedTime;
+    private User user; // אובייקט המשתמש המלא
+    private String requestedTime; // שעת האיסוף מה-Spinner
     private String paymentMethod;
     private boolean isPaid;
     private double totalPrice;
     private String summary;
 
-    // 1. Empty constructor required for Firebase Realtime Database
-    public Order()
-    {
-    }
+    public Order() {}
 
-    // 2. Full constructor
-    public Order(String orderId, String orderCode, String orderStatus, String orderReceivedTime, 
+    public Order(String orderId, String userId, String orderCode, String orderStatus, String orderReceivedTime, 
                  List<Product> products, User user, String paymentMethod, boolean isPaid, double totalPrice)
     {
         this.orderId = orderId;
+        this.userId = userId;
         this.orderCode = orderCode;
         this.orderStatus = orderStatus;
         this.orderReceivedTime = orderReceivedTime;
@@ -49,12 +38,14 @@ public class Order implements Serializable
         this.paymentMethod = paymentMethod;
         this.isPaid = isPaid;
         this.totalPrice = totalPrice;
-        this.isOrderCollected = false;
     }
 
-    // 3. Getters and Setters (Firebase uses these to map the data)
+    // Getters and Setters
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public String getOrderCode() { return orderCode; }
     public void setOrderCode(String orderCode) { this.orderCode = orderCode; }
@@ -64,18 +55,6 @@ public class Order implements Serializable
 
     public String getOrderReceivedTime() { return orderReceivedTime; }
     public void setOrderReceivedTime(String orderReceivedTime) { this.orderReceivedTime = orderReceivedTime; }
-
-    public String getOrderPreparedTime() { return orderPreparedTime; }
-    public void setOrderPreparedTime(String orderPreparedTime) { this.orderPreparedTime = orderPreparedTime; }
-
-    public String getEstimatedReadyTime() { return estimatedReadyTime; }
-    public void setEstimatedReadyTime(String estimatedReadyTime) { this.estimatedReadyTime = estimatedReadyTime; }
-
-    public String getOrderCollectedTime() { return orderCollectedTime; }
-    public void setOrderCollectedTime(String orderCollectedTime) { this.orderCollectedTime = orderCollectedTime; }
-
-    public boolean isOrderCollected() { return isOrderCollected; }
-    public void setOrderCollected(boolean orderCollected) { isOrderCollected = orderCollected; }
 
     public List<Product> getProducts() { return products; }
     public void setProducts(List<Product> products) { this.products = products; }

@@ -11,17 +11,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.CafeteriaApp.Adapters.OrdersAdapter;
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class OrdersFragment extends Fragment
 {
 
     private RecyclerView recyclerView;
-    //private OrdersAdapter adapter;
+    private OrdersAdapter adapter;
     private List<Order> orderList;
 
     @Nullable
