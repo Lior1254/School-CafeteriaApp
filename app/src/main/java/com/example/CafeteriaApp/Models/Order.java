@@ -25,7 +25,7 @@ public class Order implements Serializable
 
     public Order() {}
 
-    public Order(String orderId, String userId, String orderCode, String orderStatus, String orderReceivedTime, 
+    public Order(String orderId, String userId, String orderCode, String orderStatus, String orderReceivedTime, String requestedTime,
                  List<Product> products, User user, String paymentMethod, boolean isPaid, double totalPrice)
     {
         this.orderId = orderId;
@@ -33,6 +33,7 @@ public class Order implements Serializable
         this.orderCode = orderCode;
         this.orderStatus = orderStatus;
         this.orderReceivedTime = orderReceivedTime;
+        this.requestedTime = requestedTime;
         this.products = products;
         this.user = user;
         this.paymentMethod = paymentMethod;

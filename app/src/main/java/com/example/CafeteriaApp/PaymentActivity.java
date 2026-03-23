@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -40,9 +41,12 @@ public class PaymentActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        // Get data from intent
         totalAmount = getIntent().getDoubleExtra("total_amount", 0);
         pickupTime = getIntent().getStringExtra("pickup_time");
+
+        if (pickupTime != null && pickupTime.contains(" ")) {
+            pickupTime = pickupTime.split(" ")[0].trim();
+        }
 
         subtotal = totalAmount - serviceFee;
         if (subtotal < 0) subtotal = 0;
@@ -92,33 +96,47 @@ public class PaymentActivity extends BaseActivity {
         pd.setMessage("שולח הזמנה...");
         pd.show();
 
-        // 1. Generate Identifiers
         String orderId = FBRef.refOrders.push().getKey();
-        String timeKey = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-        String shortCode = String.valueOf(new Random().nextInt(9000) + 1000);
+        
+        String datePart = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        String timePart = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+        
+        String receivedTime = datePart + " " + timePart;
+        String requestedTime = datePart + " " + pickupTime + ":00";
 
+        String shortCode = String.valueOf(new Random().nextInt(9000) + 1000);
         List<Product> cartItems = FileManager.loadCart(this);
         String userId = FBRef.refAuth.getUid();
         User user = (User) getIntent().getSerializableExtra("user_data");
 
-        // 2. Create Order
-        // Here we set pickupTime as the orderCode, so FBRef uses it as the second-level node
+        // --- Build Summary String ---
+        StringBuilder summaryBuilder = new StringBuilder();
+        if (cartItems != null) {
+            for (int i = 0; i < cartItems.size(); i++) {
+                summaryBuilder.append(cartItems.get(i).getName());
+                if (i < cartItems.size() - 1) {
+                    summaryBuilder.append(", ");
+                }
+            }
+        }
+        String orderSummary = summaryBuilder.toString();
+
         Order order = new Order(
                 orderId,
                 userId,
                 shortCode,
-                "0",
-                timeKey, // orderReceivedTime
+                Order.STATUS_PENDING,
+                receivedTime,
+                requestedTime,
                 cartItems,
                 user,
                 paymentMethod,
                 !paymentMethod.equals(getString(R.string.payment_counter)),
                 totalAmount
         );
-        order.setRequestedTime(pickupTime);
-        order.setSummary(shortCode); // Store the random numeric code in the summary field
+        
+        order.setSummary(orderSummary); // Set the actual list of products as summary
 
-        // 3. Upload via FBRef
         FBRef.uploadOrder(order, new FBRef.FBListener() {
             @Override
             public void onSuccess() {
@@ -126,6 +144,10 @@ public class PaymentActivity extends BaseActivity {
                 FileManager.saveCart(PaymentActivity.this, new ArrayList<>());
                 finalizePayment(paymentMethod);
             }
+
+            @Override
+            public void onSuccess(Object data) {}
+
             @Override
             public void onFailure(String error) {
                 pd.dismiss();
