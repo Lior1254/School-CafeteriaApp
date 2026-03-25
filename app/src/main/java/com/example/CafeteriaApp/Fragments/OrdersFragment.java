@@ -17,6 +17,7 @@ import com.example.CafeteriaApp.Adapters.OrdersAdapter;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.R;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class OrdersFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private OrdersAdapter adapter;
+    private TabLayout tabLayout;
     private List<Order> orderList = new ArrayList<>();
 
     @Nullable
@@ -38,23 +40,46 @@ public class OrdersFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.rvOrders);
+        tabLayout = view.findViewById(R.id.tabLayoutOrders);
+        
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
         adapter = new OrdersAdapter(orderList);
         recyclerView.setAdapter(adapter);
 
-        fetchOrders();
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                // If position is 1, it's History, otherwise it's Active Order
+                boolean isHistory = (tab.getPosition() == 1) ? FBRef.HistoryFlag : FBRef.OrderFlag;
+                fetchOrders(isHistory);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        // Initial fetch: Active orders
+        fetchOrders(FBRef.OrderFlag);
     }
 
-    private void fetchOrders() {
-        FBRef.downloadOrderForUser(FBRef.OrderFlag, new FBRef.FBListener() {
+    private void fetchOrders(boolean isHistory)
+    {
+        if (adapter != null)
+        {
+            adapter.setOrders(new ArrayList<>(), isHistory);
+        }
+
+        FBRef.downloadOrderForUser(isHistory, new FBRef.FBListener() {
             @Override
-            @SuppressWarnings("unchecked") // מעלים את האזהרה על ה-Casting
+            @SuppressWarnings("unchecked")
             public void onSuccess(Object data) {
                 if (data instanceof List) {
                     List<Order> myOrders = (List<Order>) data;
                     if (adapter != null) {
-                        adapter.setOrders(myOrders);
+                        adapter.setOrders(myOrders, isHistory);
                     }
                 }
             }
@@ -65,7 +90,7 @@ public class OrdersFragment extends Fragment {
             @Override
             public void onFailure(String error) {
                 if (getContext() != null) {
-                    Toast.makeText(getContext(), "שגיאה בטעינת הזמנות: " + error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "שגיאה בטעינת נתונים: " + error, Toast.LENGTH_SHORT).show();
                 }
             }
         });
