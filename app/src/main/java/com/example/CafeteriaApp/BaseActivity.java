@@ -6,8 +6,24 @@ import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.CafeteriaApp.Models.Order;
 
 public abstract class BaseActivity extends AppCompatActivity {
+
+    /**
+     * Converts a status code to a user-friendly Hebrew string.
+     * Static so it can be used in Adapters and other helpers.
+     */
+    public static String getStatusText(String status) {
+        if (status == null) return "לא ידוע";
+        switch (status) {
+            case Order.STATUS_PENDING: return "ממתין";
+            case Order.STATUS_PREPARING: return "בהכנה";
+            case Order.STATUS_READY: return "מוכן";
+            case Order.STATUS_COLLECTED: return "נאסף";
+            default: return "לא ידוע";
+        }
+    }
 
     /**
      * Checks for internet connection and shows a dialog if disconnected.

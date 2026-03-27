@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.CafeteriaApp.BaseActivity;
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.R;
 import com.google.android.material.card.MaterialCardView;
@@ -82,7 +83,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         holder.tvOrderNumber.setText("הזמנה #" + order.getOrderCode());
         holder.tvOrderNumber.setOnClickListener(v -> showPrettyDialog(v.getContext(), order.getOrderCode()));
 
-        String statusText = getStatusText(order.getOrderStatus());
+        // Using the centralized method from BaseActivity
+        String statusText = BaseActivity.getStatusText(order.getOrderStatus());
         holder.tvOrderStatus.setText(statusText);
 
         holder.tvEstimatedTimeValue.setText(formatTimeOnly(order.getRequestedTime()));
@@ -113,16 +115,6 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         holder.btnOrderAgain.setOnClickListener(v -> {
             // Implement logic to add these items back to cart
         });
-    }
-
-    private String getStatusText(String status) {
-        switch (status) {
-            case Order.STATUS_PENDING: return "ממתין";
-            case Order.STATUS_PREPARING: return "בהכנה";
-            case Order.STATUS_READY: return "מוכן";
-            case Order.STATUS_COLLECTED: return "נאסף";
-            default: return "לא ידוע";
-        }
     }
 
     private String formatTimeOnly(String fullTime) {

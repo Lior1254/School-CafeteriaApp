@@ -3,6 +3,11 @@
     <!-- General -->
     <string name="app_name">CafeteriaApp</string>
 
+    <!-- Notifications -->
+    <string name="notif_order_update_title">עדכון הזמנה</string>
+    <string name="notif_channel_orders_name">סטטוס הזמנה</string>
+    <string name="notif_channel_updates_name">עדכוני אפליקציה</string>
+
     <!-- Login Screen -->
     <string name="login_title">התחברות</string>
     <string name="login_email_hint">אימייל</string>

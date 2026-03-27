@@ -1,12 +1,16 @@
 package com.example.CafeteriaApp.Helpers;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.example.CafeteriaApp.BaseActivity;
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
@@ -14,11 +18,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.example.CafeteriaApp.Receivers.AlarmReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +55,89 @@ public class FBRef
     public interface FBListener
     {
         void onSuccess();
-        void onSuccess(Object data); // Added to support returning data
+        void onSuccess(Object data);
         void onFailure(String error);
+    }
+
+    /**
+     * Listens specifically for changes in orders (status updates, etc.)
+     * This triggers ONLY for the specific order that was modified.
+     */
+    public static void observeOrderUpdates(Context context, FBListener listener) {
+        FirebaseUser currentUser = refAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        getUserOrdersRef(currentUser.getUid(), false)
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                        // Triggers when a new order is created
+                    }
+
+                    @Override
+                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                        // THIS IS WHAT YOU NEED: Triggers only when an existing order is updated
+                        Order updatedOrder = snapshot.getValue(Order.class);
+                        if (updatedOrder != null) {
+                            if (listener != null) listener.onSuccess(updatedOrder);
+
+                            // Construct the Hebrew message: "ההזמנה שלך היא [סטטוס]"
+                            String statusText = BaseActivity.getStatusText(updatedOrder.getOrderStatus());
+                            String message = "ההזמנה שלך היא: " + statusText;
+
+                            Intent intent = new Intent(context, AlarmReceiver.class);
+                            intent.setPackage(context.getPackageName()); // Ensure it reaches your app
+                            intent.putExtra("Type", AlarmReceiver.OrderStatus);
+                            intent.putExtra("text", message);
+                            
+                            // Convert String ID to int for notification compatibility if possible
+                            try {
+                                intent.putExtra("orderID", Integer.parseInt(updatedOrder.getOrderId()));
+                            } catch (NumberFormatException e) {
+                                intent.putExtra("orderID", (int) System.currentTimeMillis());
+                            }
+
+                            context.sendBroadcast(intent);
+                        }
+                    }
+
+                    @Override
+                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+
+                    @Override
+                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        if (listener != null) listener.onFailure(error.getMessage());
+                    }
+                });
+    }
+
+    /**
+     * Legacy method: Listens for the whole list of orders (good for RecyclerView).
+     */
+    public static void listenToUserOrders(FBListener listener) {
+        FirebaseUser currentUser = refAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        getUserOrdersRef(currentUser.getUid(), false)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Order> orders = new ArrayList<>();
+                        for (DataSnapshot child : snapshot.getChildren()) {
+                            Order order = child.getValue(Order.class);
+                            if (order != null) orders.add(order);
+                        }
+                        if (listener != null) listener.onSuccess(orders);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        if (listener != null) listener.onFailure(error.getMessage());
+                    }
+                });
     }
 
     public static void uploadOrder(Order order, FBListener listener)
@@ -115,7 +204,7 @@ public class FBRef
                     }
                 });
     }
-    
+
     public static void loadProductImage(Product product, ImageView imageView)
     {
         String productId = product.getId();
