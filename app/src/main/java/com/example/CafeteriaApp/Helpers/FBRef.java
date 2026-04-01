@@ -64,6 +64,7 @@ public class FBRef
      * This triggers ONLY for the specific order that was modified.
      */
     public static void observeOrderUpdates(Context context, FBListener listener) {
+        if (context == null) return;
         FirebaseUser currentUser = refAuth.getCurrentUser();
         if (currentUser == null) return;
 
@@ -78,26 +79,35 @@ public class FBRef
                     public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                         // THIS IS WHAT YOU NEED: Triggers only when an existing order is updated
                         Order updatedOrder = snapshot.getValue(Order.class);
-                        if (updatedOrder != null) {
+                        if (updatedOrder != null && context != null) {
                             if (listener != null) listener.onSuccess(updatedOrder);
 
                             // Construct the Hebrew message: "ההזמנה שלך היא [סטטוס]"
                             String statusText = BaseActivity.getStatusText(updatedOrder.getOrderStatus());
                             String message = "ההזמנה שלך היא: " + statusText;
 
-                            Intent intent = new Intent(context, AlarmReceiver.class);
-                            intent.setPackage(context.getPackageName()); // Ensure it reaches your app
-                            intent.putExtra("Type", AlarmReceiver.OrderStatus);
-                            intent.putExtra("text", message);
-                            
-                            // Convert String ID to int for notification compatibility if possible
                             try {
-                                intent.putExtra("orderID", Integer.parseInt(updatedOrder.getOrderId()));
-                            } catch (NumberFormatException e) {
-                                intent.putExtra("orderID", (int) System.currentTimeMillis());
-                            }
+                                Intent intent = new Intent(context, AlarmReceiver.class);
+                                intent.setPackage(context.getPackageName()); // Ensure it reaches your app
+                                intent.putExtra("Type", AlarmReceiver.OrderStatus);
+                                intent.putExtra("text", message);
+                                
+                                // Convert String ID to int for notification compatibility if possible
+                                String orderIdStr = updatedOrder.getOrderId();
+                                if (orderIdStr != null) {
+                                    try {
+                                        intent.putExtra("orderID", Integer.parseInt(orderIdStr));
+                                    } catch (NumberFormatException e) {
+                                        intent.putExtra("orderID", (int) System.currentTimeMillis());
+                                    }
+                                } else {
+                                    intent.putExtra("orderID", (int) System.currentTimeMillis());
+                                }
 
-                            context.sendBroadcast(intent);
+                                context.sendBroadcast(intent);
+                            } catch (Exception e) {
+                                Log.e("FBRef", "Failed to send broadcast", e);
+                            }
                         }
                     }
 
@@ -142,7 +152,11 @@ public class FBRef
 
     public static void uploadOrder(Order order, FBListener listener)
     {
-        if (order == null) return;
+        if (order == null || order.getOrderStatus() == null || 
+            order.getRequestedTime() == null || order.getOrderId() == null) {
+            if (listener != null) listener.onFailure("Order data is missing required fields");
+            return;
+        }
 
         refOrders.child(order.getOrderStatus())
                 .child(order.getRequestedTime())
@@ -152,7 +166,8 @@ public class FBRef
                     if (task.isSuccessful()) {
                         uploadUserOrder(order, listener, OrderFlag);
                     } else {
-                        if (listener != null) listener.onFailure(task.getException().getMessage());
+                        if (listener != null) listener.onFailure(task.getException() != null ? 
+                                task.getException().getMessage() : "Unknown upload error");
                     }
                 });
     }
@@ -163,15 +178,22 @@ public class FBRef
         if (currentUser == null) return;
 
         String uid = currentUser.getUid();
+        String requestedTime = order.getRequestedTime();
+        
+        if (requestedTime == null) {
+            if (listener != null) listener.onFailure("Requested time is null");
+            return;
+        }
         
         getUserOrdersRef(uid, isHistory)
-                .child(order.getRequestedTime())
+                .child(requestedTime)
                 .setValue(order)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (listener != null) listener.onSuccess();
                     } else {
-                        if (listener != null) listener.onFailure(task.getException().getMessage());
+                        if (listener != null) listener.onFailure(task.getException() != null ? 
+                                task.getException().getMessage() : "Unknown user order upload error");
                     }
                 });
     }
@@ -188,7 +210,7 @@ public class FBRef
                     if (task.isSuccessful()) {
                         List<Order> orderList = new ArrayList<>();
                         DataSnapshot snapshot = task.getResult();
-                        if (snapshot.exists()) {
+                        if (snapshot != null && snapshot.exists()) {
                             for (DataSnapshot child : snapshot.getChildren()) {
                                 Order order = child.getValue(Order.class);
                                 if (order != null) {
@@ -207,6 +229,8 @@ public class FBRef
 
     public static void loadProductImage(Product product, ImageView imageView)
     {
+        if (product == null || imageView == null) return;
+        
         String productId = product.getId();
         imageView.setTag(productId);
 
@@ -227,8 +251,10 @@ public class FBRef
             if (productId.equals(imageView.getTag()))
             {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                product.setImageBitmap(bitmap);
-                imageView.setImageBitmap(bitmap);
+                if (bitmap != null) {
+                    product.setImageBitmap(bitmap);
+                    imageView.setImageBitmap(bitmap);
+                }
             }
         }).addOnFailureListener(e ->
         {
@@ -238,8 +264,10 @@ public class FBRef
                 if (productId.equals(imageView.getTag()))
                 {
                     Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    product.setImageBitmap(bitmap);
-                    imageView.setImageBitmap(bitmap);
+                    if (bitmap != null) {
+                        product.setImageBitmap(bitmap);
+                        imageView.setImageBitmap(bitmap);
+                    }
                 }
             }).addOnFailureListener(e2 -> {
                  if (productId.equals(imageView.getTag())) {

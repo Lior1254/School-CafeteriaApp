@@ -32,6 +32,11 @@ public class MainPage extends AppCompatActivity
     Fragment profileFragment;
     private Fragment activeFragment;
 
+    /**
+     * Called when the activity is starting.
+     * Initializes fragments and sets up navigation listeners.
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -42,13 +47,12 @@ public class MainPage extends AppCompatActivity
         MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
 
+        if (topAppBar == null || bottomNav == null) return;
+
         // --- Toolbar Setup ---
-        // We do NOT call setSupportActionBar(topAppBar) to keep total control
-        // and prevent default Activity title behavior.
         topAppBar.setTitle("");
 
         // Handle Search Action
-        // The menu is inflated from XML (app:menu), so we can find the item immediately.
         MenuItem searchItem = topAppBar.getMenu().findItem(R.id.action_search);
         if (searchItem != null)
         {
@@ -63,7 +67,6 @@ public class MainPage extends AppCompatActivity
                     {
                         Toast.makeText(MainPage.this, "Searching: " + query,
                                        Toast.LENGTH_SHORT).show();
-                        // Here you can implement transition to a search fragment if needed
                         return false;
                     }
 
@@ -79,14 +82,13 @@ public class MainPage extends AppCompatActivity
         // Handle Hamburger Navigation Click (Opens PopupMenu)
         topAppBar.setNavigationOnClickListener(v ->
                                                {
-                                                   PopupMenu popup = new PopupMenu(MainPage.this,
-                                                                                   v);
+                                                   if (isFinishing()) return;
+                                                   PopupMenu popup = new PopupMenu(MainPage.this, v);
                                                    popup.getMenuInflater().inflate(
                                                            R.menu.menu_bottom_nav, popup.getMenu());
 
                                                    popup.setOnMenuItemClickListener(item ->
                                                                                     {
-                                                                                        // Sync with BottomNavigationView
                                                                                         bottomNav.setSelectedItemId(
                                                                                                 item.getItemId());
                                                                                         return true;
@@ -103,14 +105,12 @@ public class MainPage extends AppCompatActivity
             profileFragment = new ProfileFragment();
             activeFragment = menuFragment;
 
-            // Add all fragments hidden, except the first one
-            fm.beginTransaction().add(R.id.fragmentContainer, profileFragment, "4").hide(
-                    profileFragment).commit();
-            fm.beginTransaction().add(R.id.fragmentContainer, ordersFragment, "3").hide(
-                    ordersFragment).commit();
-            fm.beginTransaction().add(R.id.fragmentContainer, cartFragment, "2").hide(
-                    cartFragment).commit();
-            fm.beginTransaction().add(R.id.fragmentContainer, menuFragment, "1").commit();
+            fm.beginTransaction()
+                .add(R.id.fragmentContainer, profileFragment, "4").hide(profileFragment)
+                .add(R.id.fragmentContainer, ordersFragment, "3").hide(ordersFragment)
+                .add(R.id.fragmentContainer, cartFragment, "2").hide(cartFragment)
+                .add(R.id.fragmentContainer, menuFragment, "1")
+                .commit();
 
         } else
         {
@@ -119,14 +119,11 @@ public class MainPage extends AppCompatActivity
             ordersFragment = fm.findFragmentByTag("3");
             profileFragment = fm.findFragmentByTag("4");
 
-            // Restore active fragment state
-            if (menuFragment != null && menuFragment.isVisible()) activeFragment = menuFragment;
-            else if (cartFragment != null && cartFragment.isVisible())
-                activeFragment = cartFragment;
-            else if (ordersFragment != null && ordersFragment.isVisible())
-                activeFragment = ordersFragment;
-            else if (profileFragment != null && profileFragment.isVisible())
-                activeFragment = profileFragment;
+            // Restore active fragment state safely
+            activeFragment = menuFragment; // default
+            if (cartFragment != null && cartFragment.isVisible()) activeFragment = cartFragment;
+            else if (ordersFragment != null && ordersFragment.isVisible()) activeFragment = ordersFragment;
+            else if (profileFragment != null && profileFragment.isVisible()) activeFragment = profileFragment;
         }
 
         // --- Bottom Navigation Listener ---
@@ -135,24 +132,14 @@ public class MainPage extends AppCompatActivity
                                                 int itemId = item.getItemId();
                                                 Fragment targetFragment = null;
 
-                                                if (itemId == R.id.nav_home)
-                                                {
-                                                    targetFragment = menuFragment;
-                                                } else if (itemId == R.id.nav_cart)
-                                                {
-                                                    targetFragment = cartFragment;
-                                                } else if (itemId == R.id.nav_orders)
-                                                {
-                                                    targetFragment = ordersFragment;
-                                                } else if (itemId == R.id.nav_profile)
-                                                {
-                                                    targetFragment = profileFragment;
-                                                }
+                                                if (itemId == R.id.nav_home) targetFragment = menuFragment;
+                                                else if (itemId == R.id.nav_cart) targetFragment = cartFragment;
+                                                else if (itemId == R.id.nav_orders) targetFragment = ordersFragment;
+                                                else if (itemId == R.id.nav_profile) targetFragment = profileFragment;
 
-                                                if (targetFragment != null && targetFragment != activeFragment)
+                                                if (targetFragment != null && targetFragment != activeFragment && !isFinishing())
                                                 {
-                                                    fm.beginTransaction().hide(activeFragment).show(
-                                                            targetFragment).commit();
+                                                    fm.beginTransaction().hide(activeFragment).show(targetFragment).commit();
                                                     activeFragment = targetFragment;
                                                     return true;
                                                 }

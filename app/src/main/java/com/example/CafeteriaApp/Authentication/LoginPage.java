@@ -50,56 +50,63 @@ public class LoginPage extends BaseActivity
         FirebaseUser currentUser = FBRef.refAuth.getCurrentUser();
         if (currentUser != null)
         {
-            // 2. Fetch stored authentication string (UID#ExpiryTime)
+            // 2. Fetch stored authentication string
             String str = FileManager.getUserAuthentication(this);
-            if (!str.isEmpty())
+            if (str != null && !str.isEmpty())
             {
-                String[] strs = str.split("#"); // Expected format: uid#expiry_time
-                if (strs.length == 2 && currentUser.getUid().equals(strs[0]))
-                {
-                    // 3. Check if current time is before the saved expiry time
-                    long expiryTime = Utils.dateStringToLong(strs[1]);
-                    long currentTime = System.currentTimeMillis();
-
-                    if (currentTime < expiryTime)
+                try {
+                    String[] strs = str.split("#"); 
+                    if (strs.length == 2 && currentUser.getUid().equals(strs[0]))
                     {
-                        // 4. Session is still valid - proceed to automatic login
-                        autoLogin(currentUser.getUid());
+                        long expiryTime = Utils.dateStringToLong(strs[1]);
+                        long currentTime = System.currentTimeMillis();
+
+                        if (currentTime < expiryTime)
+                        {
+                            autoLogin(currentUser.getUid());
+                        }
                     }
+                } catch (Exception e) {
+                    // If parsing fails, just clear and require manual login
+                    FileManager.clearUserAuthentication(this);
                 }
             }
         }
     }
 
     /**
-     * Performs automatic login by fetching user data and navigating to the main page.
-     * @param uid The authenticated user's ID.
+     * Performs automatic login safely.
      */
     private void autoLogin(String uid) {
+        if (isFinishing()) return;
+        
         ProgressDialog pd = new ProgressDialog(this);
         pd.setTitle("Connecting");
         pd.setMessage("Logging in automatically...");
+        pd.setCancelable(false);
         pd.show();
 
         FBRef.refUsers.child(uid).get().addOnCompleteListener(task -> {
-            pd.dismiss();
+            if (!isFinishing() && pd.isShowing()) {
+                pd.dismiss();
+            }
+            
             if (task.isSuccessful()) {
                 DataSnapshot snapshot = task.getResult();
-                User userModel = snapshot.getValue(User.class);
-                if (userModel != null) {
-                    Intent mainIntent = new Intent(this, MainPage.class);
-                    mainIntent.putExtra("userData", userModel);
-                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(mainIntent);
-                    finish();
+                if (snapshot != null && snapshot.exists()) {
+                    User userModel = snapshot.getValue(User.class);
+                    if (userModel != null) {
+                        Intent mainIntent = new Intent(this, MainPage.class);
+                        mainIntent.putExtra("userData", userModel);
+                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(mainIntent);
+                        finish();
+                    }
                 }
             }
         });
     }
 
-    /**
-     * Initializes UI components from layout.
-     */
     public void initializeViews()
     {
         ED_login_email = findViewById(R.id.ED_login_email);
@@ -107,21 +114,15 @@ public class LoginPage extends BaseActivity
         tv_login_warning = findViewById(R.id.tv_login_warning);
     }
 
-    /**
-     * Navigates to the Sign Up page.
-     */
     public void SignUp_Click(View view)
     {
         intent = new Intent(this, SignUpPage.class);
         startActivity(intent);
     }
 
-    /**
-     * Displays a warning message with a visual shake animation.
-     * @param warning Text message to be displayed.
-     */
     private void showWarning(String warning)
     {
+        if (tv_login_warning == null) return;
         tv_login_warning.setVisibility(View.VISIBLE);
         tv_login_warning.setText(warning);
 
@@ -131,10 +132,6 @@ public class LoginPage extends BaseActivity
         animator.start();
     }
 
-    /**
-     * Validates user input for email and password.
-     * @return true if input is valid, false otherwise.
-     */
     public boolean checkInput()
     {
         email = ED_login_email.getText().toString().trim();
@@ -156,18 +153,17 @@ public class LoginPage extends BaseActivity
         return true;
     }
 
-    /**
-     * Performs standard login with Firebase Authentication.
-     */
     public void loginUser()
     {
         if (FBRef.refAuth.getCurrentUser() != null)
         {
             FBRef.refAuth.signOut();
         }
+        
         ProgressDialog pd = new ProgressDialog(this);
         pd.setTitle("Connecting");
         pd.setMessage("Logging in user...");
+        pd.setCancelable(false);
         pd.show();
 
         FBRef.refAuth.signInWithEmailAndPassword(email, password)
@@ -181,74 +177,62 @@ public class LoginPage extends BaseActivity
                             FirebaseUser firebaseUser = FBRef.refAuth.getCurrentUser();
                             if (firebaseUser != null)
                             {
-                                // Store current UID and login expiry time (7 days from now)
                                 FileManager.saveUserAuthentication(LoginPage.this);
 
                                 FBRef.refUsers.child(firebaseUser.getUid()).get().addOnCompleteListener(
-                                        new OnCompleteListener<DataSnapshot>()
-                                        {
-                                            @Override
-                                            public void onComplete(
-                                                    @NonNull Task<DataSnapshot> taskSnapshot)
+                                        taskSnapshot -> {
+                                            if (!isFinishing() && pd.isShowing()) pd.dismiss();
+                                            
+                                            if (taskSnapshot.isSuccessful())
                                             {
-                                                pd.dismiss();
-                                                if (taskSnapshot.isSuccessful())
+                                                DataSnapshot snapshot = taskSnapshot.getResult();
+                                                User userModel = snapshot.getValue(User.class);
+                                                if (userModel != null)
                                                 {
-                                                    DataSnapshot snapshot = taskSnapshot.getResult();
-                                                    User userModel = snapshot.getValue(User.class);
-                                                    if (userModel != null)
-                                                    {
-                                                        Intent mainIntent = new Intent(LoginPage.this, MainPage.class);
-                                                        mainIntent.putExtra("userData", userModel);
-                                                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                        startActivity(mainIntent);
-                                                        finish();
-                                                    }
-                                                } else
-                                                {
-                                                    showWarning("  שגיאה בקריאת נתוני המשתמש.");
+                                                    Intent mainIntent = new Intent(LoginPage.this, MainPage.class);
+                                                    mainIntent.putExtra("userData", userModel);
+                                                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                    startActivity(mainIntent);
+                                                    finish();
                                                 }
+                                            } else
+                                            {
+                                                showWarning("  שגיאה בקריאת נתוני המשתמש.");
                                             }
                                         });
                             } else
                             {
-                                pd.dismiss();
+                                if (!isFinishing() && pd.isShowing()) pd.dismiss();
                             }
                         } else
                         {
-                            pd.dismiss();
-                            Exception exp = task.getException();
-                            if (exp instanceof FirebaseAuthInvalidUserException)
-                            {
-                                showWarning("  Invalid email address.");
-                            } else if (exp instanceof FirebaseAuthWeakPasswordException)
-                            {
-                                showWarning("  Password is too weak.");
-                            } else if (exp instanceof FirebaseAuthUserCollisionException)
-                            {
-                                showWarning("  User already exists.");
-                            } else if (exp instanceof FirebaseAuthInvalidCredentialsException)
-                            {
-                                showWarning("  Authentication failed.");
-                            } else if (exp instanceof FirebaseNetworkException)
-                            {
-                                showWarning("  Network error. Please check your connection.");
-                            } else
-                            {
-                                showWarning("  An error occurred. Please try again later.");
-                            }
-                        }                    }
+                            if (!isFinishing() && pd.isShowing()) pd.dismiss();
+                            handleLoginError(task.getException());
+                        }
+                    }
                 });
     }
 
-    /**
-     * Handles the login button click event.
-     */
+    private void handleLoginError(Exception exp) {
+        if (exp instanceof FirebaseAuthInvalidUserException) {
+            showWarning("  Invalid email address.");
+        } else if (exp instanceof FirebaseAuthWeakPasswordException) {
+            showWarning("  Password is too weak.");
+        } else if (exp instanceof FirebaseAuthUserCollisionException) {
+            showWarning("  User already exists.");
+        } else if (exp instanceof FirebaseAuthInvalidCredentialsException) {
+            showWarning("  Authentication failed.");
+        } else if (exp instanceof FirebaseNetworkException) {
+            showWarning("  Network error. Please check your connection.");
+        } else {
+            showWarning("  An error occurred. Please try again later.");
+        }
+    }
+
     public void Login_Click(View view)
     {
         if (checkInput())
         {
-            // Executes login with network validation from BaseActivity
             executeFirebaseOperation(this::loginUser);
         }
     }
