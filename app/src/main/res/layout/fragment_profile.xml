@@ -311,14 +311,10 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/btn_logout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
             app:cardBackgroundColor="@color/logout_red_foreground"
             app:cardCornerRadius="24dp"
             app:cardElevation="6dp"
@@ -335,6 +331,7 @@
                 android:paddingBottom="8dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/btn_logout"
                     style="@style/ProfileRowStyle">
 
                     <FrameLayout

@@ -5,6 +5,7 @@
     <color name="gray">#666666</color>
     <color name="blue">#006b98</color>
 
+    <color name="main_bg_blue">#003A58</color>
     <color name="light_blue">#008ac5</color>
     <color name="dark_blue">#1e3742</color>
     <color name="ice_blue">#86AFF7</color>
@@ -65,4 +66,3 @@
     <color name="quantity_button_bg">#F0F0F0</color>
 
 </resources>
-
