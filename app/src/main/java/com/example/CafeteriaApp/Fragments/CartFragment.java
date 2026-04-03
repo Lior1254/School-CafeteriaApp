@@ -197,7 +197,9 @@ public class CartFragment extends Fragment
         if (loadedItems != null) {
             cartItems.addAll(loadedItems);
         }
-        adapter.notifyDataSetChanged();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
         updateOrderSummary();
     }
 
@@ -208,8 +210,12 @@ public class CartFragment extends Fragment
         {
             currentTotal += item.getPrice() * item.getAmount();
         }
-        tvTotal.setText(String.format("₪%.2f", currentTotal));
-        btnCheckout.setText(String.format("%s - ₪%.2f", getString(R.string.cart_proceed_to_checkout), currentTotal));
+        if (tvTotal != null) {
+            tvTotal.setText(String.format("₪%.2f", currentTotal));
+        }
+        if (btnCheckout != null) {
+            btnCheckout.setText(String.format("%s - ₪%.2f", getString(R.string.cart_proceed_to_checkout), currentTotal));
+        }
     }
     
     @Override
@@ -217,5 +223,13 @@ public class CartFragment extends Fragment
         super.onResume();
         loadCartData();
         setupTimeSpinner();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            loadCartData();
+        }
     }
 }

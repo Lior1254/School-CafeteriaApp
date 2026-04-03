@@ -52,6 +52,26 @@ public class Product implements Serializable
         return "₪" + String.format("%.2f", price);
     }
 
+    /**
+     * Returns a string representation of selected addons for comparison.
+     * This is used to determine if two product instances in the cart are identical.
+     */
+    public String getSelectedOptions() {
+        if (addons == null || addons.isEmpty()) {
+            return "";
+        }
+        StringBuilder selected = new StringBuilder();
+        for (Addon addon : addons) {
+            if (addon.isSelected()) {
+                if (selected.length() > 0) {
+                    selected.append(",");
+                }
+                selected.append(addon.getAddonId());
+            }
+        }
+        return selected.toString();
+    }
+
     //<editor-fold desc="Getters and Setters">
     public String getId()
     {

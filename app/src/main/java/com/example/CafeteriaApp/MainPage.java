@@ -1,6 +1,8 @@
 package com.example.CafeteriaApp;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -14,6 +16,7 @@ import com.example.CafeteriaApp.Fragments.CartFragment;
 import com.example.CafeteriaApp.Fragments.MenuFragment;
 import com.example.CafeteriaApp.Fragments.OrdersFragment;
 import com.example.CafeteriaApp.Fragments.ProfileFragment;
+import com.example.CafeteriaApp.Helpers.FBRef;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -31,12 +34,8 @@ public class MainPage extends AppCompatActivity
     Fragment ordersFragment;
     Fragment profileFragment;
     private Fragment activeFragment;
+    private BottomNavigationView bottomNav;
 
-    /**
-     * Called when the activity is starting.
-     * Initializes fragments and sets up navigation listeners.
-     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -45,9 +44,21 @@ public class MainPage extends AppCompatActivity
 
         // Initialize Views
         MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav = findViewById(R.id.bottomNav);
 
         if (topAppBar == null || bottomNav == null) return;
+
+        // --- Start Real-time Notifications ---
+        FBRef.observeOrderUpdates(this, new FBRef.FBListener() {
+            @Override
+            public void onSuccess(Object data) {}
+            @Override
+            public void onSuccess() {}
+            @Override
+            public void onFailure(String error) {
+                Log.e("MainPage", "Order listener failed: " + error);
+            }
+        });
 
         // --- Toolbar Setup ---
         topAppBar.setTitle("");
@@ -79,7 +90,7 @@ public class MainPage extends AppCompatActivity
             }
         }
 
-        // Handle Hamburger Navigation Click (Opens PopupMenu)
+        // Handle Hamburger Navigation Click
         topAppBar.setNavigationOnClickListener(v ->
                                                {
                                                    if (isFinishing()) return;
@@ -119,14 +130,14 @@ public class MainPage extends AppCompatActivity
             ordersFragment = fm.findFragmentByTag("3");
             profileFragment = fm.findFragmentByTag("4");
 
-            // Restore active fragment state safely
-            activeFragment = menuFragment; // default
+            // Safe restore
+            activeFragment = menuFragment;
             if (cartFragment != null && cartFragment.isVisible()) activeFragment = cartFragment;
             else if (ordersFragment != null && ordersFragment.isVisible()) activeFragment = ordersFragment;
             else if (profileFragment != null && profileFragment.isVisible()) activeFragment = profileFragment;
         }
 
-        // --- Bottom Navigation Listener ---
+        // --- Navigation Listener ---
         bottomNav.setOnItemSelectedListener(item ->
                                             {
                                                 int itemId = item.getItemId();
@@ -145,5 +156,30 @@ public class MainPage extends AppCompatActivity
                                                 }
                                                 return targetFragment == activeFragment;
                                             });
+
+        // Check for Intent to navigate to a specific tab
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent != null && intent.getBooleanExtra("OPEN_CART", false)) {
+            navigateToCart();
+        }
+    }
+
+    /**
+     * Programmatically switches to the Cart tab.
+     */
+    public void navigateToCart() {
+        if (bottomNav != null) {
+            bottomNav.setSelectedItemId(R.id.nav_cart);
+        }
     }
 }
