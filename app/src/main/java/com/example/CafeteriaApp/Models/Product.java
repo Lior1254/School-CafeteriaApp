@@ -19,6 +19,7 @@ public class Product implements Serializable
     private List<Addon> addons; // List of available addons for this product
     private int imageRes; // Local drawable resource for placeholder
     private int amount; // Quantity of the product in cart/order
+    private String notes; // User notes for the product
 
     @Exclude
     private transient Bitmap imageBitmap; // The downloaded image, excluded from Firebase
@@ -151,6 +152,14 @@ public class Product implements Serializable
     public void setAmount(int amount)
     {
         this.amount = amount;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     @Exclude

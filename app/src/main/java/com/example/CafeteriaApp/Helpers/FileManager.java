@@ -20,6 +20,7 @@ public class FileManager {
     private static final String PREFS_NAME = "CartPrefs";
     private static final String CART_KEY_PREFIX = "cart_items_";
     private static final String KEY_AUTH_TIME = "user_authentication_time";
+    private static final String KEY_GENERAL_NOTES = "cart_general_notes_";
     private static final String TAG = "FileManager";
     
     public static final int AUTH_EXPIRY_DAYS = 7;
@@ -27,6 +28,11 @@ public class FileManager {
     private static String getCartKey() {
         String uid = FBRef.refAuth.getUid();
         return (uid == null || uid.isEmpty()) ? "guest_cart" : CART_KEY_PREFIX + uid;
+    }
+
+    private static String getGeneralNotesKey() {
+        String uid = FBRef.refAuth.getUid();
+        return (uid == null || uid.isEmpty()) ? "guest_notes" : KEY_GENERAL_NOTES + uid;
     }
 
     private static String getAuthenticationUid() {
@@ -77,6 +83,26 @@ public class FileManager {
         String jsonString = new Gson().toJson(cartItems);
         editor.putString(key, jsonString);
         editor.commit();
+    }
+
+    /**
+     * Saves general order notes.
+     */
+    public static void saveGeneralNotes(Context context, String notes) {
+        String key = getGeneralNotesKey();
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(key, notes);
+        editor.commit();
+    }
+
+    /**
+     * Loads general order notes.
+     */
+    public static String loadGeneralNotes(Context context) {
+        String key = getGeneralNotesKey();
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(key, "");
     }
 
     /**

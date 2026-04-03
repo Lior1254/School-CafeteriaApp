@@ -3,6 +3,8 @@ package com.example.CafeteriaApp.Fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +26,7 @@ import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.PaymentActivity;
 import com.example.CafeteriaApp.R;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,6 +43,7 @@ public class CartFragment extends Fragment
     private TextView tvTotal;
     private Button btnCheckout;
     private Spinner spinPickupTime;
+    private TextInputEditText etGeneralNotes;
     private ShoppingCartAdapter adapter;
     private List<Product> cartItems = new ArrayList<>();
     private double currentTotal = 0;
@@ -68,6 +72,23 @@ public class CartFragment extends Fragment
         tvTotal = view.findViewById(R.id.tv_total);
         btnCheckout = view.findViewById(R.id.btn_checkout);
         spinPickupTime = view.findViewById(R.id.spin_pickup_time);
+        etGeneralNotes = view.findViewById(R.id.etGeneralNotes);
+
+        // Save general notes as the user types
+        if (etGeneralNotes != null) {
+            etGeneralNotes.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    FileManager.saveGeneralNotes(requireContext(), s.toString().trim());
+                }
+            });
+        }
 
         btnCheckout.setOnClickListener(v -> {
             if (cartItems.isEmpty() ) {
@@ -84,6 +105,8 @@ public class CartFragment extends Fragment
             Intent intent = new Intent(getActivity(), PaymentActivity.class);
             intent.putExtra("total_amount", currentTotal);
             intent.putExtra("pickup_time", selectedTime);
+            // Pass general notes to payment
+            intent.putExtra("general_notes", FileManager.loadGeneralNotes(requireContext()));
             startActivityForResult(intent, PAYMENT_REQUEST_CODE);
         });
     }
@@ -151,6 +174,10 @@ public class CartFragment extends Fragment
     private void clearCart() {
         cartItems.clear();
         FileManager.saveCart(requireContext(), new ArrayList<>());
+        FileManager.saveGeneralNotes(requireContext(), ""); // Clear notes after successful order
+        if (etGeneralNotes != null) {
+            etGeneralNotes.setText("");
+        }
         adapter.notifyDataSetChanged();
         updateOrderSummary();
         Toast.makeText(getContext(), "תודה רבה! ההזמנה בוצעה בהצלחה.", Toast.LENGTH_LONG).show();
@@ -200,6 +227,12 @@ public class CartFragment extends Fragment
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
+        
+        // Load general notes
+        if (etGeneralNotes != null) {
+            etGeneralNotes.setText(FileManager.loadGeneralNotes(requireContext()));
+        }
+
         updateOrderSummary();
     }
 
