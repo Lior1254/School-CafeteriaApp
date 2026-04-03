@@ -13,6 +13,11 @@
         <item name="cornerSize">20dp</item>
     </style>
 
+    <style name="ShapeAppearanceOverlay.Material3.Corner.Medium" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
 
     <!-- ================================= -->
     <!--      Styles for Order Progress Bar    -->

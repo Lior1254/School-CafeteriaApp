@@ -1,29 +1,44 @@
 package com.example.CafeteriaApp;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.PopupMenu;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.CafeteriaApp.Authentication.LoginPage;
 import com.example.CafeteriaApp.Fragments.CartFragment;
 import com.example.CafeteriaApp.Fragments.MenuFragment;
 import com.example.CafeteriaApp.Fragments.OrdersFragment;
 import com.example.CafeteriaApp.Fragments.ProfileFragment;
 import com.example.CafeteriaApp.Helpers.FBRef;
+import com.example.CafeteriaApp.Helpers.FileManager;
+import com.example.CafeteriaApp.Models.User;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * Main Activity of the application.
- * Handles the main navigation using a BottomNavigationView and a FragmentManager.
- * Displays Menu, Cart, Orders, and Profile fragments.
+ * Handles the main navigation using a BottomNavigationView, a Navigation Drawer, and a FragmentManager.
  */
 public class MainPage extends AppCompatActivity
 {
@@ -34,7 +49,10 @@ public class MainPage extends AppCompatActivity
     Fragment ordersFragment;
     Fragment profileFragment;
     private Fragment activeFragment;
+    
     private BottomNavigationView bottomNav;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -45,6 +63,8 @@ public class MainPage extends AppCompatActivity
         // Initialize Views
         MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
         bottomNav = findViewById(R.id.bottomNav);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
 
         if (topAppBar == null || bottomNav == null) return;
 
@@ -90,22 +110,40 @@ public class MainPage extends AppCompatActivity
             }
         }
 
-        // Handle Hamburger Navigation Click
-        topAppBar.setNavigationOnClickListener(v ->
-                                               {
-                                                   if (isFinishing()) return;
-                                                   PopupMenu popup = new PopupMenu(MainPage.this, v);
-                                                   popup.getMenuInflater().inflate(
-                                                           R.menu.menu_bottom_nav, popup.getMenu());
+        // Handle Hamburger Navigation Click (Open Drawer)
+        topAppBar.setNavigationOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
-                                                   popup.setOnMenuItemClickListener(item ->
-                                                                                    {
-                                                                                        bottomNav.setSelectedItemId(
-                                                                                                item.getItemId());
-                                                                                        return true;
-                                                                                    });
-                                                   popup.show();
-                                               });
+        // --- Drawer Navigation Listener ---
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            
+            if (itemId == R.id.nav_home) {
+                bottomNav.setSelectedItemId(R.id.nav_home);
+            } else if (itemId == R.id.nav_cart) {
+                bottomNav.setSelectedItemId(R.id.nav_cart);
+            } else if (itemId == R.id.nav_orders) {
+                if (ordersFragment instanceof OrdersFragment) {
+                    ((OrdersFragment) ordersFragment).setStartWithHistory(false);
+                }
+                bottomNav.setSelectedItemId(R.id.nav_orders);
+            } else if (itemId == R.id.nav_profile) {
+                bottomNav.setSelectedItemId(R.id.nav_profile);
+            } else if (itemId == R.id.nav_history) {
+                // Ensure Orders Fragment is loaded and set to History tab
+                if (ordersFragment instanceof OrdersFragment) {
+                    ((OrdersFragment) ordersFragment).setStartWithHistory(true);
+                }
+                bottomNav.setSelectedItemId(R.id.nav_orders);
+            } else if (itemId == R.id.nav_logout) {
+                logout();
+            }
+            
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
+
+        setupDrawerHeader();
+        customizeDrawerMenu();
 
         // --- Fragment Management ---
         if (savedInstanceState == null)
@@ -137,7 +175,7 @@ public class MainPage extends AppCompatActivity
             else if (profileFragment != null && profileFragment.isVisible()) activeFragment = profileFragment;
         }
 
-        // --- Navigation Listener ---
+        // --- Bottom Navigation Listener ---
         bottomNav.setOnItemSelectedListener(item ->
                                             {
                                                 int itemId = item.getItemId();
@@ -152,13 +190,56 @@ public class MainPage extends AppCompatActivity
                                                 {
                                                     fm.beginTransaction().hide(activeFragment).show(targetFragment).commit();
                                                     activeFragment = targetFragment;
+                                                    // Sync drawer selection
+                                                    navigationView.setCheckedItem(itemId);
                                                     return true;
                                                 }
                                                 return targetFragment == activeFragment;
                                             });
 
-        // Check for Intent to navigate to a specific tab
         handleIntent(getIntent());
+    }
+
+    private void setupDrawerHeader() {
+        View headerView = navigationView.getHeaderView(0);
+        TextView tvUserName = headerView.findViewById(R.id.tvUserName);
+        TextView tvUserEmail = headerView.findViewById(R.id.tvUserEmail);
+
+        FirebaseUser currentUser = FBRef.refAuth.getCurrentUser();
+        if (currentUser != null) {
+            FBRef.refUsers.child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    User user = snapshot.getValue(User.class);
+                    if (user != null) {
+                        tvUserName.setText("שלום, " + user.getFirstName());
+                        tvUserEmail.setText(user.getEmail());
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {}
+            });
+        }
+    }
+
+    private void customizeDrawerMenu() {
+        Menu menu = navigationView.getMenu();
+        MenuItem logoutItem = menu.findItem(R.id.nav_logout);
+        if (logoutItem != null) {
+            SpannableString s = new SpannableString(logoutItem.getTitle());
+            s.setSpan(new ForegroundColorSpan(Color.RED), 0, s.length(), 0);
+            logoutItem.setTitle(s);
+            logoutItem.getIcon().setTint(Color.RED);
+        }
+    }
+
+    private void logout() {
+        FBRef.refAuth.signOut();
+        FileManager.clearUserAuthentication(this);
+        Intent intent = new Intent(this, LoginPage.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -174,12 +255,18 @@ public class MainPage extends AppCompatActivity
         }
     }
 
-    /**
-     * Programmatically switches to the Cart tab.
-     */
     public void navigateToCart() {
         if (bottomNav != null) {
             bottomNav.setSelectedItemId(R.id.nav_cart);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }

@@ -57,6 +57,16 @@ public class User implements Serializable
         return name;
     }
 
+    /**
+     * Returns the first name by splitting the full name.
+     * @return The first part of the name string.
+     */
+    public String getFirstName()
+    {
+        if (name == null || name.isEmpty()) return "";
+        return name.split(" ")[0];
+    }
+
     public String getEmail()
     {
         return email;

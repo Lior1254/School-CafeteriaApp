@@ -11,13 +11,22 @@
     <color name="ice_blue">#86AFF7</color>
     <color name="ice_blue_light_indicator">#3387CEEB</color>
 
-
     <color name="Yellow_warning">#ffcc00</color>
 
+    <!-- Logout Red -->
+    <color name="logout_red">#E53935</color>
+    <color name="logout_red_background">#1AE53935</color>
 
-    <color name="logout_red_foreground">#FF5252</color>
-    <color name="logout_red_background">#40FF5252</color>
+    <!-- Category Colors -->
+    <color name="category_selected">#FF6B35</color> <!-- Warm Orange -->
+    <color name="category_unselected_border">#E0E0E0</color>
+    <color name="category_text_selected">#FFFFFF</color>
+    <color name="category_text_unselected">#424242</color>
 
+    <!-- Active Order Bolder Look -->
+    <color name="order_card_dark">#1A1A1A</color>
+    <color name="order_accent_orange">#FF9800</color>
+    <color name="order_status_bg">#2C2C2C</color>
 
     <color name="card_background_cream">#FFF7E9</color>
     <color name="status_received_grey">#9E9E9E</color>
@@ -37,7 +46,6 @@
     <color name="mc_text_secondary">#666666</color>
     <color name="mc_divider">#E0E0E0</color>
     <color name="mc_chip_bg">#FFF8E1</color>
-
 
     <color name="cream">#FFF5E6</color>
     <color name="soft_gray">#D9D9D9</color>
