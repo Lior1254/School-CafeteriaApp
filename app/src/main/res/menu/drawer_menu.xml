@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:id="@+id/menu_main" android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/bottom_bar_menu"
+            android:title="תפריט ראשי" />
+        <item
+            android:id="@+id/nav_cart"
+            android:icon="@drawable/bottom_bar_cart"
+            android:title="סל הקניות שלי" />
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/bottom_bar_profile"
+            android:title="אזור אישי" />
+    </group>
+
+    <item android:title="הזמנות שלי">
+        <menu>
+            <item
+                android:id="@+id/nav_orders"
+                android:icon="@drawable/bottom_bar_orders"
+                android:title="הזמנות פעילות" />
+            <item
+                android:id="@+id/nav_history"
+                android:icon="@drawable/bottom_bar_orders"
+                android:title="היסטוריית הזמנות" />
+        </menu>
+    </item>
+
+    <item android:title="הגדרות">
+        <menu>
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_launcher_foreground"
+                android:title="הגדרות" />
+        </menu>
+    </item>
+
+    <group android:id="@+id/menu_logout">
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="התנתקות" />
+    </group>
+
+</menu>

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/cart_background"
+    android:layoutDirection="rtl"
     tools:context=".Fragments.CartFragment">
 
     <!-- Top Toolbar -->
@@ -73,6 +74,27 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:spinnerMode="dropdown" />
+
+            <!-- General Order Notes -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilGeneralNotes"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="הערות כלליות להזמנה"
+                app:boxStrokeColor="@color/ice_blue"
+                app:hintTextColor="@color/ice_blue">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etGeneralNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:lines="2"
+                    android:textAlignment="viewStart" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Total -->
             <RelativeLayout

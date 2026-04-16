@@ -28,6 +28,15 @@ public class OrdersFragment extends Fragment {
     private OrdersAdapter adapter;
     private TabLayout tabLayout;
     private List<Order> orderList = new ArrayList<>();
+    private boolean startWithHistory = false;
+
+    public void setStartWithHistory(boolean startWithHistory) {
+        this.startWithHistory = startWithHistory;
+        if (tabLayout != null) {
+            TabLayout.Tab tab = tabLayout.getTabAt(startWithHistory ? 1 : 0);
+            if (tab != null) tab.select();
+        }
+    }
 
     @Nullable
     @Override
@@ -50,7 +59,7 @@ public class OrdersFragment extends Fragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 // If position is 1, it's History, otherwise it's Active Order
-                boolean isHistory = (tab.getPosition() == 1) ? FBRef.HistoryFlag : FBRef.OrderFlag;
+                boolean isHistory = (tab.getPosition() == 1);
                 fetchOrders(isHistory);
             }
 
@@ -61,8 +70,14 @@ public class OrdersFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        // Initial fetch: Active orders
-        fetchOrders(FBRef.OrderFlag);
+        // Check if we should start with history
+        if (startWithHistory) {
+            TabLayout.Tab tab = tabLayout.getTabAt(1);
+            if (tab != null) tab.select();
+            fetchOrders(true);
+        } else {
+            fetchOrders(false);
+        }
     }
 
     private void fetchOrders(boolean isHistory)

@@ -2,6 +2,7 @@ package com.example.CafeteriaApp.Adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -11,12 +12,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.BaseActivity;
+import com.example.CafeteriaApp.Helpers.FileManager;
+import com.example.CafeteriaApp.MainPage;
 import com.example.CafeteriaApp.Models.Order;
+import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.R;
 import com.google.android.material.card.MaterialCardView;
 import com.google.zxing.BarcodeFormat;
@@ -25,9 +30,14 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Adapter for displaying orders in a RecyclerView.
+ * Supports both active orders and historical orders with different layouts.
+ */
 public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_ACTIVE = 0;
@@ -40,13 +50,15 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.ordersList = ordersList;
     }
 
+    /**
+     * Updates the data set and switches between active and history modes.
+     */
     public void setOrders(List<Order> newOrders, boolean isHistory) {
         this.ordersList = newOrders;
         this.isHistoryMode = isHistory;
         notifyDataSetChanged();
     }
     
-    // Support for the old method call in case it's used elsewhere
     public void setOrders(List<Order> newOrders) {
         setOrders(newOrders, false);
     }
@@ -79,11 +91,13 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
+    /**
+     * Binds data for an active order, including real-time status tracking.
+     */
     private void bindActiveOrder(ActiveViewHolder holder, Order order) {
         holder.tvOrderNumber.setText("הזמנה #" + order.getOrderCode());
         holder.tvOrderNumber.setOnClickListener(v -> showPrettyDialog(v.getContext(), order.getOrderCode()));
 
-        // Using the centralized method from BaseActivity
         String statusText = BaseActivity.getStatusText(order.getOrderStatus());
         holder.tvOrderStatus.setText(statusText);
 
@@ -100,6 +114,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         updateStepper(holder, order.getOrderStatus());
     }
 
+    /**
+     * Binds data for a historical order and handles the "Order Again" logic.
+     */
     private void bindHistoryOrder(HistoryViewHolder holder, Order order) {
         holder.tvOrderNumber.setText("הזמנה #" + order.getOrderCode());
         holder.tvItemsDetails.setText(order.getSummary());
@@ -111,9 +128,29 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             holder.tvOrderDate.setText("הוזמן בתאריך: " + parts[0] + ", בשעה " + parts[1].substring(0, 5));
         }
 
-        // Button action if needed
+        // Implementation of "Order Again" functionality
         holder.btnOrderAgain.setOnClickListener(v -> {
-            // Implement logic to add these items back to cart
+            List<Product> itemsToReorder = order.getProducts();
+            if (itemsToReorder != null && !itemsToReorder.isEmpty()) {
+                Context context = v.getContext();
+                
+                // 1. Clear current cart and add items from the history order
+                List<Product> newCart = new ArrayList<>(itemsToReorder);
+                FileManager.saveCart(context, newCart);
+                
+                // 2. Notify the user
+                Toast.makeText(context, "הסל עודכן עם פריטי ההזמנה!", Toast.LENGTH_SHORT).show();
+                
+                // 3. Navigate to the Cart tab using Intent
+                Intent intent = new Intent(context, MainPage.class);
+                intent.putExtra("OPEN_CART", true);
+                // Ensure we don't create multiple instances of MainPage
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                context.startActivity(intent);
+
+            } else {
+                Toast.makeText(v.getContext(), "לא ניתן לשחזר את הפריטים מהזמנה זו.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

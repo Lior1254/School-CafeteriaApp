@@ -22,6 +22,7 @@ public class Order implements Serializable
     private boolean isPaid;
     private double totalPrice;
     private String summary;
+    private String generalNotes; // הערות כלליות להזמנה
 
     public Order() {}
 
@@ -77,4 +78,7 @@ public class Order implements Serializable
 
     public String getSummary() { return summary; }
     public void setSummary(String summary) { this.summary = summary; }
+
+    public String getGeneralNotes() { return generalNotes; }
+    public void setGeneralNotes(String generalNotes) { this.generalNotes = generalNotes; }
 }

@@ -76,7 +76,7 @@
                 app:layout_constraintStart_toStartOf="@id/step1_circle"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Active Green Line -->
+            <!-- Active Line -->
             <View
                 android:id="@+id/view_line_active"
                 android:layout_width="0dp"
@@ -87,7 +87,7 @@
                 app:layout_constraintStart_toStartOf="@id/step1_circle"
                 app:layout_constraintTop_toTopOf="@id/view_line_back" />
 
-            <!-- Step 1: Received -->
+            <!-- Steps -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/step1_circle"
                 android:layout_width="40dp"
@@ -111,14 +111,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/order_status_received"
+                android:text="התקבלה"
                 android:textColor="#212121"
                 android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="@id/step1_circle"
                 app:layout_constraintStart_toStartOf="@id/step1_circle"
                 app:layout_constraintTop_toBottomOf="@id/step1_circle" />
 
-            <!-- Step 2: Preparing -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/step2_circle"
                 android:layout_width="40dp"
@@ -142,7 +141,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/order_status_preparing"
+                android:text="בהכנה"
                 android:textColor="#212121"
                 android:textSize="10sp"
                 android:textStyle="bold"
@@ -150,7 +149,6 @@
                 app:layout_constraintStart_toStartOf="@id/step2_circle"
                 app:layout_constraintTop_toBottomOf="@id/step2_circle" />
 
-            <!-- Step 3: Ready -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/step3_circle"
                 android:layout_width="40dp"
@@ -174,14 +172,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/order_status_ready"
+                android:text="מוכנה"
                 android:textColor="#9E9E9E"
                 android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="@id/step3_circle"
                 app:layout_constraintStart_toStartOf="@id/step3_circle"
                 app:layout_constraintTop_toBottomOf="@id/step3_circle" />
 
-            <!-- Step 4: Collected -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/step4_circle"
                 android:layout_width="40dp"
@@ -204,7 +201,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/order_status_collected"
+                android:text="נאספה"
                 android:textColor="#9E9E9E"
                 android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="@id/step4_circle"
@@ -237,7 +234,7 @@
                     android:id="@+id/tvEstimatedTimeLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/order_estimated_completion"
+                    android:text="זמן משוער לסיום:"
                     android:textColor="#2E7D32"
                     android:textSize="12sp" />
 
@@ -260,7 +257,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
-            android:text="@string/order_items_label"
+            android:text="פירוט ההזמנה:"
             android:textColor="#757575"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -279,7 +276,7 @@
             app:layout_constraintTop_toBottomOf="@id/tvSummaryLabel"
             tools:text="Rib meal, Fries, Coke Zero" />
 
-        <!-- Divider -->
+        <!-- Footer Divider -->
         <View
             android:id="@+id/footerDivider"
             android:layout_width="match_parent"

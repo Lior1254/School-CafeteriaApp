@@ -17,6 +17,7 @@ import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class CustomizeItemActivity extends BaseActivity
     RecyclerView Addons;
     Button btn_AddToCart;
     ImageButton ibtn_plus_item, ibtn_minus_item;
+    TextInputEditText etNotes;
     Product item;
 
     private int amount_of_products = 1;
@@ -69,6 +71,7 @@ public class CustomizeItemActivity extends BaseActivity
         ibtn_plus_item = findViewById(R.id.ibtn_plus_item);
         ibtn_minus_item = findViewById(R.id.ibtn_minus_item);
         btn_AddToCart = findViewById(R.id.btn_AddToCart);
+        etNotes = findViewById(R.id.etNotes);
     }
 
     private void setupUI()
@@ -106,6 +109,11 @@ public class CustomizeItemActivity extends BaseActivity
         tv_amount_of_items.setText(String.valueOf(amount_of_products));
         tv_price.setText(item.getPriceText());
         btn_AddToCart.setText(AddBtnText + "   " + "₪" + String.format("%.2f", totalPrice));
+
+        // Load existing notes if in edit mode
+        if (item.getNotes() != null) {
+            etNotes.setText(item.getNotes());
+        }
 
         if (item.getImageBitmap() == null && CustomizeItemActivity.selectedImageBitmap != null) {
              item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
@@ -209,6 +217,7 @@ public class CustomizeItemActivity extends BaseActivity
     {
         item.setPrice(price);
         item.setAmount(amount_of_products);
+        item.setNotes(etNotes.getText() != null ? etNotes.getText().toString().trim() : "");
 
         List<Product> currentCart = FileManager.loadCart(this);
         

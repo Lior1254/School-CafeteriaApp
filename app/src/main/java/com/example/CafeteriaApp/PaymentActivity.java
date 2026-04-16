@@ -35,6 +35,7 @@ public class PaymentActivity extends BaseActivity {
     private double subtotal = 0;
     private final double serviceFee = 3.50;
     private String pickupTime = "";
+    private String generalNotes = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +44,7 @@ public class PaymentActivity extends BaseActivity {
 
         totalAmount = getIntent().getDoubleExtra("total_amount", 0);
         pickupTime = getIntent().getStringExtra("pickup_time");
+        generalNotes = getIntent().getStringExtra("general_notes");
 
         if (pickupTime != null && pickupTime.contains(" ")) {
             pickupTime = pickupTime.split(" ")[0].trim();
@@ -135,13 +137,15 @@ public class PaymentActivity extends BaseActivity {
                 totalAmount
         );
         
-        order.setSummary(orderSummary); // Set the actual list of products as summary
+        order.setSummary(orderSummary);
+        order.setGeneralNotes(generalNotes); // Upload general notes to Firebase
 
         FBRef.uploadOrder(order, new FBRef.FBListener() {
             @Override
             public void onSuccess() {
                 pd.dismiss();
                 FileManager.saveCart(PaymentActivity.this, new ArrayList<>());
+                FileManager.saveGeneralNotes(PaymentActivity.this, ""); // Clear notes after upload
                 finalizePayment(paymentMethod);
             }
 
