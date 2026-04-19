@@ -8,6 +8,10 @@ import java.io.Serializable;
  */
 public class User implements Serializable
 {
+    public static final int ROLE_USER = 0;    // משתמש רגיל
+    public static final int ROLE_COOK = 1;    // טבח
+    public static final int ROLE_MANAGER = 3; // מנהל קפיטריה
+
     private String uid;
     private String name;
     private String email;
@@ -15,6 +19,7 @@ public class User implements Serializable
     private String phoneNumber;
     private String school;
     private String classRoom;
+    private int role = ROLE_USER; // ברירת מחדל: משתמש רגיל (0)
 
     /**
      * Default constructor required for Firebase.
@@ -25,14 +30,6 @@ public class User implements Serializable
 
     /**
      * Constructs a UserData object with all details.
-     *
-     * @param uid         Unique user ID from authentication.
-     * @param name        Full name of the user.
-     * @param email       Email address.
-     * @param username    Chosen username.
-     * @param phoneNumber Contact phone number.
-     * @param school      Name of the school.
-     * @param classRoom   Classroom identifier (e.g., "12-A").
      */
     public User(String uid, String name, String email, String username, String phoneNumber,
                 String school, String classRoom)
@@ -44,51 +41,39 @@ public class User implements Serializable
         this.phoneNumber = phoneNumber;
         this.school = school;
         this.classRoom = classRoom;
+        this.role = ROLE_USER;
     }
 
-    // Getters
-    public String getUid()
+    // Constructor with role
+    public User(String uid, String name, String email, String username, String phoneNumber,
+                String school, String classRoom, int role)
     {
-        return uid;
+        this(uid, name, email, username, phoneNumber, school, classRoom);
+        this.role = role;
     }
 
-    public String getName()
-    {
-        return name;
-    }
+    // Getters and Setters
+    public String getUid() { return uid; }
+    public void setUid(String uid) { this.uid = uid; }
 
-    /**
-     * Returns the first name by splitting the full name.
-     * @return The first part of the name string.
-     */
-    public String getFirstName()
-    {
-        if (name == null || name.isEmpty()) return "";
-        return name.split(" ")[0];
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getEmail()
-    {
-        return email;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getUsername()
-    {
-        return username;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getPhoneNumber()
-    {
-        return phoneNumber;
-    }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-    public String getSchool()
-    {
-        return school;
-    }
+    public String getSchool() { return school; }
+    public void setSchool(String school) { this.school = school; }
 
-    public String getClassRoom()
-    {
-        return classRoom;
-    }
+    public String getClassRoom() { return classRoom; }
+    public void setClassRoom(String classRoom) { this.classRoom = classRoom; }
+
+    public int getRole() { return role; }
+    public void setRole(int role) { this.role = role; }
 }

@@ -1,7 +1,11 @@
 package com.example.CafeteriaApp.Fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -66,6 +70,24 @@ public class CartFragment extends Fragment
         loadCartData();
     }
 
+    /**
+     * Local method to check internet connection within the fragment.
+     */
+    private boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = (cm != null) ? cm.getActiveNetworkInfo() : null;
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnected();
+
+        if (!isConnected) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("שגיאת חיבור")
+                    .setMessage("פעולה זו דורשת חיבור לאינטרנט כדי לבצע תשלום.")
+                    .setPositiveButton("Ok", null)
+                    .show();
+        }
+        return isConnected;
+    }
+
     private void initializeViews(View view)
     {
         rvCartItems = view.findViewById(R.id.rvOrders);
@@ -74,15 +96,12 @@ public class CartFragment extends Fragment
         spinPickupTime = view.findViewById(R.id.spin_pickup_time);
         etGeneralNotes = view.findViewById(R.id.etGeneralNotes);
 
-        // Save general notes as the user types
         if (etGeneralNotes != null) {
             etGeneralNotes.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
                 @Override
                 public void afterTextChanged(Editable s) {
                     FileManager.saveGeneralNotes(requireContext(), s.toString().trim());
@@ -91,21 +110,28 @@ public class CartFragment extends Fragment
         }
 
         btnCheckout.setOnClickListener(v -> {
+            // 1. בדיקת אינטרנט
+            if (!isNetworkAvailable()) {
+                return;
+            }
+
+            // 2. בדיקת סל ריק
             if (cartItems.isEmpty() ) {
                 Toast.makeText(getContext(), "הסל שלך ריק", Toast.LENGTH_SHORT).show();
                 return;
             }
             
+            // 3. בדיקת זמן איסוף
             String selectedTime = spinPickupTime.getSelectedItem().toString();
             if (selectedTime.equals("לא ניתן להזמין להיום")) {
                 Toast.makeText(getContext(), "הקפיטריה סגורה כעת", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            // מעבר לתשלום
             Intent intent = new Intent(getActivity(), PaymentActivity.class);
             intent.putExtra("total_amount", currentTotal);
             intent.putExtra("pickup_time", selectedTime);
-            // Pass general notes to payment
             intent.putExtra("general_notes", FileManager.loadGeneralNotes(requireContext()));
             startActivityForResult(intent, PAYMENT_REQUEST_CODE);
         });
@@ -174,7 +200,7 @@ public class CartFragment extends Fragment
     private void clearCart() {
         cartItems.clear();
         FileManager.saveCart(requireContext(), new ArrayList<>());
-        FileManager.saveGeneralNotes(requireContext(), ""); // Clear notes after successful order
+        FileManager.saveGeneralNotes(requireContext(), "");
         if (etGeneralNotes != null) {
             etGeneralNotes.setText("");
         }
@@ -205,7 +231,6 @@ public class CartFragment extends Fragment
 
             @Override
             public void onEditClick(Product item, int position) {
-                // Pass the item, its current position in the list, and the edit flag
                 Intent intent = new Intent(requireContext(), CustomizeItemActivity.class);
                 intent.putExtra("item", item);
                 intent.putExtra("position", position);
@@ -228,7 +253,6 @@ public class CartFragment extends Fragment
             adapter.notifyDataSetChanged();
         }
         
-        // Load general notes
         if (etGeneralNotes != null) {
             etGeneralNotes.setText(FileManager.loadGeneralNotes(requireContext()));
         }

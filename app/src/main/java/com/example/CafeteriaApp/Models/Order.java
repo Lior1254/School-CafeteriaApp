@@ -23,6 +23,7 @@ public class Order implements Serializable
     private double totalPrice;
     private String summary;
     private String generalNotes; // הערות כלליות להזמנה
+    private int role = User.ROLE_USER; // תפקיד המשתמש בזמן ההזמנה
 
     public Order() {}
 
@@ -40,6 +41,9 @@ public class Order implements Serializable
         this.paymentMethod = paymentMethod;
         this.isPaid = isPaid;
         this.totalPrice = totalPrice;
+        if (user != null) {
+            this.role = user.getRole();
+        }
     }
 
     // Getters and Setters
@@ -81,4 +85,7 @@ public class Order implements Serializable
 
     public String getGeneralNotes() { return generalNotes; }
     public void setGeneralNotes(String generalNotes) { this.generalNotes = generalNotes; }
+
+    public int getRole() { return role; }
+    public void setRole(int role) { this.role = role; }
 }

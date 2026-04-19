@@ -1,10 +1,10 @@
 package com.example.CafeteriaApp.Fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,8 +16,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.CafeteriaApp.Adapters.OrdersAdapter;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Order;
+import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,16 +32,14 @@ public class OrdersFragment extends Fragment {
     private RecyclerView recyclerView;
     private OrdersAdapter adapter;
     private TabLayout tabLayout;
+    private TextView tvTitle;
     private List<Order> orderList = new ArrayList<>();
-    private boolean startWithHistory = false;
+    private int userRole = User.ROLE_USER;
 
-    public void setStartWithHistory(boolean startWithHistory) {
-        this.startWithHistory = startWithHistory;
-        if (tabLayout != null) {
-            TabLayout.Tab tab = tabLayout.getTabAt(startWithHistory ? 1 : 0);
-            if (tab != null) tab.select();
-        }
-    }
+    private ValueEventListener currentOrdersListener;
+    private ValueEventListener activeCountListener;
+    private ValueEventListener historyCountListener;
+    private boolean isHistoryTab = false;
 
     @Nullable
     @Override
@@ -50,64 +53,142 @@ public class OrdersFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.rvOrders);
         tabLayout = view.findViewById(R.id.tabLayoutOrders);
+        tvTitle = view.findViewById(R.id.tvOrdersTitle);
         
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new OrdersAdapter(orderList);
         recyclerView.setAdapter(adapter);
 
+        if (tabLayout.getTabAt(0) != null) tabLayout.getTabAt(0).setText("פעילות (0)");
+        if (tabLayout.getTabAt(1) != null) tabLayout.getTabAt(1).setText("היסטוריה (0)");
+
+        checkUserRoleAndSetTitle();
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                // If position is 1, it's History, otherwise it's Active Order
-                boolean isHistory = (tab.getPosition() == 1);
-                fetchOrders(isHistory);
+                isHistoryTab = (tab.getPosition() == 1);
+                startListeningToOrders();
             }
-
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {}
-
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
         });
-
-        // Check if we should start with history
-        if (startWithHistory) {
-            TabLayout.Tab tab = tabLayout.getTabAt(1);
-            if (tab != null) tab.select();
-            fetchOrders(true);
-        } else {
-            fetchOrders(false);
-        }
     }
 
-    private void fetchOrders(boolean isHistory)
-    {
-        if (adapter != null)
-        {
-            adapter.setOrders(new ArrayList<>(), isHistory);
-        }
+    private void checkUserRoleAndSetTitle() {
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid == null) return;
 
-        FBRef.downloadOrderForUser(isHistory, new FBRef.FBListener() {
+        FBRef.refUsers.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                User user = snapshot.getValue(User.class);
+                if (user != null) {
+                    userRole = user.getRole();
+                    if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) {
+                        if (tvTitle != null) tvTitle.setText("הזמנות");
+                    }
+                    // Start listeners only after we know the role
+                    startListeningToAllCounts();
+                    startListeningToOrders();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void startListeningToAllCounts() {
+        // Active count listener
+        activeCountListener = FBRef.listenToOrdersByRoleLive(userRole, false, new FBRef.FBListener() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof List) updateTabTitles(false, ((List<?>) data).size());
+            }
+            @Override public void onSuccess() {}
+            @Override public void onFailure(String error) {}
+        });
+
+        // History count listener
+        historyCountListener = FBRef.listenToOrdersByRoleLive(userRole, true, new FBRef.FBListener() {
+            @Override
+            public void onSuccess(Object data) {
+                if (data instanceof List) updateTabTitles(true, ((List<?>) data).size());
+            }
+            @Override public void onSuccess() {}
+            @Override public void onFailure(String error) {}
+        });
+    }
+
+    private void startListeningToOrders() {
+        stopOrdersListener();
+
+        currentOrdersListener = FBRef.listenToOrdersByRoleLive(userRole, isHistoryTab, new FBRef.FBListener() {
             @Override
             @SuppressWarnings("unchecked")
             public void onSuccess(Object data) {
                 if (data instanceof List) {
-                    List<Order> myOrders = (List<Order>) data;
-                    if (adapter != null) {
-                        adapter.setOrders(myOrders, isHistory);
-                    }
+                    List<Order> orders = (List<Order>) data;
+                    adapter.setOrders(orders, isHistoryTab);
+                    updateTabTitles(isHistoryTab, orders.size());
                 }
             }
-
-            @Override
-            public void onSuccess() {}
-
-            @Override
-            public void onFailure(String error) {
-                if (getContext() != null) {
-                    Toast.makeText(getContext(), "שגיאה בטעינת נתונים: " + error, Toast.LENGTH_SHORT).show();
-                }
+            @Override public void onSuccess() {}
+            @Override public void onFailure(String error) {
+                if (getContext() != null) Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void stopOrdersListener() {
+        if (currentOrdersListener != null) {
+            if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) {
+                FBRef.refOrders.removeEventListener(currentOrdersListener);
+            } else {
+                String uid = FirebaseAuth.getInstance().getUid();
+                if (uid != null) FBRef.getUserOrdersRef(uid, isHistoryTab).removeEventListener(currentOrdersListener);
+            }
+            currentOrdersListener = null;
+        }
+    }
+
+    private void stopAllListeners() {
+        stopOrdersListener();
+        if (activeCountListener != null) {
+            if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) FBRef.refOrders.removeEventListener(activeCountListener);
+            else {
+                String uid = FirebaseAuth.getInstance().getUid();
+                if (uid != null) FBRef.getUserOrdersRef(uid, false).removeEventListener(activeCountListener);
+            }
+            activeCountListener = null;
+        }
+        if (historyCountListener != null) {
+            if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) FBRef.refOrders.removeEventListener(historyCountListener);
+            else {
+                String uid = FirebaseAuth.getInstance().getUid();
+                if (uid != null) FBRef.getUserOrdersRef(uid, true).removeEventListener(historyCountListener);
+            }
+            historyCountListener = null;
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopAllListeners();
+    }
+
+    private void updateTabTitles(boolean isHistory, int count) {
+        if (!isAdded()) return;
+        TabLayout.Tab activeTab = tabLayout.getTabAt(0);
+        TabLayout.Tab historyTab = tabLayout.getTabAt(1);
+
+        if (isHistory && historyTab != null) {
+            historyTab.setText("היסטוריה (" + count + ")");
+        } else if (!isHistory && activeTab != null) {
+            activeTab.setText("פעילות (" + count + ")");
+        }
     }
 }

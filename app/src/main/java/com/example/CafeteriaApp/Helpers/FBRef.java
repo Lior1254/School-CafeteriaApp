@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import com.example.CafeteriaApp.BaseActivity;
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.Models.Product;
+import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -60,94 +61,61 @@ public class FBRef
     }
 
     /**
-     * Listens specifically for changes in orders (status updates, etc.)
-     * This triggers ONLY for the specific order that was modified.
+     * Real-time listener for orders based on role.
      */
-    public static void observeOrderUpdates(Context context, FBListener listener) {
-        if (context == null) return;
-        FirebaseUser currentUser = refAuth.getCurrentUser();
-        if (currentUser == null) return;
-
-        getUserOrdersRef(currentUser.getUid(), false)
-                .addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                        // Triggers when a new order is created
-                    }
-
-                    @Override
-                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                        // THIS IS WHAT YOU NEED: Triggers only when an existing order is updated
-                        Order updatedOrder = snapshot.getValue(Order.class);
-                        if (updatedOrder != null && context != null) {
-                            if (listener != null) listener.onSuccess(updatedOrder);
-
-                            // Construct the Hebrew message: "ההזמנה שלך היא [סטטוס]"
-                            String statusText = BaseActivity.getStatusText(updatedOrder.getOrderStatus());
-                            String message = "ההזמנה שלך היא: " + statusText;
-
-                            try {
-                                Intent intent = new Intent(context, AlarmReceiver.class);
-                                intent.setPackage(context.getPackageName()); // Ensure it reaches your app
-                                intent.putExtra("Type", AlarmReceiver.OrderStatus);
-                                intent.putExtra("text", message);
-                                
-                                // Convert String ID to int for notification compatibility if possible
-                                String orderIdStr = updatedOrder.getOrderId();
-                                if (orderIdStr != null) {
-                                    try {
-                                        intent.putExtra("orderID", Integer.parseInt(orderIdStr));
-                                    } catch (NumberFormatException e) {
-                                        intent.putExtra("orderID", (int) System.currentTimeMillis());
-                                    }
-                                } else {
-                                    intent.putExtra("orderID", (int) System.currentTimeMillis());
+    public static ValueEventListener listenToOrdersByRoleLive(int role, boolean isHistory, FBListener listener) {
+        if (role == User.ROLE_COOK || role == User.ROLE_MANAGER) {
+            // Admin/Cook listens to ALL orders
+            ValueEventListener vel = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    List<Order> allOrders = new ArrayList<>();
+                    for (DataSnapshot statusSnap : snapshot.getChildren()) {
+                        String status = statusSnap.getKey();
+                        boolean isOrderStatusHistory = "3".equals(status);
+                        if (isHistory == isOrderStatusHistory) {
+                            for (DataSnapshot timeSnap : statusSnap.getChildren()) {
+                                for (DataSnapshot orderSnap : timeSnap.getChildren()) {
+                                    Order o = orderSnap.getValue(Order.class);
+                                    if (o != null) allOrders.add(o);
                                 }
-
-                                context.sendBroadcast(intent);
-                            } catch (Exception e) {
-                                Log.e("FBRef", "Failed to send broadcast", e);
                             }
                         }
                     }
+                    listener.onSuccess(allOrders);
+                }
 
-                    @Override
-                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {}
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    listener.onFailure(error.getMessage());
+                }
+            };
+            refOrders.addValueEventListener(vel);
+            return vel;
+        } else {
+            // Regular user listens only to their own orders
+            FirebaseUser currentUser = refAuth.getCurrentUser();
+            if (currentUser == null) return null;
 
-                    @Override
-                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        if (listener != null) listener.onFailure(error.getMessage());
+            ValueEventListener vel = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    List<Order> orderList = new ArrayList<>();
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        Order order = child.getValue(Order.class);
+                        if (order != null) orderList.add(order);
                     }
-                });
-    }
+                    listener.onSuccess(orderList);
+                }
 
-    /**
-     * Legacy method: Listens for the whole list of orders (good for RecyclerView).
-     */
-    public static void listenToUserOrders(FBListener listener) {
-        FirebaseUser currentUser = refAuth.getCurrentUser();
-        if (currentUser == null) return;
-
-        getUserOrdersRef(currentUser.getUid(), false)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        List<Order> orders = new ArrayList<>();
-                        for (DataSnapshot child : snapshot.getChildren()) {
-                            Order order = child.getValue(Order.class);
-                            if (order != null) orders.add(order);
-                        }
-                        if (listener != null) listener.onSuccess(orders);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        if (listener != null) listener.onFailure(error.getMessage());
-                    }
-                });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    listener.onFailure(error.getMessage());
+                }
+            };
+            getUserOrdersRef(currentUser.getUid(), isHistory).addValueEventListener(vel);
+            return vel;
+        }
     }
 
     public static void uploadOrder(Order order, FBListener listener)
@@ -177,52 +145,16 @@ public class FBRef
         FirebaseUser currentUser = refAuth.getCurrentUser();
         if (currentUser == null) return;
 
-        String uid = currentUser.getUid();
-        String requestedTime = order.getRequestedTime();
-        
-        if (requestedTime == null) {
-            if (listener != null) listener.onFailure("Requested time is null");
-            return;
-        }
-        
-        getUserOrdersRef(uid, isHistory)
-                .child(requestedTime)
+        // FIX: Use orderId instead of requestedTime to allow multiple orders at the same time
+        getUserOrdersRef(currentUser.getUid(), isHistory)
+                .child(order.getOrderId())
                 .setValue(order)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (listener != null) listener.onSuccess();
                     } else {
                         if (listener != null) listener.onFailure(task.getException() != null ? 
-                                task.getException().getMessage() : "Unknown user order upload error");
-                    }
-                });
-    }
-
-    public static void downloadOrderForUser(boolean isHistory, FBListener listener)
-    {
-        FirebaseUser currentUser = refAuth.getCurrentUser();
-        if (currentUser == null) return;
-
-        String uid = currentUser.getUid();
-        getUserOrdersRef(uid, isHistory)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<Order> orderList = new ArrayList<>();
-                        DataSnapshot snapshot = task.getResult();
-                        if (snapshot != null && snapshot.exists()) {
-                            for (DataSnapshot child : snapshot.getChildren()) {
-                                Order order = child.getValue(Order.class);
-                                if (order != null) {
-                                    orderList.add(order);
-                                }
-                            }
-                        }
-                        if (listener != null) listener.onSuccess(orderList);
-                    } 
-                    else {
-                        if (listener != null && task.getException() != null) 
-                            listener.onFailure(task.getException().getMessage());
+                                task.getException().getMessage() : "Error");
                     }
                 });
     }
@@ -230,7 +162,6 @@ public class FBRef
     public static void loadProductImage(Product product, ImageView imageView)
     {
         if (product == null || imageView == null) return;
-        
         String productId = product.getId();
         imageView.setTag(productId);
 
@@ -256,24 +187,6 @@ public class FBRef
                     imageView.setImageBitmap(bitmap);
                 }
             }
-        }).addOnFailureListener(e ->
-        {
-            StorageReference rootRef = refStorage.child(productId + ".jpg");
-            rootRef.getBytes(MAX_SIZE).addOnSuccessListener(bytes ->
-            {
-                if (productId.equals(imageView.getTag()))
-                {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    if (bitmap != null) {
-                        product.setImageBitmap(bitmap);
-                        imageView.setImageBitmap(bitmap);
-                    }
-                }
-            }).addOnFailureListener(e2 -> {
-                 if (productId.equals(imageView.getTag())) {
-                     imageView.setImageResource(R.drawable.ic_launcher_background);
-                 }
-            });
-        });
+        }).addOnFailureListener(e -> {});
     }
 }
