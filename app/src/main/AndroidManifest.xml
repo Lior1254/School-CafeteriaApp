@@ -26,18 +26,21 @@
         <activity
             android:name=".Authentication.SignUpPage"
             android:exported="false" />
+        
+        <!-- LoginPage is now the Launcher activity -->
         <activity
             android:name=".Authentication.LoginPage"
-            android:exported="false"
-            android:supportsRtl="true" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:supportsRtl="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
 
     </application>
 
