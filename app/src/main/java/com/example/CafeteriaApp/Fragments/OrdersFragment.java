@@ -77,6 +77,21 @@ public class OrdersFragment extends Fragment {
         });
     }
 
+    /**
+     * Public method to switch tabs from outside (like MainPage)
+     */
+    public void switchToTab(int position) {
+        if (tabLayout != null) {
+            TabLayout.Tab tab = tabLayout.getTabAt(position);
+            if (tab != null) {
+                tab.select();
+            }
+        } else {
+            // If tabLayout is not yet created, save it for later
+            isHistoryTab = (position == 1);
+        }
+    }
+
     private void checkUserRoleAndSetTitle() {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;

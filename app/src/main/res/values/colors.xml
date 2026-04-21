@@ -73,4 +73,7 @@
     <color name="checkout_button_orange">#FF9800</color>
     <color name="quantity_button_bg">#F0F0F0</color>
 
+    <!-- Navigation Colors -->
+    <color name="nav_logout_red">#FFEBEE</color>
+
 </resources>

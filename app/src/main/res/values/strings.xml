@@ -30,15 +30,15 @@
     <string name="cart_promo_code_hint">הוסף קוד קופון</string>
     <string name="cart_order_summary">סיכום הזמנה</string>
     <string name="cart_subtotal">סכום ביניים</string>
-    <string name="cart_taxes_and_fees">מיסים ועמלות</string>
+    <string name="cart_taxes_and_fees">מע"מ (18%)</string>
     <string name="cart_total">סה\"כ</string>
     <string name="cart_proceed_to_checkout">לתשלום</string>
 
     <!-- Payment Screen -->
     <string name="payment_title">אמצעי תשלום</string>
     <string name="payment_total_amount">סה\"כ לתשלום</string>
-    <string name="payment_subtotal">סכום ביניים</string>
-    <string name="payment_service_fee">עמלת שירות</string>
+    <string name="payment_subtotal">סכום ביניים (ללא מע"מ)</string>
+    <string name="payment_service_fee">מע"מ (18%)</string>
     <string name="payment_select_method">בחר אמצעי תשלום</string>
     <string name="payment_google_pay">Google Pay</string>
     <string name="payment_gpay_subtitle">תשלום מהיר ומאובטח</string>

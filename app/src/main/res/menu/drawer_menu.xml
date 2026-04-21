@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:id="@+id/menu_main" android:checkableBehavior="single">
         <item
@@ -15,35 +14,23 @@
             android:id="@+id/nav_profile"
             android:icon="@drawable/bottom_bar_profile"
             android:title="אזור אישי" />
-    </group>
-
-    <item android:title="הזמנות שלי">
-        <menu>
-            <item
-                android:id="@+id/nav_orders"
-                android:icon="@drawable/bottom_bar_orders"
-                android:title="הזמנות פעילות" />
-            <item
-                android:id="@+id/nav_history"
-                android:icon="@drawable/bottom_bar_orders"
-                android:title="היסטוריית הזמנות" />
-        </menu>
-    </item>
-
-    <item android:title="הגדרות">
-        <menu>
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_launcher_foreground"
-                android:title="הגדרות" />
-        </menu>
-    </item>
-
-    <group android:id="@+id/menu_logout">
         <item
-            android:id="@+id/nav_logout"
-            android:icon="@drawable/ic_launcher_foreground"
-            android:title="התנתקות" />
+            android:id="@+id/nav_orders"
+            android:icon="@drawable/bottom_bar_orders"
+            android:title="הזמנות פעילות" />
+        <item
+            android:id="@+id/nav_history"
+            android:icon="@android:drawable/ic_menu_recent_history"
+            android:title="היסטוריית הזמנות" />
     </group>
+
+    <item android:title="חשבון">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@android:drawable/ic_lock_power_off"
+                android:title="התנתקות" />
+        </menu>
+    </item>
 
 </menu>

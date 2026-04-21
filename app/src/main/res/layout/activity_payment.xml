@@ -94,7 +94,7 @@
 
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/payment_service_fee" android:textColor="#E6FFFFFF" android:layout_alignParentStart="true"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₪3.50" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                        <TextView android:id="@+id/tv_vat_amount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₪0.00" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_alignParentEnd="true"/>
                     </RelativeLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -22,7 +22,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:menu="@menu/menu_top_appbar"
             app:navigationIcon="@drawable/ic_menu_burger"
             app:title=""
             app:titleCentered="false" />
@@ -77,7 +76,9 @@
         app:itemShapeFillColor="@color/sky"
         app:itemShapeInsetStart="12dp"
         app:itemShapeInsetEnd="12dp"
-        app:itemVerticalPadding="8dp"
+        app:itemShapeInsetTop="12dp"
+        app:itemShapeInsetBottom="12dp"
+        app:itemVerticalPadding="20dp"
         app:itemShapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.Corner.Medium" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

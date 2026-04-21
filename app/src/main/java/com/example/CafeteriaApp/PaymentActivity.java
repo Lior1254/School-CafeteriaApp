@@ -33,7 +33,7 @@ public class PaymentActivity extends BaseActivity {
     
     private double totalAmount = 0;
     private double subtotal = 0;
-    private final double serviceFee = 3.50;
+    private double vatAmount = 0;
     private String pickupTime = "";
     private String generalNotes = "";
 
@@ -50,8 +50,10 @@ public class PaymentActivity extends BaseActivity {
             pickupTime = pickupTime.split(" ")[0].trim();
         }
 
-        subtotal = totalAmount - serviceFee;
-        if (subtotal < 0) subtotal = 0;
+        // Calculation: Total = Subtotal + VAT(18%)
+        // Total = Subtotal * 1.18 => Subtotal = Total / 1.18
+        subtotal = totalAmount / 1.18;
+        vatAmount = totalAmount - subtotal;
 
         initializeViews();
         updateUI();
@@ -72,6 +74,12 @@ public class PaymentActivity extends BaseActivity {
     private void updateUI() {
         tvTotal.setText(String.format("₪%.2f", totalAmount));
         tvSubtotal.setText(String.format("₪%.2f", subtotal));
+        
+        // Update VAT text in the layout if possible
+        TextView tvVatLabel = findViewById(R.id.tv_vat_amount); // Need to check if id exists
+        if (tvVatLabel != null) {
+            tvVatLabel.setText(String.format("₪%.2f", vatAmount));
+        }
     }
 
     public void onBackClick(View view) { finish(); }
@@ -86,6 +94,11 @@ public class PaymentActivity extends BaseActivity {
     }
 
     public void onConfirmOrderClick(View view) {
+        // בדיקת אינטרנט לפני שליחת הזמנה
+        if (!checkNetworkAndShowDialog()) {
+            return;
+        }
+
         String method = "";
         if (radioGPay.isChecked()) method = getString(R.string.payment_google_pay);
         else if (radioCredit.isChecked()) method = getString(R.string.payment_credit_card);
@@ -109,6 +122,8 @@ public class PaymentActivity extends BaseActivity {
         String shortCode = String.valueOf(new Random().nextInt(9000) + 1000);
         List<Product> cartItems = FileManager.loadCart(this);
         String userId = FBRef.refAuth.getUid();
+        
+        // Get user data from intent or Firebase if null
         User user = (User) getIntent().getSerializableExtra("user_data");
 
         // --- Build Summary String ---
@@ -138,14 +153,14 @@ public class PaymentActivity extends BaseActivity {
         );
         
         order.setSummary(orderSummary);
-        order.setGeneralNotes(generalNotes); // Upload general notes to Firebase
+        order.setGeneralNotes(generalNotes);
 
         FBRef.uploadOrder(order, new FBRef.FBListener() {
             @Override
             public void onSuccess() {
                 pd.dismiss();
                 FileManager.saveCart(PaymentActivity.this, new ArrayList<>());
-                FileManager.saveGeneralNotes(PaymentActivity.this, ""); // Clear notes after upload
+                FileManager.saveGeneralNotes(PaymentActivity.this, "");
                 finalizePayment(paymentMethod);
             }
 
