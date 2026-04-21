@@ -105,6 +105,12 @@ public class OrdersFragment extends Fragment {
                     if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) {
                         if (tvTitle != null) tvTitle.setText("הזמנות");
                     }
+                    
+                    // IMPORTANT: Pass the role to the adapter so it knows how to handle clicks
+                    if (adapter != null) {
+                        adapter.setCurrentUserRole(userRole);
+                    }
+
                     // Start listeners only after we know the role
                     startListeningToAllCounts();
                     startListeningToOrders();

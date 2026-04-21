@@ -46,6 +46,15 @@ public class LoginPage extends BaseActivity
         setContentView(R.layout.activity_login_page);
         initializeViews();
 
+        // Check internet before attempting auto-login
+        if (isNetworkAvailable()) {
+            attemptAutoLogin();
+        } else {
+            showWarning("  אין חיבור לאינטרנט. אנא התחבר ונסה שוב.");
+        }
+    }
+
+    private void attemptAutoLogin() {
         // 1. Check if Firebase remembers the session
         FirebaseUser currentUser = FBRef.refAuth.getCurrentUser();
         if (currentUser != null)

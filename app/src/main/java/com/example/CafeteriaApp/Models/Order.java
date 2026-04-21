@@ -1,5 +1,6 @@
 package com.example.CafeteriaApp.Models;
 
+import com.google.firebase.database.PropertyName;
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,19 +12,19 @@ public class Order implements Serializable
     public static final String STATUS_COLLECTED = "3";
 
     private String orderId;
-    private String userId; // המזהה של המשתמש שביצע את ההזמנה
-    private String orderCode; // מספר רנדומלי קצר (למשל 5967)
+    private String userId; 
+    private String orderCode;
     private String orderStatus; 
-    private String orderReceivedTime; // הזמן שמשמש כמפתח בעץ (YYYY-MM-DD...)
+    private String orderReceivedTime;
     private List<Product> products;
-    private User user; // אובייקט המשתמש המלא
-    private String requestedTime; // שעת האיסוף מה-Spinner
+    private User user;
+    private String requestedTime;
     private String paymentMethod;
     private boolean isPaid;
     private double totalPrice;
     private String summary;
-    private String generalNotes; // הערות כלליות להזמנה
-    private int role = User.ROLE_USER; // תפקיד המשתמש בזמן ההזמנה
+    private String generalNotes;
+    private int role = User.ROLE_USER;
 
     public Order() {}
 
@@ -46,7 +47,6 @@ public class Order implements Serializable
         }
     }
 
-    // Getters and Setters
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
 
@@ -56,8 +56,19 @@ public class Order implements Serializable
     public String getOrderCode() { return orderCode; }
     public void setOrderCode(String orderCode) { this.orderCode = orderCode; }
 
+    @PropertyName("orderStatus")
     public String getOrderStatus() { return orderStatus; }
-    public void setOrderStatus(String orderStatus) { this.orderStatus = orderStatus; }
+    
+    @PropertyName("orderStatus")
+    public void setOrderStatus(Object status) {
+        if (status instanceof Long) {
+            this.orderStatus = String.valueOf(status);
+        } else if (status instanceof String) {
+            this.orderStatus = (String) status;
+        } else {
+            this.orderStatus = STATUS_PENDING;
+        }
+    }
 
     public String getOrderReceivedTime() { return orderReceivedTime; }
     public void setOrderReceivedTime(String orderReceivedTime) { this.orderReceivedTime = orderReceivedTime; }
@@ -74,7 +85,9 @@ public class Order implements Serializable
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
+    @PropertyName("paid")
     public boolean isPaid() { return isPaid; }
+    @PropertyName("paid")
     public void setPaid(boolean paid) { isPaid = paid; }
 
     public double getTotalPrice() { return totalPrice; }

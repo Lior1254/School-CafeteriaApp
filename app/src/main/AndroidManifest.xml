@@ -24,6 +24,9 @@
             android:name=".MainPage"
             android:exported="false" />
         <activity
+            android:name=".CookOrderDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".Authentication.SignUpPage"
             android:exported="false" />
         

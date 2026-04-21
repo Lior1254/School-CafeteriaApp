@@ -29,7 +29,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      * Checks for internet connection and shows a dialog if disconnected.
      * @return true if connected, false otherwise.
      */
-    protected boolean checkNetworkAndShowDialog() {
+    public boolean checkNetworkAndShowDialog() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = (cm != null) ? cm.getActiveNetworkInfo() : null;
         boolean isConnected = activeNetwork != null && activeNetwork.isConnected();
@@ -57,7 +57,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      * Checks if the network is available.
      * @return true if available, false otherwise.
      */
-    protected boolean isNetworkAvailable() {
+    public boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = (cm != null) ? cm.getActiveNetworkInfo() : null;
         return activeNetwork != null && activeNetwork.isConnected();

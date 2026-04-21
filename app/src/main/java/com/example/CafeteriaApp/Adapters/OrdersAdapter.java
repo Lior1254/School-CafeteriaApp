@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +20,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.BaseActivity;
+import com.example.CafeteriaApp.CookOrderDetailsActivity;
+import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.MainPage;
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.Models.Product;
+import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.card.MaterialCardView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -45,9 +52,14 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private List<Order> ordersList;
     private boolean isHistoryMode = false;
+    private int currentUserRole = User.ROLE_USER; // Default to user
 
     public OrdersAdapter(List<Order> ordersList) {
         this.ordersList = ordersList;
+    }
+
+    public void setCurrentUserRole(int role) {
+        this.currentUserRole = role;
     }
 
     /**
@@ -91,12 +103,15 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    /**
-     * Binds data for an active order, including real-time status tracking.
-     */
-    private void bindActiveOrder(ActiveViewHolder holder, Order order) {
+    private void bindActiveOrder(ActiveViewHolder holder, final Order order) {
         holder.tvOrderNumber.setText("הזמנה #" + order.getOrderCode());
-        holder.tvOrderNumber.setOnClickListener(v -> showPrettyDialog(v.getContext(), order.getOrderCode()));
+        
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleOrderClick(v.getContext(), order);
+            }
+        });
 
         String statusText = BaseActivity.getStatusText(order.getOrderStatus());
         holder.tvOrderStatus.setText(statusText);
@@ -114,10 +129,94 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         updateStepper(holder, order.getOrderStatus());
     }
 
+    private boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = (cm != null) ? cm.getActiveNetworkInfo() : null;
+        return activeNetwork != null && activeNetwork.isConnected();
+    }
+
+    private void showNoInternetDialog(Context context) {
+        new AlertDialog.Builder(context)
+                .setTitle("שגיאת חיבור")
+                .setMessage("פעולה זו דורשת חיבור לאינטרנט. אנא בדוק את ההגדרות שלך.")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Ok", null)
+                .show();
+    }
+
     /**
-     * Binds data for a historical order and handles the "Order Again" logic.
+     * Logic for handling clicks on an order block.
      */
-    private void bindHistoryOrder(HistoryViewHolder holder, Order order) {
+    private void handleOrderClick(final Context context, final Order order) {
+        if (currentUserRole == User.ROLE_COOK || currentUserRole == User.ROLE_MANAGER) {
+            // Check internet before opening/updating
+            if (!isNetworkAvailable(context)) {
+                showNoInternetDialog(context);
+                return;
+            }
+
+            // Check if status is still Pending (0), if so, update to Preparing (1) automatically
+            if (Order.STATUS_PENDING.equals(order.getOrderStatus())) {
+                final String oldStatus = order.getOrderStatus();
+                order.setOrderStatus(Order.STATUS_PREPARING);
+                
+                // Update in UserOrders branch first
+                FBRef.getUserOrdersRef(order.getUserId(), false)
+                    .child(order.getOrderId())
+                    .setValue(order)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                moveGlobalOrderNode(context, order, oldStatus, Order.STATUS_PREPARING);
+                            } else {
+                                Toast.makeText(context, "שגיאה בעדכון הסטטוס", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+            } else {
+                openCookDetails(context, order);
+            }
+        } else {
+             showPrettyDialog(context, order.getOrderCode());
+        }
+    }
+
+    private void moveGlobalOrderNode(final Context context, final Order order, String oldStatus, String newStatus) {
+        // Remove old node
+        FBRef.refOrders.child(oldStatus)
+                .child(order.getRequestedTime())
+                .child(order.getOrderId())
+                .removeValue()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // Create new node
+                        FBRef.refOrders.child(order.getOrderStatus())
+                            .child(order.getRequestedTime())
+                            .child(order.getOrderId())
+                            .setValue(order)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        openCookDetails(context, order);
+                                    } else {
+                                        Toast.makeText(context, "שגיאה בסנכרון גלובלי", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                    }
+                });
+    }
+
+    private void openCookDetails(Context context, Order order) {
+        Intent intent = new Intent(context, CookOrderDetailsActivity.class);
+        intent.putExtra("order", order);
+        context.startActivity(intent);
+    }
+
+    private void bindHistoryOrder(HistoryViewHolder holder, final Order order) {
         holder.tvOrderNumber.setText("הזמנה #" + order.getOrderCode());
         holder.tvItemsDetails.setText(order.getSummary());
         holder.tvOrderPrice.setText(String.format(Locale.getDefault(), "₪%.2f", order.getTotalPrice()));
@@ -128,30 +227,32 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             holder.tvOrderDate.setText("הוזמן בתאריך: " + parts[0] + ", בשעה " + parts[1].substring(0, 5));
         }
 
-        // Implementation of "Order Again" functionality
-        holder.btnOrderAgain.setOnClickListener(v -> {
-            List<Product> itemsToReorder = order.getProducts();
-            if (itemsToReorder != null && !itemsToReorder.isEmpty()) {
-                Context context = v.getContext();
-                
-                // 1. Clear current cart and add items from the history order
-                List<Product> newCart = new ArrayList<>(itemsToReorder);
-                FileManager.saveCart(context, newCart);
-                
-                // 2. Notify the user
-                Toast.makeText(context, "הסל עודכן עם פריטי ההזמנה!", Toast.LENGTH_SHORT).show();
-                
-                // 3. Navigate to the Cart tab using Intent
-                Intent intent = new Intent(context, MainPage.class);
-                intent.putExtra("OPEN_CART", true);
-                // Ensure we don't create multiple instances of MainPage
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                context.startActivity(intent);
-
-            } else {
-                Toast.makeText(v.getContext(), "לא ניתן לשחזר את הפריטים מהזמנה זו.", Toast.LENGTH_SHORT).show();
+        holder.btnOrderAgain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleOrderAgain(v.getContext(), order);
             }
         });
+    }
+
+    private void handleOrderAgain(Context context, Order order) {
+        if (!isNetworkAvailable(context)) {
+            showNoInternetDialog(context);
+            return;
+        }
+
+        List<Product> itemsToReorder = order.getProducts();
+        if (itemsToReorder != null && !itemsToReorder.isEmpty()) {
+            List<Product> newCart = new ArrayList<>(itemsToReorder);
+            FileManager.saveCart(context, newCart);
+            Toast.makeText(context, "הסל עודכן עם פריטי ההזמנה!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(context, MainPage.class);
+            intent.putExtra("OPEN_CART", true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            context.startActivity(intent);
+        } else {
+            Toast.makeText(context, "לא ניתן לשחזר את פריטים מהזמנה זו.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private String formatTimeOnly(String fullTime) {
@@ -173,9 +274,15 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setView(dialogView);
-        AlertDialog dialog = builder.create();
+        final AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        btnClose.setOnClickListener(v1 -> dialog.dismiss());
+        
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
         dialog.show();
     }
 
@@ -203,8 +310,6 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemCount() {
         return ordersList != null ? ordersList.size() : 0;
     }
-
-    // --- ViewHolders ---
 
     public static class ActiveViewHolder extends RecyclerView.ViewHolder {
         TextView tvOrderNumber, tvOrderStatus, tvEstimatedTimeValue, tvOrderSummary, tvTotalPrice, tvOrderReceivedTime;
