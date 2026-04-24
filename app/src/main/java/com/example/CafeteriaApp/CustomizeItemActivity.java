@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,11 +36,12 @@ public class CustomizeItemActivity extends BaseActivity
     private ImageButton ibtn_plus_item, ibtn_minus_item;
     private TextInputEditText etNotes;
     private TextInputLayout tilNotes;
+    private LinearLayout addonsContainer, notesContainer;
     private Product item;
 
     private int amount_of_products = 1;
     private double totalPrice = 0, price = 0;
-    private String AddBtnText = "הוסף לסל";
+    private String AddBtnText = "הוספה להזמנה";
     private boolean isEditMode = false;
     private int editPosition = -1;
 
@@ -57,7 +59,7 @@ public class CustomizeItemActivity extends BaseActivity
         editPosition = intent.getIntExtra("position", -1);
         
         if (isEditMode) {
-            AddBtnText = "חזור לסל";
+            AddBtnText = "חזרה לסל";
         }
 
         initializeViews();
@@ -76,11 +78,13 @@ public class CustomizeItemActivity extends BaseActivity
         ibtn_minus_item = findViewById(R.id.ibtn_minus_item);
         btn_AddToCart = findViewById(R.id.btn_AddToCart);
         etNotes = findViewById(R.id.etNotes);
-        tilNotes = findViewById(R.id.tilNotes); // Ensure this ID exists in your XML
+        tilNotes = findViewById(R.id.tilNotes);
+        addonsContainer = findViewById(R.id.addonsContainer);
+        notesContainer = findViewById(R.id.notesContainer);
     }
 
     /**
-     * Initializes the UI components with product data.
+     * Initializes the UI components with product data and handles conditional visibility.
      * @param intent The intent containing product details.
      */
     private void setupUI(Intent intent)
@@ -100,11 +104,35 @@ public class CustomizeItemActivity extends BaseActivity
             return;
         }
 
-        // Hide notes section for drinks
+        // --- Conditional Visibility Logic ---
+
+        // Hide notes section for drinks (including the title via notesContainer)
         if ("שתייה קרה".equals(item.getCategory()) || "שתייה חמה".equals(item.getCategory())) {
-            if (tilNotes != null) tilNotes.setVisibility(View.GONE);
-            else if (etNotes != null) etNotes.setVisibility(View.GONE);
+            if (notesContainer != null) {
+                notesContainer.setVisibility(View.GONE);
+            }
         }
+
+        // Hide addons section if none available (including the title via addonsContainer)
+        if (item.getAddons() == null || item.getAddons().isEmpty()) {
+            if (addonsContainer != null) {
+                addonsContainer.setVisibility(View.GONE);
+            }
+        } else {
+            if (addonsContainer != null) {
+                addonsContainer.setVisibility(View.VISIBLE);
+            }
+            rvAddons.setVisibility(View.VISIBLE);
+            CustomProductOptionRvAdapter ad = new CustomProductOptionRvAdapter(
+                    this,
+                    item.getAddons(),
+                    (addon, pos, isChecked) -> updatePriceBasedOnAddons(addon)
+            );
+            rvAddons.setLayoutManager(new LinearLayoutManager(this));
+            rvAddons.setAdapter(ad);
+        }
+
+        // --- Basic UI Setup ---
 
         if(item.getAmount() != 0)
         {
@@ -117,43 +145,20 @@ public class CustomizeItemActivity extends BaseActivity
         tvProductName.setText(item.getName());
         tvProductDescription.setText(item.getDescription());
         tv_amount_of_items.setText(String.valueOf(amount_of_products));
-        tv_price.setText(item.getPriceText());
+        tv_price.setText(String.format("₪%.2f", price));
         updateButtonText();
 
         if (item.getNotes() != null) {
             etNotes.setText(item.getNotes());
         }
 
-        if (item.getImageBitmap() == null && CustomizeItemActivity.selectedImageBitmap != null) {
-             item.setImageBitmap(CustomizeItemActivity.selectedImageBitmap);
-             CustomizeItemActivity.selectedImageBitmap = null;
-        }
-        
-        if (checkNetworkAndShowDialog())
-        {
+        if (item.getImageBitmap() != null) {
+            ivProductIMG.setImageBitmap(item.getImageBitmap());
+        } else {
             FBRef.loadProductImage(item, ivProductIMG);
-        }
-
-        if (item.getAddons() != null && !item.getAddons().isEmpty())
-        {
-            rvAddons.setVisibility(View.VISIBLE);
-            CustomProductOptionRvAdapter ad = new CustomProductOptionRvAdapter(
-                    this,
-                    item.getAddons(),
-                    (addon, pos, isChecked) -> updatePriceBasedOnAddons(addon)
-            );
-            rvAddons.setLayoutManager(new LinearLayoutManager(this));
-            rvAddons.setAdapter(ad);
-        } else
-        {
-            rvAddons.setVisibility(View.GONE);
         }
     }
 
-    /**
-     * Updates the total price when an addon is selected or deselected.
-     * @param addon The addon that was toggled.
-     */
     private void updatePriceBasedOnAddons(Addon addon)
     {
         if (addon.isSelected())
@@ -178,10 +183,6 @@ public class CustomizeItemActivity extends BaseActivity
         updateItemQuantity(false);
     }
 
-    /**
-     * Updates the quantity of the product (limited between 1 and 9).
-     * @param increment True to increase, false to decrease.
-     */
     private void updateItemQuantity(boolean increment)
     {
         if ((amount_of_products == 1 && !increment) || (amount_of_products == 9 && increment))
@@ -207,13 +208,10 @@ public class CustomizeItemActivity extends BaseActivity
 
     private void updateButtonText() {
         if (btn_AddToCart != null) {
-            btn_AddToCart.setText(String.format("%s   ₪%.2f", AddBtnText, totalPrice));
+            btn_AddToCart.setText(String.format("%s - ₪%.2f", AddBtnText, totalPrice));
         }
     }
 
-    /**
-     * Saves the customized product to the local cart and closes the activity.
-     */
     public void AddToCart_Click(View view)
     {
         item.setPrice(price);
@@ -224,10 +222,10 @@ public class CustomizeItemActivity extends BaseActivity
         
         if (isEditMode && editPosition != -1 && editPosition < currentCart.size()) {
             currentCart.set(editPosition, item);
-            Toast.makeText(this, "The cart has been updated!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "הסל עודכן!", Toast.LENGTH_SHORT).show();
         } else {
             currentCart.add(item);
-            Toast.makeText(this, "Added to cart!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "התווסף לסל!", Toast.LENGTH_SHORT).show();
         }
         
         FileManager.saveCart(this, currentCart);

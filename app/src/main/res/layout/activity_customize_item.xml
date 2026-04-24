@@ -1,240 +1,294 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
     android:layoutDirection="rtl"
-    android:orientation="vertical"
-    android:padding="10dp"
     tools:context=".CustomizeItemActivity">
 
-
-    <!-- HEADER: תמונה + שם -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+    <!-- Header Action Bar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:onClick="GoBack_Click"
-            android:padding="8dp"
+            android:padding="12dp"
             android:scaleType="centerInside"
-            android:src="@drawable/back_arrow" />
-    </LinearLayout>
+            android:src="@drawable/back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/black" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="התאמה אישית של מנה"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#F0F0F0"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="120dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <!-- Professional Image Box -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/productImageCard"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="280dp"
+                android:layout_margin="16dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#EEEEEE"
+                app:strokeWidth="1dp">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivProductIMG"
-                    android:layout_width="359dp"
-                    android:layout_height="185dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:scaleType="centerCrop"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:srcCompat="@tools:sample/backgrounds/scenic" />
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:padding="16dp"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+                    tools:src="@drawable/testoo" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Info Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp">
 
                 <TextView
                     android:id="@+id/tvProductName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:text="שם המוצר"
+                    android:text="שם המנה"
                     android:textColor="@color/mc_text_primary"
-                    android:textSize="34sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="@+id/ivProductIMG"
-                    app:layout_constraintTop_toBottomOf="@+id/ivProductIMG" />
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tv_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="מחיר"
-                    android:textColor="@color/mc_text_secondary"
-                    android:textSize="20sp"
-                    app:layout_constraintStart_toStartOf="@+id/tvProductName"
-                    app:layout_constraintTop_toBottomOf="@+id/tvProductName" />
+                    android:layout_marginTop="8dp"
+                    android:text="₪0.00"
+                    android:textColor="#1B5E20"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvProductDescription"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:text="תיאור המוצר"
-                    android:textAlignment="viewStart"
+                    android:layout_marginTop="16dp"
+                    android:lineSpacingExtra="6dp"
+                    android:text="תיאור המנה יופיע כאן בצורה קריאה ומזמינה."
                     android:textColor="@color/mc_text_secondary"
-                    app:layout_constraintEnd_toEndOf="@+id/ivProductIMG"
-                    app:layout_constraintStart_toStartOf="@+id/tv_price"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_price" />
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginVertical="28dp"
+                android:background="#F0F0F0" />
+
+            <!-- Addons List Section -->
+            <LinearLayout
+                android:id="@+id/addonsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/tvAddonsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="שדרוגים ותוספות"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/Addons"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@color/white"
-                    android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
-                    android:paddingBottom="8dp"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvProductDescription" />
+                    tools:listitem="@android:layout/simple_list_item_1" />
+            </LinearLayout>
+
+            <!-- Personal Notes Section -->
+            <LinearLayout
+                android:id="@+id/notesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/tvNotesTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="הערות אישיות למטבח"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilNotes"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:hint="הערות למנה (אופציונלי)"
-                    app:boxStrokeColor="@color/ice_blue"
-                    app:hintTextColor="@color/ice_blue"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/Addons">
+                    android:layout_marginBottom="40dp"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/main_bg_blue">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etNotes"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="top|start"
+                        android:hint="בקשות מיוחדות מהטבח..."
                         android:inputType="textMultiLine"
-                        android:lines="3"
-                        android:textAlignment="viewStart" />
+                        android:lines="3" />
                 </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </ScrollView>
 
-    <LinearLayout
-        android:id="@+id/addToCartBar"
+    <!-- Floating Footer Action Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomActionCard"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="@color/white"
-        android:clipToPadding="false"
-        android:elevation="6dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingTop="5dp">
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="32dp"
+        app:strokeWidth="0dp"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-
-        <!-- רווח בין הכפתור לבקר הכמות -->
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardQuantity"
-            android:layout_width="150dp"
-            android:layout_height="match_parent"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/white"
-                android:gravity="center"
-                android:orientation="horizontal"
-
-                android:padding="8dp">
-
-                <!-- כפתור + (אייקון בלבד, נקי וחד) -->
-                <ImageButton
-                    android:id="@+id/ibtn_plus_item"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:onClick="Plus_btn_Click"
-                    android:padding="8dp"
-                    android:scaleType="centerInside"
-                    app:srcCompat="@drawable/ic_plus_black" />
-
-
-                <!-- מונה כמות -->
-                <TextView
-                    android:id="@+id/tv_amount_of_items"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="1"
-                    android:textColor="@color/black"
-                    android:textSize="18sp" />
-
-                <!-- כפתור – (אייקון בלבד) -->
-                <ImageButton
-                    android:id="@+id/ibtn_minus_item"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:onClick="Minus_btn_Click"
-                    android:padding="8dp"
-                    android:scaleType="centerInside"
-                    app:srcCompat="@drawable/ic_minus_gray" />
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-        <!-- כפתור פעולה ראשי – Filled (Material3 ברירת מחדל) -->
-        <Space
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.1" />
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="20dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_AddToCart"
-            style="?attr/materialButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:fontFamily="sans-serif-medium"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            android:letterSpacing="0.02"
-            android:onClick="AddToCart_Click"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="הוספה להזמנה"
-            android:textAllCaps="false"
-            android:textSize="16sp"
-            app:backgroundTint="@color/ice_blue"
-            app:cornerRadius="20dp"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:iconTint="?attr/colorOnPrimary"
-            app:rippleColor="?attr/colorOnPrimary" />
+            <!-- Quantity Picker -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="6dp">
 
-    </LinearLayout>
+                    <ImageButton
+                        android:id="@+id/ibtn_minus_item"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:onClick="Minus_btn_Click"
+                        android:src="@drawable/ic_minus_black"
+                        app:tint="@color/main_bg_blue" />
 
+                    <TextView
+                        android:id="@+id/tv_amount_of_items"
+                        android:layout_width="36dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-</LinearLayout>
+                    <ImageButton
+                        android:id="@+id/ibtn_plus_item"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:onClick="Plus_btn_Click"
+                        android:src="@drawable/ic_plus_black"
+                        app:tint="@color/main_bg_blue" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="1dp" />
+
+            <!-- Add Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_AddToCart"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-black"
+                android:onClick="AddToCart_Click"
+                android:text="הוספה להזמנה"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:backgroundTint="@color/main_bg_blue"
+                app:cornerRadius="28dp"
+                app:elevation="4dp" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

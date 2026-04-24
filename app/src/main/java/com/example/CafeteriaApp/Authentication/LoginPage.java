@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ public class LoginPage extends BaseActivity
 {
     private TextView tv_login_warning;
     private EditText ED_login_email, ED_login_password;
+    private CheckBox cbRememberMe;
     private String email, password;
     Intent intent;
 
@@ -61,6 +63,8 @@ public class LoginPage extends BaseActivity
         {
             // 2. Fetch stored authentication string
             String str = FileManager.getUserAuthentication(this);
+            
+            // Check if string is null or empty to prevent crashes
             if (str != null && !str.isEmpty())
             {
                 try {
@@ -73,13 +77,17 @@ public class LoginPage extends BaseActivity
                         if (currentTime < expiryTime)
                         {
                             autoLogin(currentUser.getUid());
+                            return; // Success
                         }
                     }
                 } catch (Exception e) {
-                    // If parsing fails, just clear and require manual login
                     FileManager.clearUserAuthentication(this);
                 }
             }
+            
+            // If we are here, auto-login criteria wasn't met. 
+            // We sign out from Firebase to keep it synced with our "Remember Me" logic.
+            FBRef.refAuth.signOut();
         }
     }
 
@@ -121,6 +129,7 @@ public class LoginPage extends BaseActivity
         ED_login_email = findViewById(R.id.ED_login_email);
         ED_login_password = findViewById(R.id.ED_login_password);
         tv_login_warning = findViewById(R.id.tv_login_warning);
+        cbRememberMe = findViewById(R.id.cbRememberMe);
     }
 
     public void SignUp_Click(View view)
@@ -186,7 +195,8 @@ public class LoginPage extends BaseActivity
                             FirebaseUser firebaseUser = FBRef.refAuth.getCurrentUser();
                             if (firebaseUser != null)
                             {
-                                FileManager.saveUserAuthentication(LoginPage.this);
+                                // Save authentication based on CheckBox state
+                                FileManager.saveUserAuthentication(LoginPage.this, cbRememberMe.isChecked());
 
                                 FBRef.refUsers.child(firebaseUser.getUid()).get().addOnCompleteListener(
                                         taskSnapshot -> {

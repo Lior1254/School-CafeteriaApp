@@ -6,15 +6,6 @@
     android:orientation="vertical">
 
     <!-- Header / Title -->
-    <TextView
-        android:id="@+id/tvOrdersTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="ההזמנות שלי"
-        android:textColor="#212121"
-        android:textSize="24sp"
-        android:textStyle="bold" />
 
     <!-- Tabs for Active vs History -->
     <com.google.android.material.tabs.TabLayout

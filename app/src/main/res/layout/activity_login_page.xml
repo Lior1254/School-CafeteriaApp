@@ -92,15 +92,45 @@
                     android:textColorHint="@color/gray" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/login_forgot_password"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:layout_gravity="end"
-                android:text="Forgot Password?"
-                android:textColor="#747474"
-                android:textSize="12sp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="20dp"
+                android:layoutDirection="rtl">
+
+                <CheckBox
+                    android:id="@+id/cbRememberMe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/logout_red"
+                    android:checked="true"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="זכור אותי להתחברות אוטומטית"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:layout_marginRight="4dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+
+                <TextView
+                    android:id="@+id/login_forgot_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Forgot Password?"
+                    android:textColor="#747474"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:layout_width="match_parent"

@@ -8,6 +8,11 @@
     <string name="notif_channel_orders_name">סטטוס הזמנה</string>
     <string name="notif_channel_updates_name">עדכוני אפליקציה</string>
 
+    <!-- Order Status Notifications -->
+    <string name="notif_order_preparing">ההזמנה שלך #%1$s בתהליך הכנה! היא תהיה מוכנה ב-%2$s</string>
+    <string name="notif_order_ready">ההזמנה שלך #%1$s מוכנה! אפשר להגיע לאסוף אותה.</string>
+    <string name="notif_order_collected">ההזמנה נאספה בהצלחה. תודה רבה שהשתמשת ב-Pick-Up!</string>
+
     <!-- Login Screen -->
     <string name="login_title">התחברות</string>
     <string name="login_email_hint">אימייל</string>

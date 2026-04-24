@@ -41,17 +41,26 @@ public class FileManager {
     }
 
     /**
-     * Saves user authentication info with an expiry date.
+     * Saves user authentication info with an expiry date if rememberMe is true.
+     * If rememberMe is false, it clears any existing authentication.
      */
-    public static void saveUserAuthentication(Context context) {
-        String uid = getAuthenticationUid();
+    public static void saveUserAuthentication(Context context, boolean rememberMe) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        String expiryTime = Utils.getDateStringWithOffset(AUTH_EXPIRY_DAYS);
-        String value = uid + "#" + expiryTime;
-        editor.putString(KEY_AUTH_TIME, value);
-        editor.commit();
+        if (rememberMe) {
+            String uid = getAuthenticationUid();
+            if (!uid.isEmpty()) {
+                String expiryTime = Utils.getDateStringWithOffset(AUTH_EXPIRY_DAYS);
+                String value = uid + "#" + expiryTime;
+                editor.putString(KEY_AUTH_TIME, value);
+                Log.d(TAG, "Saved auth for auto-login: " + uid);
+            }
+        } else {
+            editor.remove(KEY_AUTH_TIME);
+            Log.d(TAG, "Remember Me disabled, clearing auth info.");
+        }
+        editor.apply(); // Using apply() is safer/asynchronous compared to commit()
     }
 
     /**
@@ -69,7 +78,7 @@ public class FileManager {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(KEY_AUTH_TIME);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -82,7 +91,7 @@ public class FileManager {
         
         String jsonString = new Gson().toJson(cartItems);
         editor.putString(key, jsonString);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -93,7 +102,7 @@ public class FileManager {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, notes);
-        editor.commit();
+        editor.apply();
     }
 
     /**

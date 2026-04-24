@@ -14,16 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        app:elevation="0dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBar"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@android:color/white"
-            app:title="@string/cart_title"
-            app:titleCentered="true" />
-    </com.google.android.material.appbar.AppBarLayout>
+        app:elevation="0dp"/>
 
     <!-- Nested Scroll for content below RecyclerView -->
     <androidx.core.widget.NestedScrollView

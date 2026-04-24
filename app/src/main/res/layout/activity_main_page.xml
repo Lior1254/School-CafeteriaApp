@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,47 +12,64 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Top App Bar -->
+        <!-- Top App Bar Area -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             android:background="@color/white"
-            android:layoutDirection="rtl"
+            android:elevation="0dp"
             app:contentInsetStartWithNavigation="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="@drawable/ic_menu_burger" />
+
+        <!-- Centered Page Title in Top Bar -->
+        <TextView
+            android:id="@+id/tvPageTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pick-Up"
+            android:textColor="@color/mc_text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/topAppBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:navigationIcon="@drawable/ic_menu_burger"
-            app:title=""
-            app:titleCentered="false" />
+            app:layout_constraintTop_toTopOf="@+id/topAppBar" />
+
+        <!-- Divider below Top Bar -->
+        <View
+            android:id="@+id/topDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#F0F0F0"
+            app:layout_constraintTop_toBottomOf="@id/topAppBar" />
 
         <!-- Content Area -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragmentContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/topAppBar"
-            app:layout_constraintBottom_toTopOf="@id/bottomNav"
+            app:layout_constraintTop_toBottomOf="@id/topDivider"
+            app:layout_constraintBottom_toTopOf="@id/bottomNavDivider"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Divider -->
+        <!-- Divider above Bottom Nav -->
         <View
+            android:id="@+id/bottomNavDivider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#1F000000"
+            android:background="#F0F0F0"
             app:layout_constraintBottom_toTopOf="@+id/bottomNav" />
 
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNav"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
             android:elevation="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:menu="@menu/menu_bottom_nav"
             app:labelVisibilityMode="labeled"

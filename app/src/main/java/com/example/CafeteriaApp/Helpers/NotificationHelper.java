@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.core.app.ActivityCompat;
@@ -21,6 +22,16 @@ public class NotificationHelper {
     public static final String CHANNEL_ORDERS_ID = "orders_status";
     public static final String CHANNEL_UPDATES_ID = "app_updates";
 
+    /**
+     * Internal helper to build and send a system notification.
+     * 
+     * @param context Application context
+     * @param channelId Target notification channel ID
+     * @param channelName User-visible name of the channel
+     * @param title Notification title
+     * @param text Notification message body
+     * @param notificationId Unique ID for the notification
+     */
     private static void sendNotification(Context context, String channelId, String channelName,
                                         String title, String text, int notificationId) {
 
@@ -34,11 +45,13 @@ public class NotificationHelper {
             }
         }
 
-        // 2. Build Notification
+        // 2. Build Notification with App Logo
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.app_logo) // Small icon in status bar
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.app_logo)) // Large icon in notification drawer
                 .setContentTitle(title)
                 .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text)) // Allows multiline text
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
@@ -55,12 +68,18 @@ public class NotificationHelper {
         notificationManager.notify(notificationId, builder.build());
     }
 
+    /**
+     * Shows a notification related to order status changes.
+     */
     public static void showOrderStatus(Context context, String text, int orderId) {
         String channelName = context.getString(R.string.notif_channel_orders_name);
         String title = context.getString(R.string.notif_order_update_title);
         sendNotification(context, CHANNEL_ORDERS_ID, channelName, title, text, orderId);
     }
 
+    /**
+     * Shows a general app update notification.
+     */
     public static void showUpdateNotification(Context context, String title, String text) {
         String channelName = context.getString(R.string.notif_channel_updates_name);
         sendNotification(context, CHANNEL_UPDATES_ID, channelName, title, text, 999);

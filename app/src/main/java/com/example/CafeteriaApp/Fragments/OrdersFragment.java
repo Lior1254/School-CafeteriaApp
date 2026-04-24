@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,12 +26,15 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment responsible for displaying user orders, separated into active and history tabs.
+ * Manages real-time updates and synchronization with Firebase.
+ */
 public class OrdersFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private OrdersAdapter adapter;
     private TabLayout tabLayout;
-    private TextView tvTitle;
     private List<Order> orderList = new ArrayList<>();
     private int userRole = User.ROLE_USER;
 
@@ -53,7 +55,6 @@ public class OrdersFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.rvOrders);
         tabLayout = view.findViewById(R.id.tabLayoutOrders);
-        tvTitle = view.findViewById(R.id.tvOrdersTitle);
         
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new OrdersAdapter(orderList);
@@ -62,7 +63,7 @@ public class OrdersFragment extends Fragment {
         if (tabLayout.getTabAt(0) != null) tabLayout.getTabAt(0).setText("פעילות (0)");
         if (tabLayout.getTabAt(1) != null) tabLayout.getTabAt(1).setText("היסטוריה (0)");
 
-        checkUserRoleAndSetTitle();
+        checkUserRoleAndInitialize();
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -78,7 +79,8 @@ public class OrdersFragment extends Fragment {
     }
 
     /**
-     * Public method to switch tabs from outside (like MainPage)
+     * Public method to switch tabs from outside (like MainPage).
+     * @param position 0 for Active, 1 for History.
      */
     public void switchToTab(int position) {
         if (tabLayout != null) {
@@ -87,12 +89,14 @@ public class OrdersFragment extends Fragment {
                 tab.select();
             }
         } else {
-            // If tabLayout is not yet created, save it for later
             isHistoryTab = (position == 1);
         }
     }
 
-    private void checkUserRoleAndSetTitle() {
+    /**
+     * Verifies the user role and initializes the appropriate data listeners.
+     */
+    private void checkUserRoleAndInitialize() {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
@@ -102,27 +106,20 @@ public class OrdersFragment extends Fragment {
                 User user = snapshot.getValue(User.class);
                 if (user != null) {
                     userRole = user.getRole();
-                    if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) {
-                        if (tvTitle != null) tvTitle.setText("הזמנות");
-                    }
                     
-                    // IMPORTANT: Pass the role to the adapter so it knows how to handle clicks
                     if (adapter != null) {
                         adapter.setCurrentUserRole(userRole);
                     }
-
-                    // Start listeners only after we know the role
+                    
                     startListeningToAllCounts();
                     startListeningToOrders();
                 }
             }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
     private void startListeningToAllCounts() {
-        // Active count listener
         activeCountListener = FBRef.listenToOrdersByRoleLive(userRole, false, new FBRef.FBListener() {
             @Override
             public void onSuccess(Object data) {
@@ -132,7 +129,6 @@ public class OrdersFragment extends Fragment {
             @Override public void onFailure(String error) {}
         });
 
-        // History count listener
         historyCountListener = FBRef.listenToOrdersByRoleLive(userRole, true, new FBRef.FBListener() {
             @Override
             public void onSuccess(Object data) {

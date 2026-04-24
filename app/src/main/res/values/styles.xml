@@ -18,19 +18,16 @@
         <item name="cornerSize">12dp</item>
     </style>
 
-
     <!-- ================================= -->
     <!--      Styles for Order Progress Bar    -->
     <!-- ================================= -->
 
     <style name="ProgressStepIcon" parent="Widget.AppCompat.TextView">
-        <!-- הגדלת גודל העיגול -->
         <item name="android:layout_width">32dp</item>
         <item name="android:layout_height">32dp</item>
         <item name="android:background">@drawable/progress_icon_background</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">@color/white</item>
-        <!-- הגדלת גודל הטקסט/ה-V בתוך העיגול -->
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
@@ -38,14 +35,12 @@
     <style name="ProgressStepText" parent="Widget.AppCompat.TextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <!-- הגדלת המרווח מהעיגול -->
         <item name="android:layout_marginTop">8dp</item>
         <item name="android:textSize">12sp</item>
     </style>
 
     <style name="ProgressLine">
         <item name="android:layout_width">0dp</item>
-        <!-- הגדלת עובי הקו -->
         <item name="android:layout_height">3dp</item>
         <item name="android:layout_marginHorizontal">4dp</item>
     </style>

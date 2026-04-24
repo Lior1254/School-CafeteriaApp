@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/profilebkg"
+    android:background="@color/white"
     android:fillViewport="true"
     android:scrollbars="none"
     tools:context=".Fragments.ProfileFragment">
@@ -12,351 +12,267 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp">
+        android:paddingBottom="100dp">
 
-        <ImageView
-            android:id="@+id/profileImg"
-            android:layout_width="84dp"
-            android:layout_height="77dp"
-            android:layout_marginTop="16dp"
+        <!-- Top Profile Header -->
+        <View
+            android:id="@+id/headerBg"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@color/ice_blue"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfilePic"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="40dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_person"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircularImage"
+            app:strokeColor="@color/white"
+            app:strokeWidth="4dp" />
 
         <TextView
-            android:id="@+id/titleName"
+            android:id="@+id/tvProfileName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="12dp"
             android:text="Name"
-            android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textColor="@color/mc_text_primary"
+            android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/profileImg"
-            app:layout_constraintStart_toStartOf="@id/profileImg"
-            app:layout_constraintEnd_toEndOf="@id/profileImg" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivProfilePic" />
 
         <TextView
-            android:id="@+id/titleUsername"
+            android:id="@+id/tvProfileUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="username"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/titleName"
-            app:layout_constraintEnd_toStartOf="@+id/verifiedIcon"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <ImageView
-            android:id="@+id/verifiedIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="4dp"
-            app:layout_constraintBottom_toBottomOf="@id/titleUsername"
-            app:layout_constraintStart_toEndOf="@id/titleUsername"
-            app:layout_constraintTop_toTopOf="@id/titleUsername"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:tint="@color/white" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/accountCard"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            app:cardBackgroundColor="@color/ice_blue"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp"
-            app:cardUseCompatPadding="true"
+            android:text="@string/signup_username_hint"
+            android:textColor="@color/mc_text_secondary"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/titleUsername">
+            app:layout_constraintTop_toBottomOf="@id/tvProfileName" />
+
+        <!-- Account Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAccount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#F0F0F0"
+            app:strokeWidth="1dp"
+            app:layout_constraintTop_toBottomOf="@id/headerBg">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:padding="8dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/rowEditProfile"
+                    android:id="@+id/btn_edit_profile"
                     style="@style/ProfileRowStyle">
 
                     <FrameLayout
-                        android:id="@+id/iconBgEditProfile"
+                        android:id="@+id/iconEdit"
                         style="@style/ProfileIconContainerStyle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
-
-                        <ImageView style="@style/ProfileIconStyle" />
-                    </FrameLayout>
-
-                    <TextView
-                        style="@style/ProfileTextStyle"
-                        android:layout_marginEnd="8dp"
-                        android:text="ערוך פרופיל"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/arrowEditProfile"
-                        app:layout_constraintStart_toEndOf="@id/iconBgEditProfile"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/arrowEditProfile"
-                        style="@style/ProfileArrowStyle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View style="@style/ProfileSeparatorStyle" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/rowOrderHistory"
-                    style="@style/ProfileRowStyle">
-
-                    <FrameLayout
-                        android:id="@+id/iconBgOrderHistory"
-                        style="@style/ProfileIconContainerStyle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                        <ImageView style="@style/ProfileIconStyle" />
-                    </FrameLayout>
-
-                    <TextView
-                        style="@style/ProfileTextStyle"
-                        android:layout_marginEnd="8dp"
-                        android:text="ההזמנות שלי"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/arrowOrderHistory"
-                        app:layout_constraintStart_toEndOf="@id/iconBgOrderHistory"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/arrowOrderHistory"
-                        style="@style/ProfileArrowStyle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View style="@style/ProfileSeparatorStyle" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/rowPaymentMethods"
-                    style="@style/ProfileRowStyle">
-
-                    <FrameLayout
-                        android:id="@+id/iconBgPayment"
-                        style="@style/ProfileIconContainerStyle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                        <ImageView style="@style/ProfileIconStyle" />
-                    </FrameLayout>
-
-                    <TextView
-                        style="@style/ProfileTextStyle"
-                        android:layout_marginEnd="8dp"
-                        android:text="אמצעי תשלום"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/arrowPayment"
-                        app:layout_constraintStart_toEndOf="@id/iconBgPayment"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/arrowPayment"
-                        style="@style/ProfileArrowStyle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/settingsCard"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            app:cardBackgroundColor="@color/ice_blue"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp"
-            app:cardUseCompatPadding="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/accountCard">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/rowNightMode"
-                    style="@style/ProfileRowStyle">
-
-                    <FrameLayout
-                        android:id="@+id/iconBgNight"
-                        style="@style/ProfileIconContainerStyle"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
-
-                        <ImageView
-                            android:src="@drawable/ic_night_mode_icon"
-                            style="@style/ProfileIconStyle" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:id="@+id/titleNight"
-                        android:text="מצב לילה"
-                        style="@style/ProfileTextStyle"
-                        android:layout_marginEnd="8dp"
-                        app:layout_constraintStart_toEndOf="@id/iconBgNight"
-                        app:layout_constraintEnd_toStartOf="@+id/switchNight"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchNight"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clickable="false"
-                        android:paddingEnd="12dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View style="@style/ProfileSeparatorStyle" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/rowDiet"
-                    style="@style/ProfileRowStyle">
-
-                    <FrameLayout
-                        android:id="@+id/iconBgDiet"
-                        style="@style/ProfileIconContainerStyle"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
-
-                        <ImageView style="@style/ProfileIconStyle" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:text="העדפות תזונה"
-                        style="@style/ProfileTextStyle"
-                        android:layout_marginEnd="8dp"
-                        app:layout_constraintStart_toEndOf="@id/iconBgDiet"
-                        app:layout_constraintEnd_toStartOf="@+id/arrowDiet"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/arrowDiet"
-                        style="@style/ProfileArrowStyle"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View style="@style/ProfileSeparatorStyle" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/rowLanguage"
-                    style="@style/ProfileRowStyle">
-
-                    <FrameLayout
-                        android:id="@+id/iconBgLang"
-                        style="@style/ProfileIconContainerStyle"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
-
-                        <ImageView style="@style/ProfileIconStyle" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:text="שפה"
-                        style="@style/ProfileTextStyle"
-                        android:layout_marginEnd="8dp"
-                        app:layout_constraintStart_toEndOf="@id/iconBgLang"
-                        app:layout_constraintEnd_toStartOf="@+id/arrowLang"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/arrowLang"
-                        style="@style/ProfileArrowStyle"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            app:cardBackgroundColor="@color/logout_red"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp"
-            app:cardUseCompatPadding="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/settingsCard">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/btn_logout"
-                    style="@style/ProfileRowStyle">
-
-                    <FrameLayout
-                        android:id="@+id/iconBgLogout"
-                        style="@style/ProfileIconContainerStyle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
                         <ImageView
                             style="@style/ProfileIconStyle"
-                            app:tint="@color/white" />
-
+                            android:src="@drawable/ic_edit" />
                     </FrameLayout>
 
                     <TextView
                         style="@style/ProfileTextStyle"
-                        android:layout_marginEnd="16dp"
-                        android:text="התנתק"
-                        android:textColor="@color/white"
+                        android:text="עריכת פרופיל"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow1"
+                        app:layout_constraintStart_toEndOf="@id/iconEdit"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/arrow1"
+                        style="@style/ProfileArrowStyle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/iconBgLogout"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View style="@style/ProfileSeparatorStyle" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/btn_my_orders"
+                    style="@style/ProfileRowStyle">
+
+                    <FrameLayout
+                        android:id="@+id/iconOrders"
+                        style="@style/ProfileIconContainerStyle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+                        <ImageView
+                            style="@style/ProfileIconStyle"
+                            android:src="@drawable/bottom_bar_orders" />
+                    </FrameLayout>
+
+                    <TextView
+                        style="@style/ProfileTextStyle"
+                        android:text="ההזמנות שלי"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow2"
+                        app:layout_constraintStart_toEndOf="@id/iconOrders"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/arrow2"
+                        style="@style/ProfileArrowStyle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Settings Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#F0F0F0"
+            app:strokeWidth="1dp"
+            app:layout_constraintTop_toBottomOf="@id/cardAccount">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/btn_night_mode"
+                    style="@style/ProfileRowStyle">
+
+                    <FrameLayout
+                        android:id="@+id/iconNight"
+                        style="@style/ProfileIconContainerStyle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+                        <ImageView
+                            style="@style/ProfileIconStyle"
+                            android:src="@drawable/ic_night_mode_icon" />
+                    </FrameLayout>
+
+                    <TextView
+                        style="@style/ProfileTextStyle"
+                        android:text="מצב לילה"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/switchNightMode"
+                        app:layout_constraintStart_toEndOf="@id/iconNight"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switchNightMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View style="@style/ProfileSeparatorStyle" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/btn_language"
+                    style="@style/ProfileRowStyle">
+
+                    <FrameLayout
+                        android:id="@+id/iconLang"
+                        style="@style/ProfileIconContainerStyle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+                        <ImageView
+                            style="@style/ProfileIconStyle"
+                            android:src="@drawable/ic_language_icon" />
+                    </FrameLayout>
+
+                    <TextView
+                        style="@style/ProfileTextStyle"
+                        android:text="שפה"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow3"
+                        app:layout_constraintStart_toEndOf="@id/iconLang"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/arrow3"
+                        style="@style/ProfileArrowStyle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Logout Button -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="24dp"
+            app:cardBackgroundColor="@color/logout_red"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@id/cardSettings">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:paddingHorizontal="24dp">
+
+                <ImageView
+                    android:id="@+id/ivLogout"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_lock_power_off"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="התנתקות מהחשבון"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
