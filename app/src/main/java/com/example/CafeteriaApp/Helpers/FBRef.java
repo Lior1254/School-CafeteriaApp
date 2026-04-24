@@ -1,25 +1,24 @@
 package com.example.CafeteriaApp.Helpers;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.CafeteriaApp.BaseActivity;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.CafeteriaApp.Models.Order;
 import com.example.CafeteriaApp.Models.Product;
 import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,11 +26,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.example.CafeteriaApp.Receivers.AlarmReceiver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Helper class for Firebase references and operations.
+ * Manages database paths, authentication, and optimized image loading with memory caching.
+ */
 public class FBRef
 {
     public static FirebaseDatabase FBDB = FirebaseDatabase.getInstance();
@@ -45,9 +49,14 @@ public class FBRef
     public static FirebaseStorage storage = FirebaseStorage.getInstance();
     public static StorageReference refStorage = storage.getReference();
 
-    public static Boolean HistoryFlag = true;
     public static Boolean OrderFlag = false;
+
+    /** Cache to store download URLs to avoid redundant Firebase storage calls */
+    private static final Map<String, Uri> urlCache = new HashMap<>();
     
+    /**
+     * Returns the database reference for a specific user's orders or history.
+     */
     public static DatabaseReference getUserOrdersRef(String uid, boolean isHistory) {
         String subPath = isHistory ? "HistoryOrders" : "Orders";
         return refUserOrders.child(uid).child(subPath);
@@ -61,11 +70,10 @@ public class FBRef
     }
 
     /**
-     * Real-time listener for orders based on role.
+     * Listens to order updates in real-time based on the user's role.
      */
     public static ValueEventListener listenToOrdersByRoleLive(int role, boolean isHistory, FBListener listener) {
         if (role == User.ROLE_COOK || role == User.ROLE_MANAGER) {
-            // Admin/Cook listens to ALL orders
             ValueEventListener vel = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -93,7 +101,6 @@ public class FBRef
             refOrders.addValueEventListener(vel);
             return vel;
         } else {
-            // Regular user listens only to their own orders
             FirebaseUser currentUser = refAuth.getCurrentUser();
             if (currentUser == null) return null;
 
@@ -118,6 +125,9 @@ public class FBRef
         }
     }
 
+    /**
+     * Uploads an order to both global and user-specific nodes in the database.
+     */
     public static void uploadOrder(Order order, FBListener listener)
     {
         if (order == null || order.getOrderStatus() == null || 
@@ -145,7 +155,6 @@ public class FBRef
         FirebaseUser currentUser = refAuth.getCurrentUser();
         if (currentUser == null) return;
 
-        // FIX: Use orderId instead of requestedTime to allow multiple orders at the same time
         getUserOrdersRef(currentUser.getUid(), isHistory)
                 .child(order.getOrderId())
                 .setValue(order)
@@ -159,34 +168,66 @@ public class FBRef
                 });
     }
 
-    public static void loadProductImage(Product product, ImageView imageView)
+    /**
+     * Loads product image with maximum optimization.
+     * Uses memory cache and Bitmap storage within the Product object for a "static" feel.
+     */
+    public static void loadProductImage(final Product product, final ImageView imageView)
     {
         if (product == null || imageView == null) return;
-        String productId = product.getId();
-        imageView.setTag(productId);
 
-        if (product.getImageBitmap() != null)
-        {
+        // 1. If we already have the Bitmap in memory, show it immediately (Static display)
+        if (product.getImageBitmap() != null) {
             imageView.setImageBitmap(product.getImageBitmap());
             return;
         }
 
+        final String productId = product.getId();
+        imageView.setTag(productId);
         imageView.setImageResource(R.drawable.ic_launcher_background);
         if (productId == null || productId.isEmpty()) return;
 
-        final long MAX_SIZE = 5 * 1024 * 1024;
-        StorageReference productsRef = refStorage.child("Products").child(productId + ".jpg");
-        
-        productsRef.getBytes(MAX_SIZE).addOnSuccessListener(bytes ->
-        {
-            if (productId.equals(imageView.getTag()))
-            {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                if (bitmap != null) {
-                    product.setImageBitmap(bitmap);
-                    imageView.setImageBitmap(bitmap);
-                }
-            }
-        }).addOnFailureListener(e -> {});
+        // 2. Check if we have the URL cached to skip Firebase call
+        if (urlCache.containsKey(productId)) {
+            loadWithGlide(imageView, urlCache.get(productId), product, productId);
+            return;
+        }
+
+        // 3. Fetch from Firebase Storage
+        StorageReference imageRef = refStorage.child("Products").child(productId + ".jpg");
+        imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+            urlCache.put(productId, uri);
+            loadWithGlide(imageView, uri, product, productId);
+        }).addOnFailureListener(e -> {
+            Log.e("FBRef", "Failed to get image for: " + productId);
+        });
+    }
+
+    /**
+     * Internal helper to load image via Glide and store result as Bitmap.
+     */
+    private static void loadWithGlide(final ImageView imageView, Uri uri, final Product product, final String productId) {
+        Glide.with(imageView.getContext())
+                .asBitmap()
+                .load(uri)
+                .placeholder(R.drawable.ic_launcher_background)
+                .fitCenter() // CHANGED: Ensuring entire image fits within the box
+                .override(300, 300)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        product.setImageBitmap(resource);
+                        if (productId.equals(imageView.getTag())) {
+                            imageView.setImageBitmap(resource);
+                        }
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        if (productId.equals(imageView.getTag())) {
+                            imageView.setImageDrawable(placeholder);
+                        }
+                    }
+                });
     }
 }

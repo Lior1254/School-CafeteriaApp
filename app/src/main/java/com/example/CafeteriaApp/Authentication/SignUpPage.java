@@ -169,7 +169,7 @@ public class SignUpPage extends BaseActivity implements AdapterView.OnItemSelect
 
                                 User user1 = new User(user.getUid(), name, email,
                                                       username, phoneNumber, school,
-                                                      classRoom);
+                                                      classRoom,0);
 
                                 FBRef.refUsers.child(user.getUid()).setValue(user1)
                                         .addOnCompleteListener(new OnCompleteListener<Void>()

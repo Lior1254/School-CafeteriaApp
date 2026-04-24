@@ -51,10 +51,13 @@ dependencies {
 
     // Firebase BOM
     implementation platform(libs.firebase.bom)
-    implementation libs.firebase.ai
     implementation libs.firebase.database
     implementation libs.firebase.auth
     implementation libs.firebase.storage
+
+    // Glide for efficient image loading
+    implementation libs.glide
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

@@ -3,14 +3,15 @@ package com.example.CafeteriaApp.Models;
 import java.io.Serializable;
 
 /**
- * Represents the user's profile data stored in the database.
- * Includes personal information like name, email, and school details.
+ * Data model representing a user in the system.
+ * Contains profile information, school details, and access roles.
  */
 public class User implements Serializable
 {
-    public static final int ROLE_USER = 0;    // משתמש רגיל
-    public static final int ROLE_COOK = 1;    // טבח
-    public static final int ROLE_MANAGER = 3; // מנהל קפיטריה
+    /** Role constants for access control */
+    public static final int ROLE_USER = 0;
+    public static final int ROLE_COOK = 1;
+    public static final int ROLE_MANAGER = 3;
 
     private String uid;
     private String name;
@@ -19,20 +20,29 @@ public class User implements Serializable
     private String phoneNumber;
     private String school;
     private String classRoom;
-    private int role = ROLE_USER; // ברירת מחדל: משתמש רגיל (0)
+    private int role = ROLE_USER;
 
     /**
-     * Default constructor required for Firebase.
+     * Default constructor required for Firebase Realtime Database deserialization.
      */
     public User()
     {
     }
 
     /**
-     * Constructs a UserData object with all details.
+     * Full constructor to initialize a user with all attributes.
+     * 
+     * @param uid Unique identifier from Firebase Auth
+     * @param name Full name of the user
+     * @param email User's email address
+     * @param username Chosen display name
+     * @param phoneNumber Contact phone number
+     * @param school School institution name
+     * @param classRoom Class/Grade identifier
+     * @param role User's authority level (User/Cook/Manager)
      */
     public User(String uid, String name, String email, String username, String phoneNumber,
-                String school, String classRoom)
+                String school, String classRoom, int role)
     {
         this.uid = uid;
         this.name = name;
@@ -41,18 +51,9 @@ public class User implements Serializable
         this.phoneNumber = phoneNumber;
         this.school = school;
         this.classRoom = classRoom;
-        this.role = ROLE_USER;
-    }
-
-    // Constructor with role
-    public User(String uid, String name, String email, String username, String phoneNumber,
-                String school, String classRoom, int role)
-    {
-        this(uid, name, email, username, phoneNumber, school, classRoom);
         this.role = role;
     }
 
-    // Getters and Setters
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
 
