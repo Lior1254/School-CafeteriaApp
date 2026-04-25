@@ -9,19 +9,14 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-
-import com.example.CafeteriaApp.BaseActivity;
+import com.example.CafeteriaApp.Helpers.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Helpers.Utils;
 import com.example.CafeteriaApp.MainPage;
 import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseNetworkException;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;

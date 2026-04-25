@@ -8,12 +8,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.CafeteriaApp.Authentication.LoginPage;
+import com.example.CafeteriaApp.Helpers.BaseActivity;
 
 /**
  * Entry point activity that handles the splash/loading logic.
  * Ensures internet connectivity before allowing the user to proceed to the login screen.
  */
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity
+{
 
     private final Handler networkHandler = new Handler(Looper.getMainLooper());
     private Runnable connectionCheckRunnable;

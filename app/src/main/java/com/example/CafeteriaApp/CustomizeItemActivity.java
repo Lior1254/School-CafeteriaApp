@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.CustomProductOptionRvAdapter;
+import com.example.CafeteriaApp.Helpers.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Models.Addon;
@@ -30,7 +31,8 @@ import java.util.Locale;
  * Activity for customizing a product before adding it to the cart.
  * Users can select addons, adjust quantity, and add personal notes.
  */
-public class CustomizeItemActivity extends BaseActivity {
+public class CustomizeItemActivity extends BaseActivity
+{
     private TextView tvProductName, tvProductDescription, tvQuantity, tvPriceDisplay;
     private ImageView ivProductImage;
     private RecyclerView rvAddons;

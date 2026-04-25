@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.example.CafeteriaApp.Helpers.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Models.Order;
@@ -29,7 +30,8 @@ import java.util.Random;
  * Activity for selecting a payment method and finalizing the order.
  * Handles order processing, Firebase synchronization, and cart management.
  */
-public class PaymentActivity extends BaseActivity {
+public class PaymentActivity extends BaseActivity
+{
 
     private TextView tvTotal, tvSubtotal, tvVatAmount;
     private MaterialCardView cardGPay, cardCredit, cardCounter;

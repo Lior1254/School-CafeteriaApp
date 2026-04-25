@@ -65,9 +65,13 @@ public class MainPage extends AppCompatActivity
     /** Keeps track of previous status to trigger notifications only on change */
     private final Map<String, String> orderStatusMap = new HashMap<>();
 
+    /**
+     * Initializes the main activity, UI components, and fragment navigation.
+     * Handles state restoration to prevent fragment duplication on screen rotation.
+     * * @param savedInstanceState Contains data of the activity's previous state, if any.
+     */
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
 
@@ -82,18 +86,38 @@ public class MainPage extends AppCompatActivity
         topAppBar.setTitle("");
         topAppBar.setNavigationOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
-        menuFragment = new MenuFragment();
-        cartFragment = new CartFragment();
-        ordersFragment = new OrdersFragment();
-        profileFragment = new ProfileFragment();
-
         requestNotificationPermission();
         setupNavigation();
-        checkUserRoleAndSetupNavigation();
         startNotificationListener();
-        
-        // Ensure color is applied after the menu is fully created
+
+        // Ensure logout button color is applied after the menu is fully created
         navigationView.post(this::customizeLogoutItem);
+
+        // Fragment restoration logic to prevent overlaps on rotation
+        if (savedInstanceState == null) {
+            menuFragment = new MenuFragment();
+            cartFragment = new CartFragment();
+            ordersFragment = new OrdersFragment();
+            profileFragment = new ProfileFragment();
+
+            // Pass true to indicate this is the initial load
+            checkUserRoleAndSetupNavigation(true);
+        } else {
+            menuFragment = fm.findFragmentByTag("1");
+            cartFragment = fm.findFragmentByTag("2");
+            ordersFragment = fm.findFragmentByTag("3");
+            profileFragment = fm.findFragmentByTag("4");
+
+            // Restore the active fragment based on BottomNav selection
+            int selectedItemId = bottomNav.getSelectedItemId();
+            if (selectedItemId == R.id.nav_home) activeFragment = menuFragment;
+            else if (selectedItemId == R.id.nav_cart) activeFragment = cartFragment;
+            else if (selectedItemId == R.id.nav_orders) activeFragment = ordersFragment;
+            else if (selectedItemId == R.id.nav_profile) activeFragment = profileFragment;
+
+            // Pass false to indicate a restored state
+            checkUserRoleAndSetupNavigation(false);
+        }
     }
 
     /**
@@ -240,8 +264,11 @@ public class MainPage extends AppCompatActivity
     }
 
     /**
-     * Switches the active fragment and updates the Top Bar title based on the selection.
-     * @param itemId The resource ID of the selected menu item.
+     * Switches the active fragment and ensures all other fragments are hidden.
+     * This explicit hide/show logic prevents UI overlapping and "ghost" fragments
+     * during and after screen orientation changes.
+     *
+     * @param itemId The resource ID of the selected menu item from navigation.
      */
     private void selectFragment(int itemId) {
         Fragment targetFragment = null;
@@ -265,8 +292,16 @@ public class MainPage extends AppCompatActivity
             tvPageTitle.setText(title);
         }
 
-        if (targetFragment != null && targetFragment != activeFragment && !isFinishing()) {
-            fm.beginTransaction().hide(activeFragment).show(targetFragment).commit();
+        if (targetFragment != null && !isFinishing()) {
+            // Explicitly hide all fragments and show only the target to ensure sync
+            fm.beginTransaction()
+                    .hide(menuFragment)
+                    .hide(cartFragment)
+                    .hide(ordersFragment)
+                    .hide(profileFragment)
+                    .show(targetFragment)
+                    .commit();
+
             activeFragment = targetFragment;
         }
     }
@@ -283,10 +318,10 @@ public class MainPage extends AppCompatActivity
     }
 
     /**
-     * Verifies the user role from the database and adjusts the navigation UI.
-     * Uses a live listener to update the UI on profile changes.
+     * Validates user role via Firebase and configures default navigation accordingly.
+     * * @param isFirstLoad True if called during initial creation, false if recreating from rotation.
      */
-    private void checkUserRoleAndSetupNavigation() {
+    private void checkUserRoleAndSetupNavigation(boolean isFirstLoad) {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
@@ -297,30 +332,29 @@ public class MainPage extends AppCompatActivity
                 if (user != null) {
                     boolean roleChanged = (userRole != user.getRole());
                     userRole = user.getRole();
-                    
-                    // Update side menu header with user details (Real-time)
+
                     updateNavHeader(user);
 
-                    // Only reset navigation if it's the first load or role actually changed
-                    if (activeFragment == null || roleChanged) {
+                    // Setup fragments only if it's the first load or the user's role changed
+                    if (isFirstLoad || roleChanged) {
                         if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) {
                             bottomNav.getMenu().findItem(R.id.nav_orders).setTitle("הזמנות");
                             bottomNav.getMenu().findItem(R.id.nav_home).setVisible(false);
                             bottomNav.getMenu().findItem(R.id.nav_cart).setVisible(false);
-                            if (activeFragment == null) setupFragments(ordersFragment);
+                            setupFragments(ordersFragment);
                             bottomNav.setSelectedItemId(R.id.nav_orders);
                             if (tvPageTitle != null) tvPageTitle.setText("ניהול הזמנות");
                         } else {
                             bottomNav.getMenu().findItem(R.id.nav_orders).setTitle("הזמנות שלי");
-                            if (activeFragment == null) setupFragments(menuFragment);
+                            setupFragments(menuFragment);
                             bottomNav.setSelectedItemId(R.id.nav_home);
                             if (tvPageTitle != null) tvPageTitle.setText("התפריט שלנו");
                         }
                     }
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) { 
-                if (activeFragment == null) setupFragments(menuFragment); 
+            @Override public void onCancelled(@NonNull DatabaseError error) {
+                if (isFirstLoad) setupFragments(menuFragment);
             }
         });
     }
@@ -344,15 +378,31 @@ public class MainPage extends AppCompatActivity
         }
     }
 
+    /**
+     * Attaches all main fragments to the FragmentManager if they are not already added.
+     * Ensures only the specified default fragment is visible initially.
+     *
+     * @param defaultFragment The fragment to be displayed as the primary view.
+     */
     private void setupFragments(Fragment defaultFragment) {
+        androidx.fragment.app.FragmentTransaction transaction = fm.beginTransaction();
+
+        // Add fragments only if they haven't been added yet (prevents IllegalStateException)
+        if (!menuFragment.isAdded()) transaction.add(R.id.fragmentContainer, menuFragment, "1");
+        if (!cartFragment.isAdded()) transaction.add(R.id.fragmentContainer, cartFragment, "2");
+        if (!ordersFragment.isAdded()) transaction.add(R.id.fragmentContainer, ordersFragment, "3");
+        if (!profileFragment.isAdded()) transaction.add(R.id.fragmentContainer, profileFragment, "4");
+
+        // Reset visibility for all fragments to hidden to avoid overlapping during restoration
+        transaction.hide(menuFragment)
+                .hide(cartFragment)
+                .hide(ordersFragment)
+                .hide(profileFragment);
+
+        // Show only the requested fragment
+        transaction.show(defaultFragment).commit();
+
         activeFragment = defaultFragment;
-        fm.beginTransaction()
-            .add(R.id.fragmentContainer, profileFragment, "4").hide(profileFragment)
-            .add(R.id.fragmentContainer, ordersFragment, "3").hide(ordersFragment)
-            .add(R.id.fragmentContainer, cartFragment, "2").hide(cartFragment)
-            .add(R.id.fragmentContainer, menuFragment, "1").hide(menuFragment)
-            .show(defaultFragment)
-            .commit();
     }
 
     @Override

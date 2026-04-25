@@ -1,4 +1,4 @@
-package com.example.CafeteriaApp;
+package com.example.CafeteriaApp.Helpers;
 
 import android.app.AlertDialog;
 import android.content.Context;

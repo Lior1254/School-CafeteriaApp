@@ -17,7 +17,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.CafeteriaApp.Authentication.LoginPage;
-import com.example.CafeteriaApp.BaseActivity;
+import com.example.CafeteriaApp.Helpers.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.MainPage;

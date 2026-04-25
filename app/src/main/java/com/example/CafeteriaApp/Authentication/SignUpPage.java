@@ -2,7 +2,6 @@ package com.example.CafeteriaApp.Authentication;
 
 import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,9 +11,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
-import com.example.CafeteriaApp.BaseActivity;
+import com.example.CafeteriaApp.Helpers.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.User;
 import com.example.CafeteriaApp.R;

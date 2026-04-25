@@ -8,11 +8,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.CafeteriaApp.Adapters.CookProductAdapter;
+import com.example.CafeteriaApp.Helpers.BaseActivity;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Order;
 
@@ -24,7 +24,8 @@ import java.util.Locale;
  * Activity for the cook to view full order details and update its status.
  * Features a real-time countdown timer synchronized with the requested pickup time.
  */
-public class CookOrderDetailsActivity extends BaseActivity {
+public class CookOrderDetailsActivity extends BaseActivity
+{
 
     private TextView tvOrderTitle, tvCountdownTimer, tvTargetTime, tvCustomerNotes;
     private RecyclerView rvOrderItems;
