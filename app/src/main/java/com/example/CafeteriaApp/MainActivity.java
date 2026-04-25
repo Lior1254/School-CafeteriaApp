@@ -3,32 +3,46 @@ package com.example.CafeteriaApp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.CafeteriaApp.Authentication.LoginPage;
 
-public class MainActivity extends BaseActivity
-{
-    private Handler handler = new Handler();
-    private Runnable networkCheckRunnable;
-    private static final int CHECK_INTERVAL = 3000; // 3 seconds
+/**
+ * Entry point activity that handles the splash/loading logic.
+ * Ensures internet connectivity before allowing the user to proceed to the login screen.
+ */
+public class MainActivity extends BaseActivity {
+
+    private final Handler networkHandler = new Handler(Looper.getMainLooper());
+    private Runnable connectionCheckRunnable;
+    private TextView tvStatusMessage;
+
+    private static final int REFRESH_DELAY_MS = 3000;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        
-        networkCheckRunnable = new Runnable() {
+        tvStatusMessage = findViewById(R.id.tv_no_internet);
+        if (tvStatusMessage != null) {
+            tvStatusMessage.setText(R.string.main_checking_connection);
+        }
+
+        connectionCheckRunnable = new Runnable() {
             @Override
             public void run() {
-                if (checkNetworkAndShowDialog()) {
-                    handler.removeCallbacks(this); // Stop the loop
-                    proceedToLogin();
+                if (isNetworkAvailable()) {
+                    networkHandler.removeCallbacks(this);
+                    navigateToLogin();
                 } else {
-                    Toast.makeText(MainActivity.this, "No internet connection. Retrying...", Toast.LENGTH_SHORT).show();
-                    handler.postDelayed(this, CHECK_INTERVAL); // Check again after the interval
+                    if (tvStatusMessage != null) {
+                        tvStatusMessage.setText(R.string.main_retrying_connection);
+                    }
+                    Toast.makeText(MainActivity.this, R.string.main_retrying_connection, Toast.LENGTH_SHORT).show();
+                    networkHandler.postDelayed(this, REFRESH_DELAY_MS);
                 }
             }
         };
@@ -37,18 +51,26 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
-        handler.post(networkCheckRunnable); // Start the check when the activity is resumed
+        if (connectionCheckRunnable != null) {
+            networkHandler.post(connectionCheckRunnable);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        handler.removeCallbacks(networkCheckRunnable); 
+        if (connectionCheckRunnable != null) {
+            networkHandler.removeCallbacks(connectionCheckRunnable);
+        }
     }
 
-    private void proceedToLogin() {
+    /**
+     * Redirects the user to the LoginPage and clears the current activity stack.
+     */
+    private void navigateToLogin() {
         Intent intent = new Intent(this, LoginPage.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        finish();
     }
 }

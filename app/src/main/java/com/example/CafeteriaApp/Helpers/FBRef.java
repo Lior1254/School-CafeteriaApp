@@ -1,6 +1,5 @@
 package com.example.CafeteriaApp.Helpers;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -33,44 +32,50 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Helper class for Firebase references and operations.
- * Manages database paths, authentication, and optimized image loading with memory caching.
+ * Global helper class for Firebase operations.
+ * Centralizes database references, authentication, and optimized image loading.
  */
-public class FBRef
-{
-    public static FirebaseDatabase FBDB = FirebaseDatabase.getInstance();
+public class FBRef {
+    public static final FirebaseDatabase FBDB = FirebaseDatabase.getInstance();
+    public static final FirebaseAuth refAuth = FirebaseAuth.getInstance();
 
-    public static FirebaseAuth refAuth = FirebaseAuth.getInstance();
-    public static DatabaseReference refUsers = FBDB.getReference("Users");
-    public static DatabaseReference refProducts = FBDB.getReference("Products");
-    public static DatabaseReference refOrders = FBDB.getReference("Orders");
-    public static DatabaseReference refUserOrders = FBDB.getReference("UserOrders");
+    public static final DatabaseReference refUsers = FBDB.getReference("Users");
+    public static final DatabaseReference refProducts = FBDB.getReference("Products");
+    public static final DatabaseReference refOrders = FBDB.getReference("Orders");
+    public static final DatabaseReference refUserOrders = FBDB.getReference("UserOrders");
 
-    public static FirebaseStorage storage = FirebaseStorage.getInstance();
-    public static StorageReference refStorage = storage.getReference();
-
-    public static Boolean OrderFlag = false;
+    public static final FirebaseStorage storage = FirebaseStorage.getInstance();
+    public static final StorageReference refStorage = storage.getReference();
 
     /** Cache to store download URLs to avoid redundant Firebase storage calls */
     private static final Map<String, Uri> urlCache = new HashMap<>();
-    
-    /**
-     * Returns the database reference for a specific user's orders or history.
-     */
-    public static DatabaseReference getUserOrdersRef(String uid, boolean isHistory) {
-        String subPath = isHistory ? "HistoryOrders" : "Orders";
-        return refUserOrders.child(uid).child(subPath);
-    }
 
-    public interface FBListener
-    {
+    /**
+     * Listener interface for Firebase operations.
+     */
+    public interface FBListener {
         void onSuccess();
         void onSuccess(Object data);
         void onFailure(String error);
     }
 
     /**
+     * Gets the database reference for a specific user's orders.
+     * @param uid The user's ID.
+     * @param isHistory True if requesting history, false for active orders.
+     * @return DatabaseReference for the requested node.
+     */
+    public static DatabaseReference getUserOrdersRef(String uid, boolean isHistory) {
+        String subPath = isHistory ? "HistoryOrders" : "Orders";
+        return refUserOrders.child(uid).child(subPath);
+    }
+
+    /**
      * Listens to order updates in real-time based on the user's role.
+     * @param role User's role (User, Cook, Manager).
+     * @param isHistory True if listening to history orders.
+     * @param listener Callback listener.
+     * @return The created ValueEventListener for cleanup.
      */
     public static ValueEventListener listenToOrdersByRoleLive(int role, boolean isHistory, FBListener listener) {
         if (role == User.ROLE_COOK || role == User.ROLE_MANAGER) {
@@ -80,12 +85,12 @@ public class FBRef
                     List<Order> allOrders = new ArrayList<>();
                     for (DataSnapshot statusSnap : snapshot.getChildren()) {
                         String status = statusSnap.getKey();
-                        boolean isOrderStatusHistory = "3".equals(status);
+                        boolean isOrderStatusHistory = Order.STATUS_COLLECTED.equals(status);
                         if (isHistory == isOrderStatusHistory) {
                             for (DataSnapshot timeSnap : statusSnap.getChildren()) {
                                 for (DataSnapshot orderSnap : timeSnap.getChildren()) {
-                                    Order o = orderSnap.getValue(Order.class);
-                                    if (o != null) allOrders.add(o);
+                                    Order order = orderSnap.getValue(Order.class);
+                                    if (order != null) allOrders.add(order);
                                 }
                             }
                         }
@@ -126,13 +131,14 @@ public class FBRef
     }
 
     /**
-     * Uploads an order to both global and user-specific nodes in the database.
+     * Uploads an order to the database.
+     * @param order The order to upload.
+     * @param listener Callback listener.
      */
-    public static void uploadOrder(Order order, FBListener listener)
-    {
-        if (order == null || order.getOrderStatus() == null || 
-            order.getRequestedTime() == null || order.getOrderId() == null) {
-            if (listener != null) listener.onFailure("Order data is missing required fields");
+    public static void uploadOrder(Order order, FBListener listener) {
+        if (order == null || order.getOrderStatus() == null ||
+                order.getRequestedTime() == null || order.getOrderId() == null) {
+            if (listener != null) listener.onFailure("Missing required order fields");
             return;
         }
 
@@ -142,41 +148,45 @@ public class FBRef
                 .setValue(order)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        uploadUserOrder(order, listener, OrderFlag);
-                    } else {
-                        if (listener != null) listener.onFailure(task.getException() != null ? 
-                                task.getException().getMessage() : "Unknown upload error");
+                        uploadToUserNode(order, listener);
+                    } else if (listener != null) {
+                        listener.onFailure(task.getException() != null ?
+                                task.getException().getMessage() : "Upload failed");
                     }
                 });
     }
 
-    private static void uploadUserOrder(Order order, FBListener listener, boolean isHistory)
-    {
+    /**
+     * Uploads the order to the user's specific order node.
+     * @param order The order to upload.
+     * @param listener Callback listener.
+     */
+    private static void uploadToUserNode(Order order, FBListener listener) {
         FirebaseUser currentUser = refAuth.getCurrentUser();
         if (currentUser == null) return;
 
+        boolean isHistory = Order.STATUS_COLLECTED.equals(order.getOrderStatus());
         getUserOrdersRef(currentUser.getUid(), isHistory)
                 .child(order.getOrderId())
                 .setValue(order)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (listener != null) listener.onSuccess();
-                    } else {
-                        if (listener != null) listener.onFailure(task.getException() != null ? 
-                                task.getException().getMessage() : "Error");
+                    } else if (listener != null) {
+                        listener.onFailure(task.getException() != null ?
+                                task.getException().getMessage() : "User node upload failed");
                     }
                 });
     }
 
     /**
-     * Loads product image with maximum optimization.
-     * Uses memory cache and Bitmap storage within the Product object for a "static" feel.
+     * Loads product image with optimization and caching.
+     * @param product The product containing image metadata.
+     * @param imageView The target ImageView.
      */
-    public static void loadProductImage(final Product product, final ImageView imageView)
-    {
+    public static void loadProductImage(final Product product, final ImageView imageView) {
         if (product == null || imageView == null) return;
 
-        // 1. If we already have the Bitmap in memory, show it immediately (Static display)
         if (product.getImageBitmap() != null) {
             imageView.setImageBitmap(product.getImageBitmap());
             return;
@@ -187,31 +197,27 @@ public class FBRef
         imageView.setImageResource(R.drawable.ic_launcher_background);
         if (productId == null || productId.isEmpty()) return;
 
-        // 2. Check if we have the URL cached to skip Firebase call
         if (urlCache.containsKey(productId)) {
             loadWithGlide(imageView, urlCache.get(productId), product, productId);
             return;
         }
 
-        // 3. Fetch from Firebase Storage
         StorageReference imageRef = refStorage.child("Products").child(productId + ".jpg");
         imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
             urlCache.put(productId, uri);
             loadWithGlide(imageView, uri, product, productId);
-        }).addOnFailureListener(e -> {
-            Log.e("FBRef", "Failed to get image for: " + productId);
-        });
+        }).addOnFailureListener(e -> Log.e("FBRef", "Image fetch failed: " + productId));
     }
 
     /**
-     * Internal helper to load image via Glide and store result as Bitmap.
+     * Helper to load image via Glide and cache as Bitmap.
      */
     private static void loadWithGlide(final ImageView imageView, Uri uri, final Product product, final String productId) {
         Glide.with(imageView.getContext())
                 .asBitmap()
                 .load(uri)
                 .placeholder(R.drawable.ic_launcher_background)
-                .fitCenter() // CHANGED: Ensuring entire image fits within the box
+                .fitCenter()
                 .override(300, 300)
                 .into(new CustomTarget<Bitmap>() {
                     @Override

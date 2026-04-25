@@ -2,6 +2,17 @@
 
     <!-- General -->
     <string name="app_name">CafeteriaApp</string>
+    <string name="error_no_internet">אין חיבור לאינטרנט. אנא התחבר ונסה שוב.</string>
+    <string name="error_user_data_read">שגיאה בקריאת נתוני המשתמש.</string>
+    <string name="connecting">מתחבר</string>
+    <string name="logging_in_auto">מתחבר באופן אוטומטי…</string>
+    <string name="logging_in_manual">מתחבר…</string>
+    <string name="creating_user">יוצר משתמש…</string>
+    <string name="user_created_success">המשתמש נוצר בהצלחה.</string>
+    <string name="error_saving_user">שגיאה בשמירת נתוני המשתמש: %s</string>
+    <string name="ok">אישור</string>
+    <string name="error_connection_title">שגיאת חיבור</string>
+    <string name="unknown">לא ידוע</string>
 
     <!-- Notifications -->
     <string name="notif_order_update_title">עדכון הזמנה</string>
@@ -18,32 +29,53 @@
     <string name="login_email_hint">אימייל</string>
     <string name="login_password_hint">סיסמה</string>
     <string name="login_button">התחבר</string>
-    <string name="login_signup_cta">עדיין לא נרשמת? להרשמה</string>
+    <string name="login_signup_cta">Don\'t have an account?</string>
+    <string name="login_signup_link"> Sign up</string>
+    <string name="login_remember_me">זכור אותי להתחברות אוטומטית</string>
+    <string name="login_forgot_password">Forgot Password?</string>
+    <string name="login_with_google">Log in with Google</string>
+
+    <!-- Login/Signup Validation -->
+    <string name="val_enter_name">נא להזין שם</string>
+    <string name="val_invalid_email">נא להזין כתובת אימייל תקינה</string>
+    <string name="val_invalid_phone">נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)</string>
+    <string name="val_username_short">שם המשתמש חייב להיות ארוך מ-4 תווים</string>
+    <string name="val_password_short">הסיסמה חייבת להכיל יותר מ-6 תווים</string>
+    <string name="val_select_school">נא לבחור בית ספר</string>
+    <string name="val_select_class">נא לבחור כיתה</string>
+    <string name="val_user_not_found">כתובת אימייל לא תקינה.</string>
+    <string name="val_weak_password">הסיסמה חלשה מדי.</string>
+    <string name="val_user_collision">המשתמש כבר קיים במערכת.</string>
+    <string name="val_auth_failed">התחברות נכשלה.</string>
+    <string name="val_network_error">שגיאת רשת. אנא בדוק את החיבור שלך.</string>
+    <string name="val_unknown_error">אירעה שגיאה. אנא נסה שוב מאוחר יותר.</string>
 
     <!-- Sign-up Screen -->
     <string name="signup_title">הרשמה</string>
-    <string name="signup_name_hint">שם</string>
+    <string name="signup_name_hint">שם מלא</string>
     <string name="signup_email_hint">אימייל</string>
     <string name="signup_username_hint">שם משתמש</string>
     <string name="signup_password_hint">סיסמה</string>
     <string name="signup_phone_hint">מספר טלפון</string>
     <string name="signup_button">הרשמה</string>
-    <string name="signup_login_cta">כבר יש משתמש? התחברות</string>
+    <string name="signup_login_cta">Already have an account?</string>
+    <string name="signup_login_link"> Log in</string>
+    <string name="signup_with_google">Sign up with Google</string>
 
     <!-- Cart Screen -->
     <string name="cart_title">העגלה שלי</string>
     <string name="cart_promo_code_hint">הוסף קוד קופון</string>
     <string name="cart_order_summary">סיכום הזמנה</string>
     <string name="cart_subtotal">סכום ביניים</string>
-    <string name="cart_taxes_and_fees">מע"מ (18%)</string>
+    <string name="cart_taxes_and_fees">מע\"מ (18%)</string>
     <string name="cart_total">סה\"כ</string>
     <string name="cart_proceed_to_checkout">לתשלום</string>
 
     <!-- Payment Screen -->
     <string name="payment_title">אמצעי תשלום</string>
     <string name="payment_total_amount">סה\"כ לתשלום</string>
-    <string name="payment_subtotal">סכום ביניים (ללא מע"מ)</string>
-    <string name="payment_service_fee">מע"מ (18%)</string>
+    <string name="payment_subtotal">סכום ביניים (ללא מע\"מ)</string>
+    <string name="payment_service_fee">מע\"מ (18%)</string>
     <string name="payment_select_method">בחר אמצעי תשלום</string>
     <string name="payment_google_pay">Google Pay</string>
     <string name="payment_gpay_subtitle">תשלום מהיר ומאובטח</string>
@@ -52,16 +84,100 @@
     <string name="payment_counter">תשלום בקופה / קופון</string>
     <string name="payment_counter_subtitle">שלם בעת איסוף ההזמנה</string>
     <string name="payment_confirm_order">אשר הזמנה</string>
+    <string name="payment_error_format">שגיאה בתשלום: %s</string>
+    <string name="payment_order_confirmed_format">ההזמנה אושרה! איסוף בשעה %s</string>
 
     <!-- Order Item Tracking -->
-    <string name="order_number_label">הזמנה #%s</string>
+    <string name="orders_active_tab">פעילות (%d)</string>
+    <string name="orders_history_tab">היסטוריה (%d)</string>
+    <string name="order_number_format">הזמנה #%s</string>
     <string name="order_status_received">התקבלה</string>
     <string name="order_status_preparing">בהכנה</string>
     <string name="order_status_ready">מוכנה</string>
     <string name="order_status_collected">נאספה</string>
+    <string name="order_status_pending">ממתין</string>
     <string name="order_estimated_completion">זמן איסוף משוער</string>
     <string name="order_items_label">פריטים בהזמנה</string>
-    <string name="order_placed_at">הוזמן בשעה %s</string>
+    <string name="order_summary_label">פירוט ההזמנה:</string>
+    <string name="order_placed_at">הוזמן ב: %1$s %2$s</string>
+    <string name="order_placed_at_label">הוזמן בתאריך: %1$s, בשעה %2$s</string>
+    <string name="order_again">הזמן שוב</string>
+    <string name="order_again_success">הסל עודכן עם פריטי ההזמנה!</string>
+    <string name="order_again_error">לא ניתן לשחזר את פריטים מהזמנה זו.</string>
+    <string name="order_update_error">שגיאה בעדכון הסטטוס</string>
+    <string name="order_sync_error">שגיאה בסנכרון גלובלי</string>
+    <string name="order_estimated_time_label">זמן משוער לסיום:</string>
+
+    <!-- Cook Order Details -->
+    <string name="cook_order_details_timer_label">זמן נותר להכנה</string>
+    <string name="cook_order_details_target_time_format">יעד: %s</string>
+    <string name="cook_order_details_status_title">עדכון סטטוס</string>
+    <string name="cook_order_details_items_title">פירוט המנות</string>
+    <string name="cook_order_details_notes_label">הערות לקוח:</string>
+    <string name="cook_order_details_no_notes">אין הערות מיוחדות</string>
+    <string name="cook_order_details_update_button">עדכן סטטוס</string>
+    <string name="cook_order_details_timer_finished">זמן עבר!</string>
+    <string name="cook_order_details_timer_late">באיחור</string>
+    <string name="cook_order_details_update_success">ההזמנה עודכנה בהצלחה!</string>
+
+    <!-- Customize Activity -->
+    <string name="customize_title">התאמה אישית של מנה</string>
+    <string name="customize_error_loading">שגיאה בטעינת המוצר</string>
+    <string name="customize_add_to_cart">הוספה להזמנה</string>
+    <string name="customize_update_cart">חזרה לסל</string>
+    <string name="customize_cart_updated">הסל עודכן!</string>
+    <string name="customize_added_to_cart">התווסף לסל!</string>
+    <string name="customize_button_format">%1$s - ₪%2$.2f</string>
+    <string name="customize_price_format">₪%.2f</string>
+    <string name="customize_addons_title">שדרוגים ותוספות</string>
+    <string name="customize_notes_title">הערות אישיות למטבח</string>
+    <string name="customize_notes_hint">בקשות מיוחדות מהטבח...</string>
+    <string name="addon_default_name">תוספת</string>
+    <string name="addon_default_price">₪0.00</string>
+
+    <!-- Product Categories -->
+    <string name="category_cold_drink">שתייה קרה</string>
+    <string name="category_hot_drink">שתייה חמה</string>
+    <string name="category_all">הכל</string>
+    <string name="category_sandwiches_and_toasts">כריכים וטוסטים</string>
+
+    <!-- Menu Fragment -->
+    <string name="menu_loading_title">טוען נתונים</string>
+    <string name="menu_loading_message">אנא המתן…</string>
+    <string name="menu_loading_error">שגיאה בטעינת נתונים: %s</string>
+    <string name="menu_updating_title">מעדכן תפריט</string>
+    <string name="menu_updating_message">מעלה פריטי תפריט חדשים…</string>
+    <string name="menu_update_success">התפריט עודכן בהצלחה!</string>
+    <string name="menu_update_failed">עדכון התפריט נכשל.</string>
+
+    <!-- Profile Fragment -->
+    <string name="profile_edit_title">עריכת פרופיל</string>
+    <string name="profile_my_orders">ההזמנות שלי</string>
+    <string name="profile_night_mode">מצב לילה</string>
+    <string name="profile_language">שפה</string>
+    <string name="profile_logout">התנתקות מהחשבון</string>
+    <string name="profile_edit_hint_name">שם מלא</string>
+    <string name="profile_edit_hint_phone">מספר טלפון</string>
+    <string name="profile_save">שמור</string>
+    <string name="profile_cancel">ביטול</string>
+    <string name="profile_error_name_empty">השם לא יכול להיות ריק</string>
+    <string name="profile_error_phone_invalid">מספר טלפון לא תקין</string>
+    <string name="profile_update_success">הפרופיל עודכן בהצלחה!</string>
+    <string name="profile_update_failed">עדכון נכשל</string>
+
+    <!-- Main Activity -->
+    <string name="main_checking_connection">בודק חיבור לאינטרנט…</string>
+    <string name="main_retrying_connection">אין חיבור לאינטרנט. מנסה שוב…</string>
+
+    <!-- Cook Product Adapter -->
+    <string name="cook_product_addons_label">תוספות: </string>
+    <string name="cook_product_no_addons">ללא</string>
+    <string name="cook_product_notes_label">הערה למנה: </string>
+
+    <!-- Order Dialog -->
+    <string name="order_dialog_code_title">קוד איסוף הזמנה</string>
+    <string name="order_dialog_instruction">הצג קוד זה בקפיטריה\nכדי לקבל את המנה שלך</string>
+    <string name="order_dialog_close">סגור</string>
 
     <!-- Arrays -->
     <string-array name="school_names">

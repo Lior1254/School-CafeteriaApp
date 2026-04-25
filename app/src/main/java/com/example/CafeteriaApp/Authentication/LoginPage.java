@@ -30,229 +30,230 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
 /**
- * Activity for user login.
- * Handles authentication with Firebase Auth and manages session persistence.
+ * Activity responsible for user authentication.
+ * Manages manual login, automatic session restoration, and "Remember Me" functionality.
  */
-public class LoginPage extends BaseActivity
-{
-    private TextView tv_login_warning;
-    private EditText ED_login_email, ED_login_password;
+public class LoginPage extends BaseActivity {
+    private TextView tvLoginWarning;
+    private EditText etLoginEmail, etLoginPassword;
     private CheckBox cbRememberMe;
     private String email, password;
-    Intent intent;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
         initializeViews();
 
-        // Check internet before attempting auto-login
         if (isNetworkAvailable()) {
             attemptAutoLogin();
         } else {
-            showWarning("  אין חיבור לאינטרנט. אנא התחבר ונסה שוב.");
+            showWarning(getString(R.string.error_no_internet));
         }
     }
 
+    /**
+     * Attempts to automatically log in the user based on stored session data and Firebase state.
+     */
     private void attemptAutoLogin() {
-        // 1. Check if Firebase remembers the session
         FirebaseUser currentUser = FBRef.refAuth.getCurrentUser();
-        if (currentUser != null)
-        {
-            // 2. Fetch stored authentication string
-            String str = FileManager.getUserAuthentication(this);
-            
-            // Check if string is null or empty to prevent crashes
-            if (str != null && !str.isEmpty())
-            {
-                try {
-                    String[] strs = str.split("#"); 
-                    if (strs.length == 2 && currentUser.getUid().equals(strs[0]))
-                    {
-                        long expiryTime = Utils.dateStringToLong(strs[1]);
-                        long currentTime = System.currentTimeMillis();
+        if (currentUser != null) {
+            String authData = FileManager.getUserAuthentication(this);
 
-                        if (currentTime < expiryTime)
-                        {
-                            autoLogin(currentUser.getUid());
-                            return; // Success
+            if (authData != null && !authData.isEmpty()) {
+                try {
+                    String[] parts = authData.split("#");
+                    if (parts.length == 2 && currentUser.getUid().equals(parts[0])) {
+                        long expiryTime = Utils.dateStringToLong(parts[1]);
+                        if (System.currentTimeMillis() < expiryTime) {
+                            performAutoLogin(currentUser.getUid());
+                            return;
                         }
                     }
                 } catch (Exception e) {
                     FileManager.clearUserAuthentication(this);
                 }
             }
-            
-            // If we are here, auto-login criteria wasn't met. 
-            // We sign out from Firebase to keep it synced with our "Remember Me" logic.
             FBRef.refAuth.signOut();
         }
     }
 
     /**
-     * Performs automatic login safely.
+     * Fetches user profile data from Firebase and redirects to the main page.
+     * @param uid The unique identifier of the user.
      */
-    private void autoLogin(String uid) {
+    private void performAutoLogin(String uid) {
         if (isFinishing()) return;
-        
-        ProgressDialog pd = new ProgressDialog(this);
-        pd.setTitle("Connecting");
-        pd.setMessage("Logging in automatically...");
-        pd.setCancelable(false);
-        pd.show();
+
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(getString(R.string.connecting));
+        progressDialog.setMessage(getString(R.string.logging_in_auto));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
         FBRef.refUsers.child(uid).get().addOnCompleteListener(task -> {
-            if (!isFinishing() && pd.isShowing()) {
-                pd.dismiss();
+            if (!isFinishing() && progressDialog.isShowing()) {
+                progressDialog.dismiss();
             }
-            
+
             if (task.isSuccessful()) {
                 DataSnapshot snapshot = task.getResult();
                 if (snapshot != null && snapshot.exists()) {
                     User userModel = snapshot.getValue(User.class);
                     if (userModel != null) {
-                        Intent mainIntent = new Intent(this, MainPage.class);
-                        mainIntent.putExtra("userData", userModel);
-                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(mainIntent);
-                        finish();
+                        navigateToMain(userModel);
                     }
                 }
             }
         });
     }
 
-    public void initializeViews()
-    {
-        ED_login_email = findViewById(R.id.ED_login_email);
-        ED_login_password = findViewById(R.id.ED_login_password);
-        tv_login_warning = findViewById(R.id.tv_login_warning);
+    /**
+     * Initializes UI component references.
+     */
+    private void initializeViews() {
+        etLoginEmail = findViewById(R.id.etLoginEmail);
+        etLoginPassword = findViewById(R.id.etLoginPassword);
+        tvLoginWarning = findViewById(R.id.tvLoginWarning);
         cbRememberMe = findViewById(R.id.cbRememberMe);
     }
 
-    public void SignUp_Click(View view)
-    {
-        intent = new Intent(this, SignUpPage.class);
-        startActivity(intent);
+    /**
+     * Navigates to the sign-up page.
+     * @param view The clicked view.
+     */
+    public void SignUp_Click(View view) {
+        startActivity(new Intent(this, SignUpPage.class));
     }
 
-    private void showWarning(String warning)
-    {
-        if (tv_login_warning == null) return;
-        tv_login_warning.setVisibility(View.VISIBLE);
-        tv_login_warning.setText(warning);
+    /**
+     * Displays a shaking warning message on the UI.
+     * @param message The Hebrew message to display.
+     */
+    private void showWarning(String message) {
+        if (tvLoginWarning == null) return;
+        tvLoginWarning.setVisibility(View.VISIBLE);
+        tvLoginWarning.setText(message);
 
-        ObjectAnimator animator = ObjectAnimator.ofFloat(tv_login_warning, "translationX", 0f, 25f,
-                                                         -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f);
-        animator.setDuration(500); 
+        ObjectAnimator animator = ObjectAnimator.ofFloat(tvLoginWarning, "translationX", 0f, 25f,
+                -25f, 25f, -25f, 15f, -15f, 6f, -6f, 0f);
+        animator.setDuration(500);
         animator.start();
     }
 
-    public boolean checkInput()
-    {
-        email = ED_login_email.getText().toString().trim();
-        password = ED_login_password.getText().toString().trim();
+    /**
+     * Validates user input before attempting login.
+     * @return true if input is valid, false otherwise.
+     */
+    private boolean validateInput() {
+        email = etLoginEmail.getText().toString().trim();
+        password = etLoginPassword.getText().toString().trim();
 
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
-        {
-            showWarning("  Please enter a valid email address");
+        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showWarning(getString(R.string.val_invalid_email));
             return false;
         }
 
-        if (password.length() <= 6)
-        {
-            showWarning("  Password must be longer than 6 characters");
+        if (password.length() <= 6) {
+            showWarning(getString(R.string.val_password_short));
             return false;
         }
 
-        tv_login_warning.setVisibility(View.GONE);
+        tvLoginWarning.setVisibility(View.GONE);
         return true;
     }
 
-    public void loginUser()
-    {
-        if (FBRef.refAuth.getCurrentUser() != null)
-        {
+    /**
+     * Authenticates the user with Firebase Email/Password.
+     */
+    private void performManualLogin() {
+        if (FBRef.refAuth.getCurrentUser() != null) {
             FBRef.refAuth.signOut();
         }
-        
-        ProgressDialog pd = new ProgressDialog(this);
-        pd.setTitle("Connecting");
-        pd.setMessage("Logging in user...");
-        pd.setCancelable(false);
-        pd.show();
+
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(getString(R.string.connecting));
+        progressDialog.setMessage(getString(R.string.logging_in_manual));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
         FBRef.refAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
-                {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task)
-                    {
-                        if (task.isSuccessful())
-                        {
-                            FirebaseUser firebaseUser = FBRef.refAuth.getCurrentUser();
-                            if (firebaseUser != null)
-                            {
-                                // Save authentication based on CheckBox state
-                                FileManager.saveUserAuthentication(LoginPage.this, cbRememberMe.isChecked());
-
-                                FBRef.refUsers.child(firebaseUser.getUid()).get().addOnCompleteListener(
-                                        taskSnapshot -> {
-                                            if (!isFinishing() && pd.isShowing()) pd.dismiss();
-                                            
-                                            if (taskSnapshot.isSuccessful())
-                                            {
-                                                DataSnapshot snapshot = taskSnapshot.getResult();
-                                                User userModel = snapshot.getValue(User.class);
-                                                if (userModel != null)
-                                                {
-                                                    Intent mainIntent = new Intent(LoginPage.this, MainPage.class);
-                                                    mainIntent.putExtra("userData", userModel);
-                                                    mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                    startActivity(mainIntent);
-                                                    finish();
-                                                }
-                                            } else
-                                            {
-                                                showWarning("  שגיאה בקריאת נתוני המשתמש.");
-                                            }
-                                        });
-                            } else
-                            {
-                                if (!isFinishing() && pd.isShowing()) pd.dismiss();
-                            }
-                        } else
-                        {
-                            if (!isFinishing() && pd.isShowing()) pd.dismiss();
-                            handleLoginError(task.getException());
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = FBRef.refAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            FileManager.saveUserAuthentication(this, cbRememberMe.isChecked());
+                            fetchUserData(firebaseUser.getUid(), progressDialog);
+                        } else if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
                         }
+                    } else {
+                        if (progressDialog.isShowing()) progressDialog.dismiss();
+                        handleLoginError(task.getException());
                     }
                 });
     }
 
-    private void handleLoginError(Exception exp) {
-        if (exp instanceof FirebaseAuthInvalidUserException) {
-            showWarning("  Invalid email address.");
-        } else if (exp instanceof FirebaseAuthWeakPasswordException) {
-            showWarning("  Password is too weak.");
-        } else if (exp instanceof FirebaseAuthUserCollisionException) {
-            showWarning("  User already exists.");
-        } else if (exp instanceof FirebaseAuthInvalidCredentialsException) {
-            showWarning("  Authentication failed.");
-        } else if (exp instanceof FirebaseNetworkException) {
-            showWarning("  Network error. Please check your connection.");
+    /**
+     * Fetches user data from Realtime Database after successful authentication.
+     * @param uid The user's UID.
+     * @param progressDialog The active progress dialog.
+     */
+    private void fetchUserData(String uid, ProgressDialog progressDialog) {
+        FBRef.refUsers.child(uid).get().addOnCompleteListener(task -> {
+            if (!isFinishing() && progressDialog.isShowing()) progressDialog.dismiss();
+
+            if (task.isSuccessful()) {
+                DataSnapshot snapshot = task.getResult();
+                User userModel = snapshot.getValue(User.class);
+                if (userModel != null) {
+                    navigateToMain(userModel);
+                }
+            } else {
+                showWarning(getString(R.string.error_user_data_read));
+            }
+        });
+    }
+
+    /**
+     * Redirects to MainPage and clears the activity stack.
+     * @param user The logged-in user object.
+     */
+    private void navigateToMain(User user) {
+        Intent mainIntent = new Intent(this, MainPage.class);
+        mainIntent.putExtra("userData", user);
+        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(mainIntent);
+        finish();
+    }
+
+    /**
+     * Maps Firebase Auth exceptions to Hebrew error messages.
+     * @param exception The exception thrown by Firebase.
+     */
+    private void handleLoginError(Exception exception) {
+        if (exception instanceof FirebaseAuthInvalidUserException) {
+            showWarning(getString(R.string.val_user_not_found));
+        } else if (exception instanceof FirebaseAuthWeakPasswordException) {
+            showWarning(getString(R.string.val_weak_password));
+        } else if (exception instanceof FirebaseAuthUserCollisionException) {
+            showWarning(getString(R.string.val_user_collision));
+        } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+            showWarning(getString(R.string.val_auth_failed));
+        } else if (exception instanceof FirebaseNetworkException) {
+            showWarning(getString(R.string.val_network_error));
         } else {
-            showWarning("  An error occurred. Please try again later.");
+            showWarning(getString(R.string.val_unknown_error));
         }
     }
 
-    public void Login_Click(View view)
-    {
-        if (checkInput())
-        {
-            executeFirebaseOperation(this::loginUser);
+    /**
+     * Handles the login button click.
+     * @param view The clicked view.
+     */
+    public void Login_Click(View view) {
+        if (validateInput()) {
+            executeFirebaseOperation(this::performManualLogin);
         }
     }
 }

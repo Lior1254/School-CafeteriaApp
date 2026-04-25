@@ -22,7 +22,7 @@
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:onClick="GoBack_Click"
+            android:onClick="onBackClick"
             android:padding="12dp"
             android:scaleType="centerInside"
             android:src="@drawable/back_arrow"
@@ -35,7 +35,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="התאמה אישית של מנה"
+            android:text="@string/customize_title"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -99,7 +99,7 @@
                     android:id="@+id/tvProductName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="שם המנה"
+                    tools:text="שם המנה"
                     android:textColor="@color/mc_text_primary"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -109,7 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="₪0.00"
+                    tools:text="₪0.00"
                     android:textColor="#1B5E20"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -120,7 +120,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:lineSpacingExtra="6dp"
-                    android:text="תיאור המנה יופיע כאן בצורה קריאה ומזמינה."
+                    tools:text="תיאור המנה יופיע כאן בצורה קריאה ומזמינה."
                     android:textColor="@color/mc_text_secondary"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -146,7 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:text="שדרוגים ותוספות"
+                    android:text="@string/customize_addons_title"
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -174,7 +174,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:text="הערות אישיות למטבח"
+                    android:text="@string/customize_notes_title"
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -195,7 +195,7 @@
                         android:id="@+id/etNotes"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="בקשות מיוחדות מהטבח..."
+                        android:hint="@string/customize_notes_hint"
                         android:inputType="textMultiLine"
                         android:lines="3" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -244,7 +244,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:onClick="Minus_btn_Click"
+                        android:onClick="onDecrementQuantityClick"
                         android:src="@drawable/ic_minus_black"
                         app:tint="@color/main_bg_blue" />
 
@@ -253,7 +253,7 @@
                         android:layout_width="36dp"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="1"
+                        tools:text="1"
                         android:textColor="@color/black"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -263,7 +263,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:onClick="Plus_btn_Click"
+                        android:onClick="onIncrementQuantityClick"
                         android:src="@drawable/ic_plus_black"
                         app:tint="@color/main_bg_blue" />
                 </LinearLayout>
@@ -280,8 +280,8 @@
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-black"
-                android:onClick="AddToCart_Click"
-                android:text="הוספה להזמנה"
+                android:onClick="onAddToCartClick"
+                android:text="@string/customize_add_to_cart"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 app:backgroundTint="@color/main_bg_blue"

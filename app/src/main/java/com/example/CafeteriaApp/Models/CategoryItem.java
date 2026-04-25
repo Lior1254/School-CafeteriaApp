@@ -1,50 +1,61 @@
 package com.example.CafeteriaApp.Models;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+
 /**
- * Represents a category in the menu.
- * Contains the category name and its associated icon resource ID.
+ * Data model representing a food category in the menu (e.g., Drinks, Sandwiches).
+ * Stores the localized name and a resource reference to its icon.
  */
-public class CategoryItem
-{
+public class CategoryItem {
+
     private String name;
     private int iconRes;
 
     /**
-     * Default constructor for Firebase or empty initialization.
+     * Default constructor required for Firebase Realtime Database deserialization.
      */
-    public CategoryItem()
-    {
+    public CategoryItem() {
     }
 
     /**
-     * Constructs a CategoryItem with a name and an icon.
+     * Constructs a new CategoryItem with specified properties.
      *
-     * @param name    The name of the category.
-     * @param iconRes The resource ID of the category icon.
+     * @param name    The display name of the category (Hebrew).
+     * @param iconRes The drawable resource ID for the category icon.
      */
-    public CategoryItem(String name, int iconRes)
-    {
+    public CategoryItem(@NonNull String name, @DrawableRes int iconRes) {
         this.name = name;
         this.iconRes = iconRes;
     }
 
-    public String getName()
-    {
-        return name;
+    /**
+     * @return The localized name of the category.
+     */
+    @NonNull
+    public String getName() {
+        return name != null ? name : "";
     }
 
-    public void setName(String name)
-    {
+    /**
+     * @param name The localized name of the category.
+     */
+    public void setName(@NonNull String name) {
         this.name = name;
     }
 
-    public int getIconRes()
-    {
+    /**
+     * @return The resource ID of the category icon.
+     */
+    @DrawableRes
+    public int getIconRes() {
         return iconRes;
     }
 
-    public void setIconRes(int iconRes)
-    {
+    /**
+     * @param iconRes The resource ID of the category icon.
+     */
+    public void setIconRes(@DrawableRes int iconRes) {
         this.iconRes = iconRes;
     }
 }

@@ -30,13 +30,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="שם המוצר"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:textDirection="rtl"
             app:layout_constraintEnd_toStartOf="@+id/tvQuantity"
             app:layout_constraintStart_toEndOf="@id/ivProduct"
-            app:layout_constraintTop_toTopOf="@id/ivProduct" />
+            app:layout_constraintTop_toTopOf="@id/ivProduct"
+            tools:text="שם המוצר" />
 
         <TextView
             android:id="@+id/tvQuantity"
@@ -45,23 +46,24 @@
             android:background="@drawable/bg_quantity_button_light_blue"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
-            android:text="x1"
             android:textColor="@color/main_bg_blue"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tvProductName" />
+            app:layout_constraintTop_toTopOf="@id/tvProductName"
+            tools:text="x1" />
 
         <TextView
             android:id="@+id/tvAddons"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="תוספות: ללא"
             android:textColor="#555555"
             android:textSize="14sp"
+            android:textDirection="rtl"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tvProductName"
-            app:layout_constraintTop_toBottomOf="@id/tvProductName" />
+            app:layout_constraintTop_toBottomOf="@id/tvProductName"
+            tools:text="תוספות: ללא" />
 
         <TextView
             android:id="@+id/tvProductNotes"
@@ -70,13 +72,15 @@
             android:layout_marginTop="8dp"
             android:background="#FFF9C4"
             android:padding="8dp"
-            android:text="הערה למנה: בלי בצל"
             android:textColor="#BF360C"
             android:textSize="13sp"
             android:visibility="gone"
+            android:textDirection="rtl"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/tvProductName"
-            app:layout_constraintTop_toBottomOf="@id/tvAddons" />
+            app:layout_constraintTop_toBottomOf="@id/tvAddons"
+            tools:text="הערה למנה: בלי בצל"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

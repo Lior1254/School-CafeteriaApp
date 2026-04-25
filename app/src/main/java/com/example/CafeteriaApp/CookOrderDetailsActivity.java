@@ -3,7 +3,6 @@ package com.example.CafeteriaApp;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -16,24 +15,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.CafeteriaApp.Adapters.CookProductAdapter;
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Models.Order;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 /**
- * Activity for the cook to view full order details and update status.
- * Includes a countdown timer synchronized with requested pickup time.
+ * Activity for the cook to view full order details and update its status.
+ * Features a real-time countdown timer synchronized with the requested pickup time.
  */
 public class CookOrderDetailsActivity extends BaseActivity {
 
-    private TextView tvOrderTitle, tvTimer, tvTargetTime, tvCustomerNotes;
+    private TextView tvOrderTitle, tvCountdownTimer, tvTargetTime, tvCustomerNotes;
     private RecyclerView rvOrderItems;
-    private Spinner spinStatus;
+    private Spinner spinOrderStatus;
     private Order order;
     private CountDownTimer countDownTimer;
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final long TIMER_INTERVAL = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,124 +48,152 @@ public class CookOrderDetailsActivity extends BaseActivity {
 
         initializeViews();
         setupUI();
-        startTimer();
+        startPickupTimer();
     }
 
+    /**
+     * Links UI components to their respective XML IDs and sets click listeners.
+     */
     private void initializeViews() {
         tvOrderTitle = findViewById(R.id.tvOrderTitle);
-        tvTimer = findViewById(R.id.tvTimer);
+        tvCountdownTimer = findViewById(R.id.tvTimer);
         tvTargetTime = findViewById(R.id.tvTargetTime);
         tvCustomerNotes = findViewById(R.id.tvCustomerNotes);
         rvOrderItems = findViewById(R.id.rvOrderItems);
-        spinStatus = findViewById(R.id.spinStatus);
+        spinOrderStatus = findViewById(R.id.spinStatus);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        findViewById(R.id.btnUpdateOrder).setOnClickListener(v -> updateOrderStatus());
+        findViewById(R.id.btnUpdateOrder).setOnClickListener(v -> handleStatusUpdate());
     }
 
+    /**
+     * Populates the UI with order data and configures the status spinner.
+     */
     private void setupUI() {
-        tvOrderTitle.setText("הזמנה #" + order.getOrderCode());
-        tvCustomerNotes.setText(order.getGeneralNotes() != null && !order.getGeneralNotes().isEmpty() 
-                ? order.getGeneralNotes() : "אין הערות מיוחדות");
+        tvOrderTitle.setText(getString(R.string.order_number_format, order.getOrderCode()));
         
-        String targetTimeStr = order.getRequestedTime();
-        if (targetTimeStr != null && targetTimeStr.contains(" ")) {
-            tvTargetTime.setText("יעד: " + targetTimeStr.split(" ")[1].substring(0, 5));
+        String notes = order.getGeneralNotes();
+        tvCustomerNotes.setText(notes != null && !notes.isEmpty() ? notes : getString(R.string.cook_order_details_no_notes));
+        
+        String requestedTime = order.getRequestedTime();
+        if (requestedTime != null && requestedTime.contains(" ")) {
+            String timePart = requestedTime.split(" ")[1];
+            tvTargetTime.setText(getString(R.string.cook_order_details_target_time_format, 
+                    timePart.length() > 5 ? timePart.substring(0, 5) : timePart));
         }
 
         rvOrderItems.setLayoutManager(new LinearLayoutManager(this));
         CookProductAdapter adapter = new CookProductAdapter(this, order.getProducts());
         rvOrderItems.setAdapter(adapter);
 
-        String[] statuses = {"ממתין", "בהכנה", "מוכן", "נאסף"};
+        String[] statuses = {
+                getString(R.string.order_status_pending),
+                getString(R.string.order_status_preparing),
+                getString(R.string.order_status_ready),
+                getString(R.string.order_status_collected)
+        };
+        
         ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, statuses);
-        spinStatus.setAdapter(statusAdapter);
+        spinOrderStatus.setAdapter(statusAdapter);
         
         try {
             int currentStatus = Integer.parseInt(order.getOrderStatus());
-            spinStatus.setSelection(currentStatus);
-        } catch (Exception e) {
-            spinStatus.setSelection(0);
+            spinOrderStatus.setSelection(currentStatus);
+        } catch (NumberFormatException e) {
+            spinOrderStatus.setSelection(0);
         }
     }
 
-    private void startTimer() {
+    /**
+     * Initializes and starts a countdown timer until the requested pickup time.
+     * Updates text color based on remaining time to alert the cook.
+     */
+    private void startPickupTimer() {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
             Date targetDate = sdf.parse(order.getRequestedTime());
             if (targetDate == null) return;
-            long diff = targetDate.getTime() - System.currentTimeMillis();
+            
+            long timeRemaining = targetDate.getTime() - System.currentTimeMillis();
 
-            if (diff > 0) {
-                countDownTimer = new CountDownTimer(diff, 1000) {
+            if (timeRemaining > 0) {
+                countDownTimer = new CountDownTimer(timeRemaining, TIMER_INTERVAL) {
                     @Override
                     public void onTick(long millisUntilFinished) {
-                        long minutes = (millisUntilFinished / 1000) / 60;
-                        long seconds = (millisUntilFinished / 1000) % 60;
-                        tvTimer.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+                        long totalSeconds = millisUntilFinished / 1000;
+                        long minutes = totalSeconds / 60;
+                        long seconds = totalSeconds % 60;
+                        
+                        tvCountdownTimer.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
 
+                        // Dynamic color feedback based on urgency
                         if (minutes < 2) {
-                            tvTimer.setTextColor(Color.parseColor("#D32F2F"));
+                            tvCountdownTimer.setTextColor(Color.parseColor("#D32F2F")); // Red
                         } else if (minutes < 5) {
-                            tvTimer.setTextColor(Color.parseColor("#F57C00"));
+                            tvCountdownTimer.setTextColor(Color.parseColor("#F57C00")); // Orange
                         } else {
-                            tvTimer.setTextColor(Color.parseColor("#388E3C"));
+                            tvCountdownTimer.setTextColor(Color.parseColor("#388E3C")); // Green
                         }
                     }
 
                     @Override
                     public void onFinish() {
-                        tvTimer.setText("זמן עבר!");
-                        tvTimer.setTextColor(Color.RED);
+                        tvCountdownTimer.setText(getString(R.string.cook_order_details_timer_finished));
+                        tvCountdownTimer.setTextColor(Color.RED);
                     }
                 }.start();
             } else {
-                tvTimer.setText("באיחור");
-                tvTimer.setTextColor(Color.RED);
+                tvCountdownTimer.setText(getString(R.string.cook_order_details_timer_late));
+                tvCountdownTimer.setTextColor(Color.RED);
             }
         } catch (Exception e) {
-            tvTimer.setText("--:--");
+            tvCountdownTimer.setText("--:--");
         }
     }
 
     /**
-     * Orchestrates the order status update across multiple Firebase nodes.
-     * Moves order to history if status is "Collected" (3).
+     * Validates connection and updates the order status in Firebase.
+     * If the status is "Collected", the order is moved to the history node.
      */
-    private void updateOrderStatus() {
+    private void handleStatusUpdate() {
         if (!checkNetworkAndShowDialog()) return;
 
-        final String oldStatus = order.getOrderStatus();
-        int selectedPosition = spinStatus.getSelectedItemPosition();
-        final String newStatus = String.valueOf(selectedPosition);
+        final String previousStatus = order.getOrderStatus();
+        int selectedStatusIndex = spinOrderStatus.getSelectedItemPosition();
+        final String newStatusString = String.valueOf(selectedStatusIndex);
         
-        order.setOrderStatus(newStatus);
+        order.setOrderStatus(newStatusString);
 
-        if (Order.STATUS_COLLECTED.equals(newStatus)) {
-            moveOrderToHistory(oldStatus);
+        if (Order.STATUS_COLLECTED.equals(newStatusString)) {
+            archiveOrder(previousStatus);
         } else {
-            updateActiveOrder(oldStatus, newStatus);
+            updateActiveOrderNode(previousStatus, newStatusString);
         }
     }
 
     /**
-     * Updates an existing active order without moving branches.
+     * Updates an active order status and synchronizes it across global nodes.
+     *
+     * @param previousStatus The previous status code.
+     * @param newStatus      The new status code.
      */
-    private void updateActiveOrder(String oldStatus, String newStatus) {
+    private void updateActiveOrderNode(String previousStatus, String newStatus) {
         FBRef.getUserOrdersRef(order.getUserId(), false)
                 .child(order.getOrderId())
                 .setValue(order)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        syncGlobalOrderNode(oldStatus, newStatus);
+                        syncGlobalOrderNode(previousStatus, newStatus);
                     }
                 });
     }
 
     /**
-     * Logic for status 3 (Collected): Removes from active nodes and adds to history.
+     * Moves a completed order to the user\'s history node and updates the global list.
+     *
+     * @param previousStatus The previous status code.
      */
-    private void moveOrderToHistory(String oldStatus) {
+    private void archiveOrder(String previousStatus) {
         FBRef.getUserOrdersRef(order.getUserId(), false)
                 .child(order.getOrderId())
                 .removeValue();
@@ -174,29 +202,38 @@ public class CookOrderDetailsActivity extends BaseActivity {
                 .child(order.getOrderId())
                 .setValue(order);
 
-        syncGlobalOrderNode(oldStatus, Order.STATUS_COLLECTED);
+        syncGlobalOrderNode(previousStatus, Order.STATUS_COLLECTED);
     }
 
+    /**
+     * Moves the order node from the old status branch to the new one in the global list.
+     *
+     * @param oldStatus The old status branch name.
+     * @param newStatus The new status branch name.
+     */
     private void syncGlobalOrderNode(String oldStatus, String newStatus) {
         if (!oldStatus.equals(newStatus)) {
             FBRef.refOrders.child(oldStatus)
                     .child(order.getRequestedTime())
                     .child(order.getOrderId())
                     .removeValue()
-                    .addOnCompleteListener(task -> saveToNewGlobalNode());
+                    .addOnCompleteListener(task -> persistToNewGlobalNode());
         } else {
-            saveToNewGlobalNode();
+            persistToNewGlobalNode();
         }
     }
 
-    private void saveToNewGlobalNode() {
+    /**
+     * Writes the order to its new global node and provides user feedback.
+     */
+    private void persistToNewGlobalNode() {
         FBRef.refOrders.child(order.getOrderStatus())
                 .child(order.getRequestedTime())
                 .child(order.getOrderId())
                 .setValue(order)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Toast.makeText(this, "ההזמנה עודכנה בהצלחה!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.cook_order_details_update_success, Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 });
@@ -204,7 +241,9 @@ public class CookOrderDetailsActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy() ;
-        if (countDownTimer != null) countDownTimer.cancel();
+        super.onDestroy();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 }

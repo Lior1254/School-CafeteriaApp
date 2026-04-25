@@ -1,106 +1,152 @@
 package com.example.CafeteriaApp.Models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
+import androidx.annotation.NonNull;
+import com.google.firebase.database.Exclude;
 import java.io.Serializable;
+import java.util.Locale;
 
-public class Addon implements Serializable
-{
-    private String addonId;
-    private String addonName;
-    private double addonPrice;
+/**
+ * Data model representing a product addon (e.g., extra cheese, egg).
+ * Implements Serializable for intent passing between activities.
+ * 
+ * This class is designed to be compatible with Firebase Realtime Database.
+ */
+public class Addon implements Serializable {
+
+    private String id;
+    private String name;
+    private double price;
     private boolean isSelected;
-    private int imgRes;
+    private int imageResId;
 
-    public Addon()
-    {
+    /**
+     * Default constructor required for Firebase Realtime Database deserialization.
+     */
+    public Addon() {
     }
 
-    public Addon(String addonId, String addonName, double addonPrice, int imgRes)
-    {
-        this.addonId = addonId;
-        this.addonName = addonName;
-        this.addonPrice = addonPrice;
-        this.imgRes = imgRes;
+    /**
+     * Constructs a new Addon with specified properties.
+     *
+     * @param id         Unique identifier for the addon.
+     * @param name       Localized display name (Hebrew).
+     * @param price      Additional cost for selecting this addon.
+     * @param imageResId Resource ID for the addon icon/image.
+     */
+    public Addon(String id, String name, double price, int imageResId) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.imageResId = imageResId;
         this.isSelected = false;
     }
 
-    public Addon(String addonId, String addonName, double addonPrice, int imgRes,
-                 boolean isSelected)
-    {
-        this.addonId = addonId;
-        this.addonName = addonName;
-        this.addonPrice = addonPrice;
-        this.imgRes = imgRes;
-        this.isSelected = isSelected;
+    /**
+     * @return The unique identifier of the addon, or an empty string if null.
+     */
+    public String getId() {
+        return id != null ? id : "";
     }
 
-    Addon[] withOutDefault(Addon[] addons)
-    {
-        Addon[] newAddon = new Addon[addons.length - 1];
-        for (int i = 1; i < addons.length; i++)
-        {
-            newAddon[i - 1] = addons[i];
-        }
-        return newAddon;
+    /**
+     * @param id The unique identifier of the addon.
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 
-    // Getters and Setters
-    public String getAddonId()
-    {
-        return addonId;
+    /**
+     * @return The localized name of the addon, or an empty string if null.
+     */
+    @NonNull
+    public String getName() {
+        return name != null ? name : "";
     }
 
-    public void setAddonId(String addonId)
-    {
-        this.addonId = addonId;
+    /**
+     * @param name The localized name of the addon.
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getAddonName()
-    {
-        return addonName;
+    /**
+     * @return The additional price of the addon.
+     */
+    public double getPrice() {
+        return price;
     }
 
-    public void setAddonName(String addonName)
-    {
-        this.addonName = addonName;
+    /**
+     * @param price The additional price of the addon.
+     */
+    public void setPrice(double price) {
+        this.price = price;
     }
 
-    public double getAddonPrice()
-    {
-        return addonPrice;
-    }
-
-    public void setAddonPrice(double addonPrice)
-    {
-        this.addonPrice = addonPrice;
-    }
-
-    public boolean isSelected()
-    {
+    /**
+     * @return True if the addon is currently selected by the user.
+     */
+    public boolean isSelected() {
         return isSelected;
     }
 
-    public void setSelected(boolean selected)
-    {
+    /**
+     * @param selected Selection state of the addon.
+     */
+    public void setSelected(boolean selected) {
         isSelected = selected;
     }
 
-    public int getImgRes()
-    {
-        return imgRes;
+    /**
+     * @return The drawable resource ID for the addon image.
+     */
+    public int getImageResId() {
+        return imageResId;
     }
 
-    public void setImgRes(int imgRes)
-    {
-        this.imgRes = imgRes;
+    /**
+     * @param imageResId The drawable resource ID for the addon image.
+     */
+    public void setImageResId(int imageResId) {
+        this.imageResId = imageResId;
     }
 
-    public String getPriceText()
-    {
-        return "₪" + String.format("%.2f", addonPrice);
+    /**
+     * Alias for getId. Excluded from Firebase mapping to prevent warnings.
+     * @return The unique identifier.
+     */
+    @Exclude
+    public String getAddonId() {
+        return getId();
     }
 
+    /**
+     * Alias for getName. Excluded from Firebase mapping to prevent warnings.
+     * @return The localized name.
+     */
+    @Exclude
+    public String getAddonName() {
+        return getName();
+    }
 
+    /**
+     * Formats the price for display with the currency symbol (₪).
+     * Excluded from Firebase to prevent ClassMapper warnings.
+     *
+     * @return A formatted price string (e.g., "₪2.50").
+     */
+    @Exclude
+    public String getFormattedPrice() {
+        return String.format(Locale.getDefault(), "₪%.2f", price);
+    }
+
+    /**
+     * Alias for getFormattedPrice. Excluded from Firebase mapping to prevent warnings.
+     * @return A formatted price string.
+     */
+    @Exclude
+    public String getPriceText() {
+        return getFormattedPrice();
+    }
 }

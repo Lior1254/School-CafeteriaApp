@@ -213,7 +213,7 @@ public class CartFragment extends Fragment
     {
         rvCartItems.setLayoutManager(new LinearLayoutManager(requireContext()));
         
-        adapter = new ShoppingCartAdapter(requireContext(), cartItems, new ShoppingCartAdapter.OnQuantityChangeListener() {
+        adapter = new ShoppingCartAdapter(requireContext(), cartItems, new ShoppingCartAdapter.OnCartInteractionListener() {
             @Override
             public void onQuantityChange(int position, int newQuantity) {
                 if (newQuantity <= 0) {

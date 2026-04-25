@@ -1,15 +1,15 @@
 package com.example.CafeteriaApp;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.example.CafeteriaApp.Helpers.FBRef;
 import com.example.CafeteriaApp.Helpers.FileManager;
@@ -25,9 +25,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+/**
+ * Activity for selecting a payment method and finalizing the order.
+ * Handles order processing, Firebase synchronization, and cart management.
+ */
 public class PaymentActivity extends BaseActivity {
 
-    private TextView tvTotal, tvSubtotal;
+    private TextView tvTotal, tvSubtotal, tvVatAmount;
     private MaterialCardView cardGPay, cardCredit, cardCounter;
     private RadioButton radioGPay, radioCredit, radioCounter;
     
@@ -37,32 +41,42 @@ public class PaymentActivity extends BaseActivity {
     private String pickupTime = "";
     private String generalNotes = "";
 
+    private static final double VAT_RATE = 1.18;
+    private static final int RANDOM_CODE_BOUND = 9000;
+    private static final int RANDOM_CODE_OFFSET = 1000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
-        totalAmount = getIntent().getDoubleExtra("total_amount", 0);
-        pickupTime = getIntent().getStringExtra("pickup_time");
-        generalNotes = getIntent().getStringExtra("general_notes");
+        Intent intent = getIntent();
+        if (intent != null) {
+            totalAmount = intent.getDoubleExtra("total_amount", 0);
+            pickupTime = intent.getStringExtra("pickup_time");
+            generalNotes = intent.getStringExtra("general_notes");
+        }
 
         if (pickupTime != null && pickupTime.contains(" ")) {
             pickupTime = pickupTime.split(" ")[0].trim();
         }
 
-        // Calculation: Total = Subtotal + VAT(18%)
-        // Total = Subtotal * 1.18 => Subtotal = Total / 1.18
-        subtotal = totalAmount / 1.18;
+        // Calculation: Total = Subtotal * 1.18 => Subtotal = Total / 1.18
+        subtotal = totalAmount / VAT_RATE;
         vatAmount = totalAmount - subtotal;
 
         initializeViews();
         updateUI();
-        updateCardStyles(R.id.radio_credit);
+        updatePaymentMethodStyles(R.id.radio_credit);
     }
 
+    /**
+     * Links UI components to their respective XML IDs.
+     */
     private void initializeViews() {
         tvTotal = findViewById(R.id.tv_total_payment);
         tvSubtotal = findViewById(R.id.tv_subtotal_payment);
+        tvVatAmount = findViewById(R.id.tv_vat_amount);
         cardGPay = findViewById(R.id.card_gpay);
         cardCredit = findViewById(R.id.card_credit);
         cardCounter = findViewById(R.id.card_counter);
@@ -71,125 +85,141 @@ public class PaymentActivity extends BaseActivity {
         radioCounter = findViewById(R.id.radio_counter);
     }
 
+    /**
+     * Populates price displays with calculated values.
+     */
     private void updateUI() {
-        tvTotal.setText(String.format("₪%.2f", totalAmount));
-        tvSubtotal.setText(String.format("₪%.2f", subtotal));
-        
-        // Update VAT text in the layout if possible
-        TextView tvVatLabel = findViewById(R.id.tv_vat_amount); // Need to check if id exists
-        if (tvVatLabel != null) {
-            tvVatLabel.setText(String.format("₪%.2f", vatAmount));
+        tvTotal.setText(String.format(Locale.getDefault(), "₪%.2f", totalAmount));
+        tvSubtotal.setText(String.format(Locale.getDefault(), "₪%.2f", subtotal));
+        if (tvVatAmount != null) {
+            tvVatAmount.setText(String.format(Locale.getDefault(), "₪%.2f", vatAmount));
         }
     }
 
-    public void onBackClick(View view) { finish(); }
+    /**
+     * Finishes activity when back button is clicked.
+     */
+    public void onBackClick(View view) {
+        finish();
+    }
 
+    /**
+     * Handles payment method card clicks to toggle radio buttons and styles.
+     */
     public void onPaymentMethodClick(View view) {
         int id = view.getId();
         int radioId = -1;
         if (id == R.id.card_gpay) radioId = R.id.radio_gpay;
         else if (id == R.id.card_credit) radioId = R.id.radio_credit;
         else if (id == R.id.card_counter) radioId = R.id.radio_counter;
-        if (radioId != -1) updateCardStyles(radioId);
+        
+        if (radioId != -1) {
+            updatePaymentMethodStyles(radioId);
+        }
     }
 
+    /**
+     * Validates connection and starts the order submission process.
+     */
     public void onConfirmOrderClick(View view) {
-        // בדיקת אינטרנט לפני שליחת הזמנה
-        if (!checkNetworkAndShowDialog()) {
-            return;
-        }
+        if (!checkNetworkAndShowDialog()) return;
 
-        String method = "";
+        String method;
         if (radioGPay.isChecked()) method = getString(R.string.payment_google_pay);
         else if (radioCredit.isChecked()) method = getString(R.string.payment_credit_card);
-        else if (radioCounter.isChecked()) method = getString(R.string.payment_counter);
-        processOrder(method);
+        else method = getString(R.string.payment_counter);
+        
+        submitOrder(method);
     }
 
-    private void processOrder(String paymentMethod) {
-        ProgressDialog pd = new ProgressDialog(this);
-        pd.setMessage("שולח הזמנה...");
-        pd.show();
+    /**
+     * Creates an Order object and uploads it to Firebase.
+     *
+     * @param paymentMethod The selected payment method name.
+     */
+    private void submitOrder(String paymentMethod) {
+        executeFirebaseOperation(() -> {
+            String orderId = FBRef.refOrders.push().getKey();
+            
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+            Date now = new Date();
+            
+            String receivedTime = dateFormat.format(now) + " " + timeFormat.format(now);
+            String requestedTime = dateFormat.format(now) + " " + pickupTime + ":00";
 
-        String orderId = FBRef.refOrders.push().getKey();
-        
-        String datePart = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        String timePart = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-        
-        String receivedTime = datePart + " " + timePart;
-        String requestedTime = datePart + " " + pickupTime + ":00";
+            String shortCode = String.valueOf(new Random().nextInt(RANDOM_CODE_BOUND) + RANDOM_CODE_OFFSET);
+            List<Product> cartItems = FileManager.loadCart(this);
+            String userId = FBRef.refAuth.getUid();
+            User user = (User) getIntent().getSerializableExtra("user_data");
 
-        String shortCode = String.valueOf(new Random().nextInt(9000) + 1000);
-        List<Product> cartItems = FileManager.loadCart(this);
-        String userId = FBRef.refAuth.getUid();
-        
-        // Get user data from intent or Firebase if null
-        User user = (User) getIntent().getSerializableExtra("user_data");
+            Order order = new Order(
+                    orderId, userId, shortCode, Order.STATUS_PENDING,
+                    receivedTime, requestedTime, cartItems, user,
+                    paymentMethod, !paymentMethod.equals(getString(R.string.payment_counter)),
+                    totalAmount
+            );
+            
+            order.setSummary(generateOrderSummary(cartItems));
+            order.setGeneralNotes(generalNotes);
 
-        // --- Build Summary String ---
-        StringBuilder summaryBuilder = new StringBuilder();
-        if (cartItems != null) {
-            for (int i = 0; i < cartItems.size(); i++) {
-                summaryBuilder.append(cartItems.get(i).getName());
-                if (i < cartItems.size() - 1) {
-                    summaryBuilder.append(", ");
+            FBRef.uploadOrder(order, new FBRef.FBListener() {
+                @Override
+                public void onSuccess() {
+                    FileManager.saveCart(PaymentActivity.this, new ArrayList<>());
+                    FileManager.saveGeneralNotes(PaymentActivity.this, "");
+                    handleOrderSuccess();
                 }
-            }
-        }
-        String orderSummary = summaryBuilder.toString();
 
-        Order order = new Order(
-                orderId,
-                userId,
-                shortCode,
-                Order.STATUS_PENDING,
-                receivedTime,
-                requestedTime,
-                cartItems,
-                user,
-                paymentMethod,
-                !paymentMethod.equals(getString(R.string.payment_counter)),
-                totalAmount
-        );
-        
-        order.setSummary(orderSummary);
-        order.setGeneralNotes(generalNotes);
+                @Override
+                public void onSuccess(Object data) {}
 
-        FBRef.uploadOrder(order, new FBRef.FBListener() {
-            @Override
-            public void onSuccess() {
-                pd.dismiss();
-                FileManager.saveCart(PaymentActivity.this, new ArrayList<>());
-                FileManager.saveGeneralNotes(PaymentActivity.this, "");
-                finalizePayment(paymentMethod);
-            }
-
-            @Override
-            public void onSuccess(Object data) {}
-
-            @Override
-            public void onFailure(String error) {
-                pd.dismiss();
-                Toast.makeText(PaymentActivity.this, "שגיאה: " + error, Toast.LENGTH_LONG).show();
-            }
+                @Override
+                public void onFailure(String error) {
+                    Toast.makeText(PaymentActivity.this, getString(R.string.payment_error_format, error), Toast.LENGTH_LONG).show();
+                }
+            });
         });
     }
 
-    private void finalizePayment(String method) {
-        Toast.makeText(this, "ההזמנה אושרה! שעת איסוף: " + pickupTime, Toast.LENGTH_LONG).show();
+    /**
+     * Generates a comma-separated string of product names in the order.
+     */
+    @NonNull
+    private String generateOrderSummary(List<Product> cartItems) {
+        if (cartItems == null) return "";
+        StringBuilder summary = new StringBuilder();
+        for (int i = 0; i < cartItems.size(); i++) {
+            summary.append(cartItems.get(i).getName());
+            if (i < cartItems.size() - 1) summary.append(", ");
+        }
+        return summary.toString();
+    }
+
+    /**
+     * Notifies user of success and returns to main screen.
+     */
+    private void handleOrderSuccess() {
+        Toast.makeText(this, getString(R.string.payment_order_confirmed_format, pickupTime), Toast.LENGTH_LONG).show();
         setResult(Activity.RESULT_OK);
         finish();
     }
 
-    private void updateCardStyles(int selectedRadioId) {
+    /**
+     * Updates radio button states and card stroke styles.
+     */
+    private void updatePaymentMethodStyles(int selectedRadioId) {
         radioGPay.setChecked(selectedRadioId == R.id.radio_gpay);
         radioCredit.setChecked(selectedRadioId == R.id.radio_credit);
         radioCounter.setChecked(selectedRadioId == R.id.radio_counter);
-        resetStyle(cardGPay); resetStyle(cardCredit); resetStyle(cardCounter);
-        if (selectedRadioId == R.id.radio_gpay) highlight(cardGPay);
-        else if (selectedRadioId == R.id.radio_credit) highlight(cardCredit);
-        else if (selectedRadioId == R.id.radio_counter) highlight(cardCounter);
+        
+        applyCardStyle(cardGPay, selectedRadioId == R.id.radio_gpay);
+        applyCardStyle(cardCredit, selectedRadioId == R.id.radio_credit);
+        applyCardStyle(cardCounter, selectedRadioId == R.id.radio_counter);
     }
-    private void resetStyle(MaterialCardView card) { card.setStrokeColor(Color.parseColor("#E0E0E0")); card.setStrokeWidth(1); }
-    private void highlight(MaterialCardView card) { card.setStrokeColor(Color.parseColor("#FF6B35")); card.setStrokeWidth(4); }
+
+    private void applyCardStyle(MaterialCardView card, boolean isSelected) {
+        card.setStrokeColor(isSelected ? Color.parseColor("#FF6B35") : Color.parseColor("#E0E0E0"));
+        card.setStrokeWidth(isSelected ? 4 : 1);
+    }
 }

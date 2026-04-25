@@ -15,7 +15,8 @@ import androidx.core.app.NotificationManagerCompat;
 import com.example.CafeteriaApp.R;
 
 /**
- * Helper class to handle application notifications safely.
+ * Global helper class for managing and displaying system notifications.
+ * Handles channel creation for Android Oreo and above, and permission checks for Android 13+.
  */
 public class NotificationHelper {
 
@@ -24,18 +25,19 @@ public class NotificationHelper {
 
     /**
      * Internal helper to build and send a system notification.
-     * 
-     * @param context Application context
-     * @param channelId Target notification channel ID
-     * @param channelName User-visible name of the channel
-     * @param title Notification title
-     * @param text Notification message body
-     * @param notificationId Unique ID for the notification
+     * Checks for required permissions and creates notification channels if necessary.
+     *
+     * @param context        The application context.
+     * @param channelId      The target notification channel ID.
+     * @param channelName    The user-visible name of the channel.
+     * @param title          The title displayed in the notification.
+     * @param message        The body text of the notification.
+     * @param notificationId A unique integer ID for this notification instance.
      */
     private static void sendNotification(Context context, String channelId, String channelName,
-                                        String title, String text, int notificationId) {
+                                        String title, String message, int notificationId) {
 
-        // 1. Create Channel (Android 8+)
+        // Ensure the notification channel exists for Android 8.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (manager != null && manager.getNotificationChannel(channelId) == null) {
@@ -45,43 +47,50 @@ public class NotificationHelper {
             }
         }
 
-        // 2. Build Notification with App Logo
+        // Construct the notification using the Builder pattern
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.app_logo) // Small icon in status bar
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.app_logo)) // Large icon in notification drawer
+                .setSmallIcon(R.drawable.app_logo)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.app_logo))
                 .setContentTitle(title)
-                .setContentText(text)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(text)) // Allows multiline text
+                .setContentText(message)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        // 3. Safe Notify
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        
-        // Check permission for Android 13+
+
+        // Perform permission check for Android 13 (Tiramisu) and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
         }
-        
+
         notificationManager.notify(notificationId, builder.build());
     }
 
     /**
-     * Shows a notification related to order status changes.
+     * Displays a notification related to order status updates.
+     *
+     * @param context The application context.
+     * @param message The Hebrew text describing the status change.
+     * @param orderId The ID used to uniquely identify the notification.
      */
-    public static void showOrderStatus(Context context, String text, int orderId) {
+    public static void showOrderStatus(Context context, String message, int orderId) {
         String channelName = context.getString(R.string.notif_channel_orders_name);
         String title = context.getString(R.string.notif_order_update_title);
-        sendNotification(context, CHANNEL_ORDERS_ID, channelName, title, text, orderId);
+        sendNotification(context, CHANNEL_ORDERS_ID, channelName, title, message, orderId);
     }
 
     /**
-     * Shows a general app update notification.
+     * Displays a general application update notification.
+     *
+     * @param context The application context.
+     * @param title   The title of the update notification.
+     * @param message The body text of the update notification.
      */
-    public static void showUpdateNotification(Context context, String title, String text) {
+    public static void showGeneralUpdateNotification(Context context, String title, String message) {
         String channelName = context.getString(R.string.notif_channel_updates_name);
-        sendNotification(context, CHANNEL_UPDATES_ID, channelName, title, text, 999);
+        sendNotification(context, CHANNEL_UPDATES_ID, channelName, title, message, 999);
     }
 }

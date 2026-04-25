@@ -102,16 +102,16 @@ public class CustomProductOptionRvAdapter
         return addons.size() - 1;
     }
 
-    static class Row extends RecyclerView.ViewHolder
+    public static class Row extends RecyclerView.ViewHolder
     {
         TextView tv_price;
         CheckBox lv_checkBox;
 
-        Row(@NonNull View itemView)
+        public Row(@NonNull View itemView)
         {
             super(itemView);
-            tv_price = itemView.findViewById(R.id.tv_price);
-            lv_checkBox = itemView.findViewById(R.id.lv_checkBox);
+            tv_price = itemView.findViewById(R.id.tvAddonPrice);
+            lv_checkBox = itemView.findViewById(R.id.cbAddonStatus);
         }
     }
 }

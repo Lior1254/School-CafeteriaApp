@@ -22,17 +22,16 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- לוגו -->
             <ImageView
-                android:id="@+id/imgLogoSignup"
+                android:id="@+id/imgLogoLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:padding="8dp"
-                android:src="@mipmap/ic_launcher" />
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/app_name" />
 
-            <!-- Title -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -44,21 +43,21 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tv_login_warning"
+                android:id="@+id/tvLoginWarning"
                 android:background="@drawable/bg_warning_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:gravity="right|top"
                 android:paddingBottom="10dp"
-                android:text=" שגיאה"
                 android:textColor="@color/Yellow_warning"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:text="שגיאה" />
 
             <EditText
-                android:id="@+id/ED_login_email"
+                android:id="@+id/etLoginEmail"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:layout_marginBottom="16dp"
@@ -68,7 +67,8 @@
                 android:inputType="textEmailAddress"
                 android:padding="12dp"
                 android:textColor="@color/black"
-                android:textColorHint="@color/gray" />
+                android:textColorHint="@color/gray"
+                android:autofillHints="emailAddress" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -80,7 +80,7 @@
                 app:passwordToggleTint="@color/black">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/ED_login_password"
+                    android:id="@+id/etLoginPassword"
                     android:layout_width="match_parent"
                     android:layout_height="55dp"
                     android:background="@drawable/bg_input_rounded"
@@ -112,10 +112,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="זכור אותי להתחברות אוטומטית"
+                    android:text="@string/login_remember_me"
                     android:textColor="@color/black"
                     android:textSize="14sp"
-                    android:layout_marginRight="4dp"/>
+                    android:layout_marginEnd="4dp"/>
 
                 <View
                     android:layout_width="0dp"
@@ -123,16 +123,17 @@
                     android:layout_weight="1"/>
 
                 <TextView
-                    android:id="@+id/login_forgot_password"
+                    android:id="@+id/tvForgotPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Forgot Password?"
+                    android:text="@string/login_forgot_password"
                     android:textColor="#747474"
                     android:textSize="12sp" />
 
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:background="@drawable/bg_button_primary"
@@ -154,27 +155,26 @@
                 android:layout_marginTop="20dp">
 
                 <TextView
-                    android:id="@+id/login_no_account"
+                    android:id="@+id/tvNoAccount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Don't have an account?"
+                    android:text="@string/login_signup_cta"
                     android:textSize="14sp"
                     android:textColor="#747474" />
 
                 <TextView
-                    android:id="@+id/login_signup_link"
+                    android:id="@+id/tvSignupLink"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="SignUp_Click"
-                    android:text=" Sign up"
+                    android:text="@string/login_signup_link"
                     android:textColor="#008080"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Google button -->
             <LinearLayout
-                android:id="@+id/login_google_button"
+                android:id="@+id/llGoogleLogin"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:orientation="horizontal"
@@ -184,16 +184,15 @@
                 android:background="@drawable/bg_button_google">
 
                 <ImageView
-                    android:id="@+id/googleIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_google" />
+                    android:src="@drawable/ic_google"
+                    android:contentDescription="@null" />
 
                 <TextView
-                    android:id="@+id/googleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Log in with Google"
+                    android:text="@string/login_with_google"
                     android:textSize="14sp"
                     android:textColor="#333333"
                     android:layout_marginStart="12dp" />

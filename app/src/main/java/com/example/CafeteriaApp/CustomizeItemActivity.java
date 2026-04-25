@@ -1,6 +1,8 @@
 package com.example.CafeteriaApp;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,102 +22,103 @@ import com.example.CafeteriaApp.Helpers.FileManager;
 import com.example.CafeteriaApp.Models.Addon;
 import com.example.CafeteriaApp.Models.Product;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Activity for customizing a product before adding it to the cart.
- * Allows selecting addons, quantity, and adding personal notes.
+ * Users can select addons, adjust quantity, and add personal notes.
  */
-public class CustomizeItemActivity extends BaseActivity
-{
-    private TextView tvProductName, tvProductDescription, tv_amount_of_items, tv_price;
-    private ImageView ivProductIMG;
+public class CustomizeItemActivity extends BaseActivity {
+    private TextView tvProductName, tvProductDescription, tvQuantity, tvPriceDisplay;
+    private ImageView ivProductImage;
     private RecyclerView rvAddons;
-    private Button btn_AddToCart;
-    private ImageButton ibtn_plus_item, ibtn_minus_item;
+    private Button btnAction;
+    private ImageButton btnIncrement, btnDecrement;
     private TextInputEditText etNotes;
-    private TextInputLayout tilNotes;
     private LinearLayout addonsContainer, notesContainer;
-    private Product item;
 
-    private int amount_of_products = 1;
-    private double totalPrice = 0, price = 0;
-    private String AddBtnText = "הוספה להזמנה";
+    private Product product;
+    private int itemQuantity = 1;
+    private double totalPrice = 0;
+    private double unitPrice = 0;
+    private String actionButtonLabel;
     private boolean isEditMode = false;
     private int editPosition = -1;
 
-    /** Static field to hold the bitmap temporarily for transitions */
-    public static android.graphics.Bitmap selectedImageBitmap = null;
+    /** Static field to hold the bitmap temporarily for transitions from MenuFragment */
+    public static Bitmap selectedImageBitmap = null;
+
+    private static final int MIN_QUANTITY = 1;
+    private static final int MAX_QUANTITY = 9;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customize_item);
 
         Intent intent = getIntent();
+        if (intent == null) {
+            showErrorAndExit();
+            return;
+        }
+
         isEditMode = intent.getBooleanExtra("isEditMode", false);
         editPosition = intent.getIntExtra("position", -1);
-        
-        if (isEditMode) {
-            AddBtnText = "חזרה לסל";
-        }
+        actionButtonLabel = getString(isEditMode ? R.string.customize_update_cart : R.string.customize_add_to_cart);
 
         initializeViews();
         setupUI(intent);
     }
 
-    private void initializeViews()
-    {
+    /**
+     * Links UI components to their respective XML IDs.
+     */
+    private void initializeViews() {
         tvProductName = findViewById(R.id.tvProductName);
         tvProductDescription = findViewById(R.id.tvProductDescription);
-        ivProductIMG = findViewById(R.id.ivProductIMG);
-        tv_price = findViewById(R.id.tv_price);
-        tv_amount_of_items = findViewById(R.id.tv_amount_of_items);
+        ivProductImage = findViewById(R.id.ivProductIMG);
+        tvPriceDisplay = findViewById(R.id.tv_price);
+        tvQuantity = findViewById(R.id.tv_amount_of_items);
         rvAddons = findViewById(R.id.Addons);
-        ibtn_plus_item = findViewById(R.id.ibtn_plus_item);
-        ibtn_minus_item = findViewById(R.id.ibtn_minus_item);
-        btn_AddToCart = findViewById(R.id.btn_AddToCart);
+        btnIncrement = findViewById(R.id.ibtn_plus_item);
+        btnDecrement = findViewById(R.id.ibtn_minus_item);
+        btnAction = findViewById(R.id.btn_AddToCart);
         etNotes = findViewById(R.id.etNotes);
-        tilNotes = findViewById(R.id.tilNotes);
         addonsContainer = findViewById(R.id.addonsContainer);
         notesContainer = findViewById(R.id.notesContainer);
     }
 
     /**
-     * Initializes the UI components with product data and handles conditional visibility.
-     * @param intent The intent containing product details.
+     * Configures the UI with product data and handles visibility logic based on category.
+     *
+     * @param intent The intent containing the product object.
      */
-    private void setupUI(Intent intent)
-    {
-        if (android.os.Build.VERSION.SDK_INT >= 33)
-        {
-            item = intent.getSerializableExtra("item", Product.class);
-        } else
-        {
-            item = (Product) intent.getSerializableExtra("item");
+    private void setupUI(@NonNull Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            product = intent.getSerializableExtra("item", Product.class);
+        } else {
+            product = (Product) intent.getSerializableExtra("item");
         }
 
-        if (item == null)
-        {
-            Toast.makeText(this, "Error loading product", Toast.LENGTH_SHORT).show();
-            finish();
+        if (product == null) {
+            showErrorAndExit();
             return;
         }
 
-        // --- Conditional Visibility Logic ---
-
-        // Hide notes section for drinks (including the title via notesContainer)
-        if ("שתייה קרה".equals(item.getCategory()) || "שתייה חמה".equals(item.getCategory())) {
+        // Hide notes for drink categories
+        String coldDrink = getString(R.string.category_cold_drink);
+        String hotDrink = getString(R.string.category_hot_drink);
+        if (coldDrink.equals(product.getCategory()) || hotDrink.equals(product.getCategory())) {
             if (notesContainer != null) {
                 notesContainer.setVisibility(View.GONE);
             }
         }
 
-        // Hide addons section if none available (including the title via addonsContainer)
-        if (item.getAddons() == null || item.getAddons().isEmpty()) {
+        // Setup addons list or hide container if empty
+        List<Addon> addons = product.getAddons();
+        if (addons == null || addons.isEmpty()) {
             if (addonsContainer != null) {
                 addonsContainer.setVisibility(View.GONE);
             }
@@ -123,117 +127,152 @@ public class CustomizeItemActivity extends BaseActivity
                 addonsContainer.setVisibility(View.VISIBLE);
             }
             rvAddons.setVisibility(View.VISIBLE);
-            CustomProductOptionRvAdapter ad = new CustomProductOptionRvAdapter(
+            CustomProductOptionRvAdapter adapter = new CustomProductOptionRvAdapter(
                     this,
-                    item.getAddons(),
-                    (addon, pos, isChecked) -> updatePriceBasedOnAddons(addon)
+                    addons,
+                    (addon, pos, isChecked) -> updatePriceOnAddonSelection(addon)
             );
             rvAddons.setLayoutManager(new LinearLayoutManager(this));
-            rvAddons.setAdapter(ad);
+            rvAddons.setAdapter(adapter);
         }
 
-        // --- Basic UI Setup ---
-
-        if(item.getAmount() != 0)
-        {
-            amount_of_products = item.getAmount();
+        // Set initial values
+        if (product.getAmount() > 0) {
+            itemQuantity = product.getAmount();
         }
+
+        unitPrice = product.getPrice();
+        totalPrice = unitPrice * itemQuantity;
+
+        tvProductName.setText(product.getName());
+        tvProductDescription.setText(product.getDescription());
+        tvQuantity.setText(String.valueOf(itemQuantity));
+        tvPriceDisplay.setText(String.format(Locale.getDefault(), getString(R.string.customize_price_format), unitPrice));
         
-        price = item.getPrice();
-        totalPrice = price * amount_of_products;
-        
-        tvProductName.setText(item.getName());
-        tvProductDescription.setText(item.getDescription());
-        tv_amount_of_items.setText(String.valueOf(amount_of_products));
-        tv_price.setText(String.format("₪%.2f", price));
-        updateButtonText();
-
-        if (item.getNotes() != null) {
-            etNotes.setText(item.getNotes());
+        if (product.getNotes() != null) {
+            etNotes.setText(product.getNotes());
         }
 
-        if (item.getImageBitmap() != null) {
-            ivProductIMG.setImageBitmap(item.getImageBitmap());
+        // Load image from static reference if available, otherwise from Firebase
+        if (product.getImageBitmap() != null) {
+            ivProductImage.setImageBitmap(product.getImageBitmap());
+        } else if (selectedImageBitmap != null) {
+            ivProductImage.setImageBitmap(selectedImageBitmap);
         } else {
-            FBRef.loadProductImage(item, ivProductIMG);
-        }
-    }
-
-    private void updatePriceBasedOnAddons(Addon addon)
-    {
-        if (addon.isSelected())
-        {
-            price += addon.getAddonPrice();
-        } else
-        {
-            price -= addon.getAddonPrice();
+            FBRef.loadProductImage(product, ivProductImage);
         }
 
-        totalPrice = price * amount_of_products;
-        updateButtonText();
+        updateActionButtons();
     }
 
-    public void Plus_btn_Click(View view)
-    {
-        updateItemQuantity(true);
+    /**
+     * Adjusts the unit price when an addon is selected or deselected.
+     *
+     * @param addon The selected/deselected addon.
+     */
+    private void updatePriceOnAddonSelection(@NonNull Addon addon) {
+        if (addon.isSelected()) {
+            unitPrice += addon.getPrice();
+        } else {
+            unitPrice -= addon.getPrice();
+        }
+
+        totalPrice = unitPrice * itemQuantity;
+        updateActionButtons();
     }
 
-    public void Minus_btn_Click(View view)
-    {
-        updateItemQuantity(false);
+    /**
+     * Handles the click event for the increment quantity button.
+     *
+     * @param view The clicked view.
+     */
+    public void onIncrementQuantityClick(View view) {
+        changeQuantity(true);
     }
 
-    private void updateItemQuantity(boolean increment)
-    {
-        if ((amount_of_products == 1 && !increment) || (amount_of_products == 9 && increment))
+    /**
+     * Handles the click event for the decrement quantity button.
+     *
+     * @param view The clicked view.
+     */
+    public void onDecrementQuantityClick(View view) {
+        changeQuantity(false);
+    }
+
+    /**
+     * Updates the product quantity within allowed bounds and refreshes the UI.
+     *
+     * @param increment True to increase, false to decrease.
+     */
+    private void changeQuantity(boolean increment) {
+        if (increment && itemQuantity < MAX_QUANTITY) {
+            itemQuantity++;
+        } else if (!increment && itemQuantity > MIN_QUANTITY) {
+            itemQuantity--;
+        } else {
             return;
+        }
 
-        if (increment) amount_of_products++;
-        else amount_of_products--;
-
-        updateItemIcons();
-        tv_amount_of_items.setText(String.valueOf(amount_of_products));
-        totalPrice = price * amount_of_products;
-        updateButtonText();
+        tvQuantity.setText(String.valueOf(itemQuantity));
+        totalPrice = unitPrice * itemQuantity;
+        updateActionButtons();
     }
 
-    private void updateItemIcons() {
-        if (ibtn_minus_item != null) {
-            ibtn_minus_item.setImageResource(amount_of_products == 1 ? R.drawable.ic_minus_gray : R.drawable.ic_minus_black);
+    /**
+     * Refreshes the action button text and quantity button icons based on current state.
+     */
+    private void updateActionButtons() {
+        if (btnDecrement != null) {
+            btnDecrement.setImageResource(itemQuantity == MIN_QUANTITY ? R.drawable.ic_minus_gray : R.drawable.ic_minus_black);
         }
-        if (ibtn_plus_item != null) {
-            ibtn_plus_item.setImageResource(amount_of_products == 9 ? R.drawable.ic_plus_gray : R.drawable.ic_plus_black);
+        if (btnIncrement != null) {
+            btnIncrement.setImageResource(itemQuantity == MAX_QUANTITY ? R.drawable.ic_plus_gray : R.drawable.ic_plus_black);
         }
-    }
-
-    private void updateButtonText() {
-        if (btn_AddToCart != null) {
-            btn_AddToCart.setText(String.format("%s - ₪%.2f", AddBtnText, totalPrice));
+        if (btnAction != null) {
+            btnAction.setText(String.format(Locale.getDefault(), getString(R.string.customize_button_format), actionButtonLabel, totalPrice));
         }
     }
 
-    public void AddToCart_Click(View view)
-    {
-        item.setPrice(price);
-        item.setAmount(amount_of_products);
-        item.setNotes(etNotes.getText() != null ? etNotes.getText().toString().trim() : "");
+    /**
+     * Saves the customized product to the cart and exits the activity.
+     *
+     * @param view The clicked view.
+     */
+    public void onAddToCartClick(View view) {
+        if (product == null) return;
 
-        List<Product> currentCart = FileManager.loadCart(this);
-        
-        if (isEditMode && editPosition != -1 && editPosition < currentCart.size()) {
-            currentCart.set(editPosition, item);
-            Toast.makeText(this, "הסל עודכן!", Toast.LENGTH_SHORT).show();
+        product.setPrice(unitPrice);
+        product.setAmount(itemQuantity);
+        product.setNotes(etNotes.getText() != null ? etNotes.getText().toString().trim() : "");
+
+        List<Product> cart = FileManager.loadCart(this);
+
+        if (isEditMode && editPosition != -1 && editPosition < cart.size()) {
+            cart.set(editPosition, product);
+            Toast.makeText(this, R.string.customize_cart_updated, Toast.LENGTH_SHORT).show();
         } else {
-            currentCart.add(item);
-            Toast.makeText(this, "התווסף לסל!", Toast.LENGTH_SHORT).show();
+            cart.add(product);
+            Toast.makeText(this, R.string.customize_added_to_cart, Toast.LENGTH_SHORT).show();
         }
-        
-        FileManager.saveCart(this, currentCart);
+
+        FileManager.saveCart(this, cart);
         finish();
     }
 
-    public void GoBack_Click(View view)
-    {
+    /**
+     * Closes the activity without saving changes.
+     *
+     * @param view The clicked view.
+     */
+    public void onBackClick(View view) {
+        finish();
+    }
+
+    /**
+     * Shows a localized error message and terminates the activity.
+     */
+    private void showErrorAndExit() {
+        Toast.makeText(this, R.string.customize_error_loading, Toast.LENGTH_SHORT).show();
         finish();
     }
 }

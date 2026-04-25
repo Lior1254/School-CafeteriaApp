@@ -12,95 +12,116 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.CafeteriaApp.Models.CategoryItem;
 import com.example.CafeteriaApp.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Adapter for the horizontal Category RecyclerView.
- * Handles displaying category items and managing selection state.
+ * Manages the display and selection of menu categories.
  */
-public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder>
-{
+public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
-    private final List<CategoryItem> categories;
-    private int selectedPos = 0; // Default to the first selection
-    private final OnCategoryClick listener;
+    private final List<CategoryItem> categoryList;
+    private final OnCategoryClickListener categoryClickListener;
+    private int selectedPosition = 0;
 
     /**
-     * Interface for handling category click events.
+     * Interface definition for a callback to be invoked when a category is clicked.
      */
-    public interface OnCategoryClick
-    {
+    public interface OnCategoryClickListener {
+        /**
+         * Called when a category item has been clicked.
+         *
+         * @param categoryName The name of the clicked category.
+         */
         void onCategoryClick(String categoryName);
     }
 
     /**
-     * Constructor for the CategoryAdapter.
+     * Constructs a new CategoryAdapter.
      *
-     * @param categories List of CategoryItem objects to display.
-     * @param listener   Listener to handle click events.
+     * @param categories List of category items to display.
+     * @param listener   The callback that will run when a category is clicked.
      */
-    public CategoryAdapter(List<CategoryItem> categories, OnCategoryClick listener)
-    {
-        this.categories = categories;
-        this.listener = listener;
-    }
-
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
-    {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_category, parent, false);
-        return new ViewHolder(v);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position)
-    {
-        CategoryItem item = categories.get(position);
-
-        holder.tvName.setText(item.getName());
-        holder.ivIcon.setImageResource(item.getIconRes());
-
-        // Manage selected state
-        boolean isSelected = (selectedPos == position);
-        holder.itemView.setSelected(isSelected);
-
-        holder.itemView.setOnClickListener(v ->
-                                           {
-                                               int prevPos = selectedPos;
-                                               selectedPos = holder.getAdapterPosition();
-
-                                               // Update the old and new View to change color
-                                               notifyItemChanged(prevPos);
-                                               notifyItemChanged(selectedPos);
-
-                                               if (listener != null)
-                                               {
-                                                   listener.onCategoryClick(item.getName());
-                                               }
-                                           });
-    }
-
-    @Override
-    public int getItemCount()
-    {
-        return categories.size();
+    public CategoryAdapter(List<CategoryItem> categories, OnCategoryClickListener listener) {
+        this.categoryList = (categories != null) ? categories : new ArrayList<>();
+        this.categoryClickListener = listener;
     }
 
     /**
-     * ViewHolder for category items.
+     * Creates a new ViewHolder for a category item.
+     *
+     * @param parent   The ViewGroup into which the new View will be added.
+     * @param viewType The view type of the new View.
+     * @return A new CategoryViewHolder that holds the View for each category item.
      */
-    public static class ViewHolder extends RecyclerView.ViewHolder
-    {
-        TextView tvName;
-        ImageView ivIcon;
+    @NonNull
+    @Override
+    public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_category, parent, false);
+        return new CategoryViewHolder(itemView);
+    }
 
-        public ViewHolder(@NonNull View itemView)
-        {
+    /**
+     * Binds the data to the ViewHolder and handles selection state and clicks.
+     *
+     * @param holder   The ViewHolder which should be updated to represent the contents of the item at the given position.
+     * @param position The position of the item within the adapter's data set.
+     */
+    @Override
+    public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
+        CategoryItem category = categoryList.get(position);
+
+        holder.nameTextView.setText(category.getName());
+        holder.iconImageView.setImageResource(category.getIconRes());
+
+        // Update the visual selection state
+        holder.itemView.setSelected(selectedPosition == position);
+
+        holder.itemView.setOnClickListener(v -> {
+            int currentPosition = holder.getAdapterPosition();
+            if (currentPosition == RecyclerView.NO_POSITION) return;
+
+            int previousPosition = selectedPosition;
+            selectedPosition = currentPosition;
+
+            // Refresh old and new items to reflect selection change in UI
+            notifyItemChanged(previousPosition);
+            notifyItemChanged(selectedPosition);
+
+            if (categoryClickListener != null) {
+                categoryClickListener.onCategoryClick(category.getName());
+            }
+        });
+    }
+
+    /**
+     * Returns the total number of items in the data set held by the adapter.
+     *
+     * @return The total number of categories.
+     */
+    @Override
+    public int getItemCount() {
+        return categoryList.size();
+    }
+
+    /**
+     * ViewHolder class for category items, containing the icon and name.
+     */
+    public static class CategoryViewHolder extends RecyclerView.ViewHolder {
+        final TextView nameTextView;
+        final ImageView iconImageView;
+
+        /**
+         * Constructs a CategoryViewHolder.
+         *
+         * @param itemView The root view of the item layout.
+         */
+        public CategoryViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvName = itemView.findViewById(R.id.tvCategoryName);
-            ivIcon = itemView.findViewById(R.id.ivCategoryIcon);
+            nameTextView = itemView.findViewById(R.id.tvCategoryName);
+            iconImageView = itemView.findViewById(R.id.ivCategoryIcon);
         }
     }
 }

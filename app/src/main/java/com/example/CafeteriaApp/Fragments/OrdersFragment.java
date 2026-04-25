@@ -35,7 +35,7 @@ public class OrdersFragment extends Fragment {
     private RecyclerView recyclerView;
     private OrdersAdapter adapter;
     private TabLayout tabLayout;
-    private List<Order> orderList = new ArrayList<>();
+    private final List<Order> orderList = new ArrayList<>();
     private int userRole = User.ROLE_USER;
 
     private ValueEventListener currentOrdersListener;
@@ -60,9 +60,7 @@ public class OrdersFragment extends Fragment {
         adapter = new OrdersAdapter(orderList);
         recyclerView.setAdapter(adapter);
 
-        if (tabLayout.getTabAt(0) != null) tabLayout.getTabAt(0).setText("פעילות (0)");
-        if (tabLayout.getTabAt(1) != null) tabLayout.getTabAt(1).setText("היסטוריה (0)");
-
+        setupTabs();
         checkUserRoleAndInitialize();
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -71,11 +69,18 @@ public class OrdersFragment extends Fragment {
                 isHistoryTab = (tab.getPosition() == 1);
                 startListeningToOrders();
             }
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
+    }
+
+    private void setupTabs() {
+        if (tabLayout.getTabAt(0) != null) {
+            tabLayout.getTabAt(0).setText(getString(R.string.orders_active_tab, 0));
+        }
+        if (tabLayout.getTabAt(1) != null) {
+            tabLayout.getTabAt(1).setText(getString(R.string.orders_history_tab, 0));
+        }
     }
 
     /**
@@ -106,11 +111,7 @@ public class OrdersFragment extends Fragment {
                 User user = snapshot.getValue(User.class);
                 if (user != null) {
                     userRole = user.getRole();
-                    
-                    if (adapter != null) {
-                        adapter.setCurrentUserRole(userRole);
-                    }
-                    
+                    if (adapter != null) adapter.setCurrentUserRole(userRole);
                     startListeningToAllCounts();
                     startListeningToOrders();
                 }
@@ -119,6 +120,9 @@ public class OrdersFragment extends Fragment {
         });
     }
 
+    /**
+     * Starts background listeners for tab badge counts.
+     */
     private void startListeningToAllCounts() {
         activeCountListener = FBRef.listenToOrdersByRoleLive(userRole, false, new FBRef.FBListener() {
             @Override
@@ -139,6 +143,9 @@ public class OrdersFragment extends Fragment {
         });
     }
 
+    /**
+     * Starts the main real-time listener for the currently selected tab.
+     */
     private void startListeningToOrders() {
         stopOrdersListener();
 
@@ -154,7 +161,7 @@ public class OrdersFragment extends Fragment {
             }
             @Override public void onSuccess() {}
             @Override public void onFailure(String error) {
-                if (getContext() != null) Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                if (isAdded()) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -173,21 +180,19 @@ public class OrdersFragment extends Fragment {
 
     private void stopAllListeners() {
         stopOrdersListener();
-        if (activeCountListener != null) {
-            if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) FBRef.refOrders.removeEventListener(activeCountListener);
-            else {
-                String uid = FirebaseAuth.getInstance().getUid();
-                if (uid != null) FBRef.getUserOrdersRef(uid, false).removeEventListener(activeCountListener);
-            }
-            activeCountListener = null;
-        }
-        if (historyCountListener != null) {
-            if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) FBRef.refOrders.removeEventListener(historyCountListener);
-            else {
-                String uid = FirebaseAuth.getInstance().getUid();
-                if (uid != null) FBRef.getUserOrdersRef(uid, true).removeEventListener(historyCountListener);
-            }
-            historyCountListener = null;
+        removeListenerByRole(activeCountListener, false);
+        activeCountListener = null;
+        removeListenerByRole(historyCountListener, true);
+        historyCountListener = null;
+    }
+
+    private void removeListenerByRole(ValueEventListener listener, boolean isHistory) {
+        if (listener == null) return;
+        if (userRole == User.ROLE_COOK || userRole == User.ROLE_MANAGER) {
+            FBRef.refOrders.removeEventListener(listener);
+        } else {
+            String uid = FirebaseAuth.getInstance().getUid();
+            if (uid != null) FBRef.getUserOrdersRef(uid, isHistory).removeEventListener(listener);
         }
     }
 
@@ -197,15 +202,16 @@ public class OrdersFragment extends Fragment {
         stopAllListeners();
     }
 
+    /**
+     * Updates tab labels with the current count.
+     * @param isHistory Tab type.
+     * @param count Order count.
+     */
     private void updateTabTitles(boolean isHistory, int count) {
-        if (!isAdded()) return;
-        TabLayout.Tab activeTab = tabLayout.getTabAt(0);
-        TabLayout.Tab historyTab = tabLayout.getTabAt(1);
-
-        if (isHistory && historyTab != null) {
-            historyTab.setText("היסטוריה (" + count + ")");
-        } else if (!isHistory && activeTab != null) {
-            activeTab.setText("פעילות (" + count + ")");
+        if (!isAdded() || tabLayout == null) return;
+        TabLayout.Tab tab = tabLayout.getTabAt(isHistory ? 1 : 0);
+        if (tab != null) {
+            tab.setText(getString(isHistory ? R.string.orders_history_tab : R.string.orders_active_tab, count));
         }
     }
 }
