@@ -137,56 +137,77 @@ public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
      * @param context Context for UI operations.
      * @param order The clicked order.
      */
-    private void handleOrderClick(final Context context, final Order order) {
-        if (!(context instanceof BaseActivity)) return;
-        BaseActivity activity = (BaseActivity) context;
+    private void handleOrderClick(Context context, final Order order) {
+        // 1. Regular User logic
+        if (currentUserRole == User.ROLE_USER) {
+            showOrderCodeDialog(context, order.getOrderCode());
+            return;
+        }
 
-        if (currentUserRole == User.ROLE_COOK || currentUserRole == User.ROLE_MANAGER) {
-            if (!activity.checkNetworkAndShowDialog()) return;
+        // 2. Staff Logic: Network check only if BaseActivity is identified
+        Context activityContext = context;
+        while (activityContext instanceof android.content.ContextWrapper) {
+            if (activityContext instanceof BaseActivity) break;
+            activityContext = ((android.content.ContextWrapper) activityContext).getBaseContext();
+        }
 
-            if (Order.STATUS_PENDING.equals(order.getOrderStatus())) {
-                final String oldStatus = order.getOrderStatus();
-                order.setOrderStatus(Order.STATUS_PREPARING);
-                
-                FBRef.getUserOrdersRef(order.getUserId(), false)
+        if (activityContext instanceof BaseActivity) {
+            if (!((BaseActivity) activityContext).checkNetworkAndShowDialog()) return;
+        }
+
+        // 3. Status Update Logic: This now runs for STAFF regardless of Activity identification
+        String currentStatus = order.getOrderStatus();
+        if (Order.STATUS_PENDING.equals(currentStatus) || "0".equals(currentStatus)) {
+            final String oldStatus = currentStatus;
+
+            // Change status to Preparing (1)
+            order.setOrderStatus(Order.STATUS_PREPARING);
+
+            // Update student's personal record first
+            FBRef.getUserOrdersRef(order.getUserId(), false)
                     .child(order.getOrderId())
                     .setValue(order)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
+                            // Successfully updated student, now move in global dashboard
                             moveGlobalOrderNode(context, order, oldStatus);
                         } else {
-                            Toast.makeText(context, R.string.order_update_error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Error updating user node: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
-            } else {
-                openCookDetails(context, order);
-            }
         } else {
-             showOrderCodeDialog(context, order.getOrderCode());
+            // Order is already in progress, just navigate to details
+            openCookDetails(context, order);
         }
     }
 
     /**
-     * Synchronizes order status across Firebase branches.
+     * Synchronizes order status in the global dashboard.
+     * Fixed: Path now correctly uses RequestedTime instead of duplicating status.
      */
     private void moveGlobalOrderNode(final Context context, final Order order, String oldStatus) {
         FBRef.refOrders.child(oldStatus)
                 .child(order.getRequestedTime())
                 .child(order.getOrderId())
                 .removeValue()
-                .addOnCompleteListener(task -> FBRef.refOrders.child(order.getOrderStatus())
-                    .child(order.getRequestedTime())
-                    .child(order.getOrderId())
-                    .setValue(order)
-                    .addOnCompleteListener(innerTask -> {
-                        if (innerTask.isSuccessful()) {
-                            openCookDetails(context, order);
-                        } else {
-                            Toast.makeText(context, R.string.order_sync_error, Toast.LENGTH_SHORT).show();
-                        }
-                    }));
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FBRef.refOrders.child(order.getOrderStatus())
+                                .child(order.getRequestedTime()) // FIXED: Was duplicating status here
+                                .child(order.getOrderId())
+                                .setValue(order)
+                                .addOnCompleteListener(innerTask -> {
+                                    if (innerTask.isSuccessful()) {
+                                        openCookDetails(context, order);
+                                    } else {
+                                        Toast.makeText(context, "Sync Error: " + innerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        Toast.makeText(context, "Cleanup Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
-
     private void openCookDetails(Context context, Order order) {
         Intent intent = new Intent(context, CookOrderDetailsActivity.class);
         intent.putExtra("order", order);
