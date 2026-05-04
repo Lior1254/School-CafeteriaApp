@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -44,7 +45,7 @@
             android:name=".Authentication.SignUpPage"
             android:exported="false" />
         
-        <!-- LoginPage is now the Launcher activity -->
+        <!-- LoginPage is the Launcher activity -->
         <activity
             android:name=".Authentication.LoginPage"
             android:exported="true"
@@ -54,10 +55,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
 
     </application>
 
