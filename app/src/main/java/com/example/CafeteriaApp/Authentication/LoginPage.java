@@ -40,7 +40,7 @@ public class LoginPage extends BaseActivity {
         setContentView(R.layout.activity_login_page);
         initializeViews();
 
-        if (isNetworkAvailable()) {
+        if (checkNetworkAndShowDialog()) {
             attemptAutoLogin();
         } else {
             showWarning(getString(R.string.error_no_internet));

@@ -36,7 +36,7 @@ public class MainActivity extends BaseActivity
         connectionCheckRunnable = new Runnable() {
             @Override
             public void run() {
-                if (isNetworkAvailable()) {
+                if (checkNetworkAndShowDialog()) {
                     networkHandler.removeCallbacks(this);
                     navigateToLogin();
                 } else {

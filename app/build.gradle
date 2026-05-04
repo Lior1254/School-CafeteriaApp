@@ -57,6 +57,7 @@ dependencies {
 
     // Glide for efficient image loading
     implementation libs.glide
+    implementation fileTree(dir: 'C:\\Users\\liors\\Downloads', include: ['*.aar', '*.jar'], exclude: [])
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 
     testImplementation libs.junit

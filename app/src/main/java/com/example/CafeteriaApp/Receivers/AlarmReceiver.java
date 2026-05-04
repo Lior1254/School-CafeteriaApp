@@ -19,7 +19,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
         else if(intent.getStringExtra("Type").equals(AppUpdate))
         {
-            //
+            //For Future
         }
     }
 }

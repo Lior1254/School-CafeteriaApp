@@ -194,7 +194,7 @@ public class ProfileFragment extends Fragment {
 
         // Check for network before performing operation
         if (getActivity() instanceof BaseActivity) {
-            if (!((BaseActivity) getActivity()).isNetworkAvailable()) {
+            if (!((BaseActivity) getActivity()).checkNetworkAndShowDialog()) {
                 Toast.makeText(getContext(), R.string.error_no_internet, Toast.LENGTH_SHORT).show();
                 return;
             }
