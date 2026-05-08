@@ -194,7 +194,7 @@ public class FBRef {
 
         final String productId = product.getId();
         imageView.setTag(productId);
-        imageView.setImageResource(R.drawable.ic_launcher_background);
+        imageView.setImageResource(R.drawable.ic_product_placeholder);
         if (productId == null || productId.isEmpty()) return;
 
         if (urlCache.containsKey(productId)) {
@@ -216,7 +216,7 @@ public class FBRef {
         Glide.with(imageView.getContext())
                 .asBitmap()
                 .load(uri)
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.ic_product_placeholder)
                 .fitCenter()
                 .override(300, 300)
                 .into(new CustomTarget<Bitmap>() {

@@ -29,8 +29,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
-            app:srcCompat="@drawable/testoo"
-            tools:src="@drawable/testoo" />
+            android:src="@drawable/ic_product_placeholder"
+            tools:src="@drawable/ic_product_placeholder" />
 
         <!-- Product Name -->
         <TextView
